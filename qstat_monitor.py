@@ -18,7 +18,7 @@ class CursesScreen(object):
         SCREEN_HEIGHT, SCREEN_WIDTH = self.stdscr.getmaxyx()
         return self.stdscr
 
-    def __exit__(self, a, b, c):
+    def __exit__(self):
         curses.nocbreak()
         self.stdscr.keypad(0)
         curses.echo()
@@ -26,7 +26,7 @@ class CursesScreen(object):
 
 
 if __name__ == '__main__':
-    with CursesScreen as win:
+    with CursesScreen() as win:
         while True:
             win.erase()
             win.border(0)
