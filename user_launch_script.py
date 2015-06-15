@@ -9,7 +9,7 @@ if __name__ == "__main__":
         project_name="jvb-000-aa", 
         walltime=10, 
         number_of_nodes=4, 
-        number_of_gpus=8, 
+        number_of_gpus=4, 
         job_name="experims"
         )
 
