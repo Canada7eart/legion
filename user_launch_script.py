@@ -8,7 +8,7 @@ if __name__ == "__main__":
         script_path="/home/julesgm/task/user_compute_script.py", 
         project_name="jvb-000-aa", 
         walltime=10, 
-        number_of_nodes=2, 
+        number_of_nodes=4, 
         number_of_gpus=2, 
         job_name="experims"
         )

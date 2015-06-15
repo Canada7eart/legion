@@ -20,20 +20,20 @@ def _accept():
     s.listen(5)
 
     connected_client_qty = 0
+    while True:
+        print("Acceptor, online for ip %s:%d" % (our_ip(), PORT))
+        conn, addr = s.accept()
+        connected_client_qty += 1
+        print("We just accepted a connection with %s" % str(addr))
+        print("It is the node #%d" % connected_client_qty)
 
-    print("Acceptor, online for ip %s:%d" % (our_ip(), PORT))
-    conn, addr = s.accept()
-    connected_client_qty += 1
-    print("We just accepted a connection with %s" % str(addr))
-    print("It is the node #%d" % connected_client_qty)
+        args={
+            "conn": conn,
+            "addr": addr
+        }
 
-    args={
-        "conn": conn,
-        "addr": addr
-    }
-
-    new_thread = threading.Thread(target=lambda : _acceptor_callback(**args))
-    new_thread.run()
+        new_thread = threading.Thread(target=lambda : _acceptor_callback(**args))
+        new_thread.start()
 
 def launch(script_path, project_name, walltime, number_of_nodes, number_of_gpus, job_name):
     launch_template = """#PBS -A %s
