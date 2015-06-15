@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-import communism.benevolant_dictator as bd
+import socialism.benevolant_dictator as bd
 import socket
 
 if __name__ == "__main__": 
