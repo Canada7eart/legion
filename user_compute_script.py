@@ -14,5 +14,6 @@ def main():
 
     socket.create_connection((args.launcher_ip[0], args.launcher_port[0]))
     print("Logic would tell us the connection worked.")
+    
 if __name__ == '__main__':
     main()

@@ -12,7 +12,7 @@ def our_ip():
     return socket.gethostbyname(socket.gethostname())
 
 def _acceptor_callback(conn, addr):
-    print("acceptor thread running.")
+    print("_acceptor_callback: acceptor thread running.")
 
 def _accept():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,11 +21,11 @@ def _accept():
 
     connected_client_qty = 0
     while True:
-        print("Acceptor, online for ip %s:%d" % (our_ip(), PORT))
+        print("_accept: Acceptor, online for ip %s:%d" % (our_ip(), PORT))
         conn, addr = s.accept()
         connected_client_qty += 1
-        print("We just accepted a connection with %s" % str(addr))
-        print("It is the node #%d" % connected_client_qty)
+        print("_accept: We just accepted a connection with %s" % str(addr))
+        print("_accept: It is the node #%d" % connected_client_qty)
 
         args={
             "conn": conn,
@@ -60,10 +60,10 @@ python '%s' --launcher-ip='%s' --launcher-port='%d' >> "/home/julesgm/task/exec.
 
     acceptor = threading.Thread(target=_accept)
     acceptor.start()
-    print("(still moving on)")
+    print("launch: (still moving on)")
     process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sp.PIPE,  stderr=sp.STDOUT)
     grep_stdout = process.communicate(input=launch_template)[0]    
-    print(grep_stdout)
+    print("launch: " + str(grep_stdout))
 
     
 
