@@ -26,8 +26,8 @@ python '%s' -o %s >> "/home/julesgm/task/exec.log"
     number_of_nodes,
     number_of_gpus,
     job_name,
-    "/home/julesgm/task/files/",
     script_path,
+    "/home/julesgm/task/files/",
     )
 
     # from subprocess import Popen, PIPE, STDOUT
