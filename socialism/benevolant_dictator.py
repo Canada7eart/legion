@@ -19,7 +19,7 @@ def launch(script_path, project_name, walltime, number_of_nodes, number_of_gpus,
 #PBS -r n
 #PBS -N %s
 
-python '%s' -o %s >> "/home/julesgm/task/exec.log"
+python '%s' --path %s >> "/home/julesgm/task/exec.log"
 """ % (
     project_name,
     walltime,
