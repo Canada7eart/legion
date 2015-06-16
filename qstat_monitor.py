@@ -32,7 +32,7 @@ if __name__ == '__main__':
             win.border(0)
             proc = sp.Popen("qstat", stdout=sp.PIPE, stderr=sp.PIPE)
             text = proc.communicate()
-            curses.addstr(3, 3, text)
+            win.addstr(3, 3, text)
             time.sleep(1)
 
 
