@@ -19,7 +19,7 @@ def launch(script_path, project_name, walltime, number_of_nodes, number_of_gpus,
 #PBS -r n
 #PBS -N %s
 
-python '%s' --path %s >> "/home/julesgm/task/exec.log"
+python '%s' --path %s >./heh.log
 """ % (
     project_name,
     walltime,
@@ -27,16 +27,14 @@ python '%s' --path %s >> "/home/julesgm/task/exec.log"
     number_of_gpus,
     job_name,
     script_path,
-    "/home/julesgm/task/files/",
+    "/home/julesgm/task/files/lol.log",
+    #"/Users/jules/Documents/LISA/task/files/lol.log", 
     )
 
     # from subprocess import Popen, PIPE, STDOUT
     # p = Popen(['grep', 'f'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)    
     # grep_stdout = p.communicate(input=b'one\ntwo\nthree\nfour\nfive\nsix\n')[0]
-
-    process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sp.PIPE,  stderr=sp.STDOUT)
+    print("Running.")
+    process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sp.PIPE,  stderr=sp.STDOUT)
+    print("Still opened.")
     grep_stdout = process.communicate(input=launch_template)[0]    
-    print("launch: " + str(grep_stdout))
-
-    
-
