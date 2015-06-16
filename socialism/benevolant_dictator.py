@@ -36,6 +36,8 @@ python '%s' --path %s >./heh.log
     # grep_stdout = p.communicate(input=b'one\ntwo\nthree\nfour\nfive\nsix\n')[0]
     print("Running.")
     print("Still opened.")
-    sp.Popen("qsub -o '/home/julesgm/task/out.out' -e '/home/julesgm/task/out.err'", shell=True, stdin=sp.PIPE)
+    test = "sh"
+    regular = "qsub -o '/home/julesgm/task/out.out' -e '/home/julesgm/task/out.err'"
+    process = sp.Popen(regular, shell=True, stdin=sp.PIPE)
     grep_stdout = process.communicate(input=launch_template)[0]    
     print("apres")
