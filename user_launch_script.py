@@ -5,7 +5,7 @@ import socket
 
 if __name__ == "__main__": 
     bd.launch(
-        script_path="/home/julesgm/task/user_compute_script.py", 
+        script_path="/home/julesgm/task/files/client.py", 
         project_name="jvb-000-aa", 
         walltime=10, 
         number_of_nodes=4, 
