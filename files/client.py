@@ -47,6 +47,8 @@ def main():
     
     else:
         print("Node num #%s: We aren't the server. The server's ip is %s." % (PBS_NODENUM, server))
-
+    
+    with open(os.path.join(os.getcwd(), PBS_NODENUM + "_text.txt"), "w") as of:
+        of.write("yooo")
 if __name__ == '__main__': 
     main()
