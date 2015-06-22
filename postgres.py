@@ -20,4 +20,4 @@ pgparams = {
 
 if __name__ == "__main__":
     conn = pg.connect(pgparams)
-    print conn
+    print(conn)
