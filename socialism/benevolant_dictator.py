@@ -11,6 +11,8 @@ PORT = 52341
 def our_ip():
     return socket.gethostbyname(socket.gethostname())
 
+def getTOD():
+    return time.strftime("%H:%M:%S", time.gmtime())
 
 def launch(script_path, project_name, walltime, number_of_nodes, number_of_gpus, job_name, number_of_procs):
     launch_template = """#PBS -A %s
@@ -18,7 +20,14 @@ def launch(script_path, project_name, walltime, number_of_nodes, number_of_gpus,
 #PBS -l nodes=%d:gpus=%d
 #PBS -r n
 #PBS -N %s
-for i in $(seq 1 %d)
+
+#PBS -v MOAB_JOBARRAYINDEX
+
+module load compilers/intel/12.0.4
+
+UPPER_LIMIT=`expr ${PBS_JOBARRAYINDEX} + %d`
+
+for i in $(seq ${PBS_JOBARRAYINDEX} ${UPPER_LIMIT})
 do
     echo "starting job $i"
     python '%s' --path %s > ./launched_python_script_log_$i.log &
@@ -43,7 +52,7 @@ wait
     print("Still opened.")
     print(launch_template)
     test = "sh"
-    regular = "msub -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log'"
+    regular = "msub -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log' -t 0-100"
     process = sp.Popen(regular, shell=True, stdin=sp.PIPE)
     grep_stdout = process.communicate(input=launch_template)[0]    
     print("apres")
