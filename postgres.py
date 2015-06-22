@@ -27,9 +27,9 @@ pgparams = {
 if __name__ == "__main__":
     conn = pg.connect(**pgparams)
     cur = conn.cursor()
-    cur.execute("INSERT INTO task (id) values (0)")
-    cur.execute("INSERT INTO job (id, task) values (0, 0)")
-    cur.execute("INSERT INTO NODE (id, ip) values (0, \"%s\")", "127.0.0.1")
+    cur.execute("INSERT INTO task (id) values (%d)", 0)
+    cur.execute("INSERT INTO job (id, task) values (%d, %d)", 0, 0)
+    cur.execute("INSERT INTO NODE (id, ip) values (%d, \"%s\")", 0, "127.0.0.1")
     cur.execute(
         "INSERT INTO process (id, pid, node, state, \
             node, port, job_id) values (%d, %d, %d, %d, %d, %d, %d)", int(random.random() * 1000), os.getpid(), 0, 0, 0, 0, 0)
