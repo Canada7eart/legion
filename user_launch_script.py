@@ -12,6 +12,6 @@ if __name__ == "__main__":
         number_of_nodes=4, 
         number_of_gpus=2, 
         job_name="experims",
-	number_of_procs=8,
+	    number_of_procs=8,
         )
 
