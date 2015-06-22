@@ -32,7 +32,7 @@ if __name__ == "__main__":
     cur.execute("INSERT INTO NODE (id, ip) values (%s, %s)", (0, "127.0.0.1", ))
     cur.execute(
         "INSERT INTO process (id, pid, state, \
-            node, port, job_id) values (%s, %s, %s, %s, %s, %s)", (str(int(random.random() * 1000)), str(os.getpid()), str(0), str(0), str(0), str(0), str(0), ))
+            node, port, job_id) values (%s, %s, %s, %s, %s, %s)", (str(int(random.random() * 1000)), str(os.getpid()), str(0), str(0), str(0), str(0), ))
     conn.commit()
     cur.close()
     conn.close()
