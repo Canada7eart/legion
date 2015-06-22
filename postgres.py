@@ -10,14 +10,14 @@ DATABASE_NAME = "gagnonmj_db"
 # we don't know this one yet
 DATABASE_PORT = 666
 
-pgarams = {
+pgparams = {
         "database": "gagnonmj_db",
         "user":     "gagnonmj",
         "password": "a365c5e839",
         "host":     "opter.iro.umontreal.ca",
-        "port":     DATABASE_PORT,
     }
 
 
 if __name__ == "__main__":
-    conn = pg.connect(DATABASE_URL)
+    conn = pg.connect(pgparams)
+    print conn
