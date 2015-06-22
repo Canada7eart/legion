@@ -19,5 +19,5 @@ pgparams = {
 
 
 if __name__ == "__main__":
-    conn = pg.connect(pgparams)
-    print conn
+    conn = pg.connect(**pgparams)
+    print(conn)
