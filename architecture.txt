@@ -1,0 +1,39 @@
+two subsystems
+
+ss1: the workers
+        
+ss2: the dispatcher
+    
+
+Definitions:
+    Job : pbs job -> one call to qsub/msub
+    Node : One physical machine
+    Process : One worker instance
+
+    New word of ours : Training Task -> potentially multi job single nn training endeavour
+
+
+The dispatcher shouldn't be on the entry node. The dispatcher should be somewhere else. The problem with that is that it is an additionnal barrier to entry.
+
+
+Dispatcher need to know a stopping criterion. should probably be execution time.
+
+
+What should be on the sql server:
+    PK: training task id
+        -> job ids
+
+    FK: job id
+        -> proc ids
+
+    FK: proc id
+        -> state
+        -> Node
+        -> Port
+        -> job id
+
+    FK: NODE
+        -> ip
+
+
+The idea woul
