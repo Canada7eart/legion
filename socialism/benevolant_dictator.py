@@ -1,6 +1,7 @@
+from __future__ import print_function, with_statement, division, generators
 """ Extremely simple launch script. Should be improved. """
 #!/usr/bin/env python2
-from __future__ import print_function, with_statement, division, generators
+
 import os, sys, re, threading, socket, time
 import subprocess as sp
 
