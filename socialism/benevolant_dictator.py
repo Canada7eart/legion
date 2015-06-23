@@ -3,6 +3,7 @@
 from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, time
 import subprocess as sp
+
 #Benevolant Dictator
 
 
@@ -19,33 +20,34 @@ def launch_multiple(script_path, project_name, walltime, number_of_nodes, number
 
     launch_template = \
 """
-#PBS -A %s
-#PBS -l walltime=%d
-#PBS -l nodes=%d:gpus=%d
+#PBS -A {project_name}
+#PBS -l walltime={walltime}
+#PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
 #PBS -r n
-#PBS -N %s
+#PBS -N {job_name}
 
 #PBS -v MOAB_JOBARRAYINDEX
 
 module load compilers/intel/12.0.4
 
-for i in $(seq 0 $(expr %d - 1))
+for i in $(seq 0 $(expr {number_of_procs} - 1))
 do
     echo "starting job $i"
-    python '%s' --path %s > ./launched_python_script_log_$i.log &
+    python '{script_path}' --path {log_path} > ./launched_python_script_log_$i.log &
 done
 wait
 """ \
-% (
-    project_name,
-    walltime,
-    number_of_nodes,
-    number_of_gpus,
-    job_name,
-    number_of_procs,
-    script_path,
-    "/home/julesgm/task/files/lol.log",
-)
+.format(
+**{   
+    "project_name":     project_name,
+    "walltime':         walltime",
+    "number_of_nodes":  number_of_nodes,
+    "number_of_gpus":   number_of_gpus,
+    "job_name':         job_name",
+    "number_of_procs":  number_of_procs,
+    "script_path":      script_path,
+    "log_path":         "/home/julesgm/task/files/inner.log",
+})
 
     print("Running.")
     print("Still opened.")
