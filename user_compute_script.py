@@ -11,7 +11,6 @@ import postgres
 def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
-
 def header():
     return "PBS_NODENUM#%s - %s" % (getTOD(), s.environ["PBS_NODENUM"],)
 
@@ -23,13 +22,14 @@ def pwh(text):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--sql_server_ip', nargs=1, type=str)
+    parser.add_argument('--sql_server_ip',   nargs=1, type=str)
     parser.add_argument('--sql_server_port', nargs=1, type=str)
-    parser.add_argument('--job_id', nargs=1, type=int)
+    parser.add_argument('--job_id',          nargs=1, type=int)
     args = parser.parse_args()
 
     pwh("Saving ip to database.")
     postgres.save_proc_entry(args.job_id, os.environ["PBS_NODENUM"], PORT)
     pwh("Done.")
+
 if __name__ == '__main__':
     main()
