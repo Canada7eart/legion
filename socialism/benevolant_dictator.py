@@ -63,7 +63,7 @@ wait
     print(launch_template + "\n")  
 
 
-    regular = "qsub -q debug -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log' -t {lower_bound}-{upper_bound}".format(lower_bound=lower_bound, upper_bound=upper_bound)
+    regular = "qsub -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log' -t {lower_bound}-{upper_bound}".format(lower_bound=lower_bound, upper_bound=upper_bound)
     print("qsub ")
     process = sp.Popen(regular, shell=True, stdin=sp.PIPE)
     grep_stdout = process.communicate(input=launch_template)[0]    
