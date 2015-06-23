@@ -41,7 +41,7 @@ def launch_multiple(
 
 module load compilers/intel/12.0.4
 
-for i in $(seq 0 $(expr {number_of_procs} - 1))
+for i in $(seq 0 $(expr {procs_per_job} - 1))
 do
     echo "starting job $i"
     python '{script_path}' --job_id {job_id} > ./launched_python_script_log_$i.log &
@@ -54,7 +54,7 @@ wait
     number_of_nodes=  number_of_nodes,
     number_of_gpus=   number_of_gpus,
     job_name=         job_name,
-    number_of_procs=  number_of_procs,
+    procs_per_job=    procs_per_job,
     script_path=      script_path,
     job_id=           job_id,
 )
