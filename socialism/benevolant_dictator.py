@@ -15,9 +15,20 @@ def our_ip():
 def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
-def launch_multiple(script_path, project_name, walltime, number_of_nodes, number_of_gpus, job_name, procs_per_job, lower_bound, upper_bound):
-    assert procs_per_job >= 1, "There needs to be at least one process per job."
+def launch_multiple(
+    script_path, 
+    project_name, 
+    walltime, 
+    number_of_nodes, 
+    number_of_gpus, 
+    job_name, 
+    procs_per_job, 
+    lower_bound, 
+    upper_bound, 
+    job_id
+    ):
 
+    assert procs_per_job >= 1, "There needs to be at least one process per job."
     launch_template = \
 """
 #PBS -A {project_name}
@@ -33,24 +44,22 @@ module load compilers/intel/12.0.4
 for i in $(seq 0 $(expr {number_of_procs} - 1))
 do
     echo "starting job $i"
-    python '{script_path}' --path {log_path} > ./launched_python_script_log_$i.log &
+    python '{script_path}' --job_id {job_id} > ./launched_python_script_log_$i.log &
 done
 wait
 """ \
 .format(
-**{   
-    "project_name":     project_name,
-    "walltime':         walltime",
-    "number_of_nodes":  number_of_nodes,
-    "number_of_gpus":   number_of_gpus,
-    "job_name':         job_name",
-    "number_of_procs":  number_of_procs,
-    "script_path":      script_path,
-    "log_path":         "/home/julesgm/task/files/inner.log",
-})
+    project_name=     project_name,
+    walltime=         walltime,
+    number_of_nodes=  number_of_nodes,
+    number_of_gpus=   number_of_gpus,
+    job_name=         job_name,
+    number_of_procs=  number_of_procs,
+    script_path=      script_path,
+    job_id=           job_id,
+)
 
     print("Running.")
-    print("Still opened.")
     print(launch_template)
 
     regular = "msub -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log' -t %d-%d" % (lower_bound, upper_bound)

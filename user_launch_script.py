@@ -5,8 +5,7 @@ import socket
 
 if __name__ == "__main__": 
     bd.launch_multiple(
-        script_path="/home/julesgm/task/files/client.py", 
-        #script_path="/Users/jules/Documents/LISA/task/files/client.py", 
+        script_path="/home/julesgm/task/user_compute_script.py", 
         project_name="jvb-000-aa", 
         walltime=10, 
         number_of_nodes=4, 
@@ -15,5 +14,6 @@ if __name__ == "__main__":
 	    procs_per_job=8,
         lower_bound=0,
         upper_bound=1,
+        job_id=0, # temporary
         )
 

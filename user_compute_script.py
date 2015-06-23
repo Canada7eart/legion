@@ -12,8 +12,14 @@ def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 
-def entete():
+def header():
     return "PBS_NODENUM#%s - %s" % (getTOD(), s.environ["PBS_NODENUM"],)
+
+# print_with_header
+def pwh(text):
+    print("{header}: {text}".format(
+        header=header(), 
+        text=text))
 
 def main():
     parser = argparse.ArgumentParser()
@@ -22,10 +28,8 @@ def main():
     parser.add_argument('--job_id', nargs=1, type=int)
     args = parser.parse_args()
 
-
+    pwh("Saving ip to database.")
     postgres.save_proc_entry(args.job_id, os.environ["PBS_NODENUM"], PORT)
-    
-
-
+    pwh("Done.")
 if __name__ == '__main__':
     main()
