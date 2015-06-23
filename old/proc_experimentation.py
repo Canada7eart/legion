@@ -23,19 +23,15 @@ def kill_time():
 # TODO:
 def find_out_our_ip():
     assert False, "TODO"
-    return "127.0.0.1"
-
+    
 # TODO:
 def find_out_our_node():
     assert False, "TODO"
-    return os.environ.get("PBS_NODE_NUMBER", None)
-
+    
 # TODO:
 def find_ips_and_ports_of_other_nodes():
     assert False, "TODO"
-    return []
-
-
+    
 class CursesScreen(object):
     def __enter__(self):
         self.stdscr = curses.initscr()
@@ -50,7 +46,6 @@ class CursesScreen(object):
         self.stdscr.keypad(0)
         curses.echo()
         curses.endwin()
-
 
 
 def main():
@@ -69,6 +64,7 @@ def main():
         server_pid = get_children()[0]
 
     client = os.fork()
+    
     if client == 0:
         kill_time()
         exit(0)
