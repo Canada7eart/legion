@@ -17,7 +17,7 @@ pgparams = {
         "host":     "opter.iro.umontreal.ca",
     }
 
-
+   
 def update_proc_state(proc_id, new_state):
     conn = pg.connect(**pgparams)
     cur = conn.cursor()
