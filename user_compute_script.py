@@ -1,6 +1,8 @@
 """ Extremely simple launch script. Should be improved. """
 #!/usr/bin/env python2
 
+PORT = 6000
+
 from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, argparse, time
 import subprocess as sp
@@ -15,15 +17,15 @@ def entete():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--launcher-ip', nargs=1, type=str)
-    parser.add_argument('--launcher-port', nargs=1, type=str)
+    parser.add_argument('--sql_server_ip', nargs=1, type=str)
+    parser.add_argument('--sql_server_port', nargs=1, type=str)
+    parser.add_argument('--job_id', nargs=1, type=int)
     args = parser.parse_args()
 
+
+    postgres.save_proc_entry(args.job_id, os.environ["PBS_NODENUM"], PORT)
     
 
-    print("%s: Trying to connect to %s:%s" % (entete(), str(args.launcher_ip[0]), str(args.launcher_port[0])))
-    socket.create_connection((args.launcher_ip[0], args.launcher_port[0]))
-    print("%s: Logic would tell us the connection worked." % (entete()))
 
 if __name__ == '__main__':
     main()

@@ -24,9 +24,11 @@ What should be on the sql server:
         -> job ids
 
     FK: job id
-        -> proc ids
+        -> task id
 
     FK: proc id
+        -> id
+        -> pid
         -> state
         -> Node
         -> Port
