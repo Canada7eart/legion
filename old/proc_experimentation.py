@@ -76,7 +76,6 @@ def main():
         win.timeout(500)
 
         while True:
-
             state_server = None
             state_client = None
 
