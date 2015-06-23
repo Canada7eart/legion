@@ -10,12 +10,6 @@ def our_ip():
 def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
-
-DATABASE_URL = "opter.iro.umontreal.ca"
-DATABASE_NAME = "gagnonmj_db"
-# we don't know this one yet
-DATABASE_PORT = 666
-
 pgparams = {
         "database": "gagnonmj_db",
         "user":     "gagnonmj",
@@ -24,13 +18,33 @@ pgparams = {
     }
 
 
-if __name__ == "__main__":
+def update_proc_state(proc_id, new_state):
     conn = pg.connect(**pgparams)
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO process (id, pid, state, \
-            node, port, job_id) values (%s, %s, %s, %s, %s, %s)", (str(int(random.random() * 1000)), str(os.getpid()), str(0), str(0), str(0), str(0), ))
+        "UPDATE state VALUES(%s) FROM process WHERE proc_id = %s", (new_state, proc_id, ))
     conn.commit()
     cur.close()
     conn.close()
-    print("done.")
+
+def save_proc_entry(job_id, node, port):
+    conn = pg.connect(**pgparams)
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO process (id, pid, state, node, port, job_id) \
+                      values (%s,  %s,    %s,   %s,   %s,     %s)", \
+                      (str(node) + str(os.getpid()), str(os.getpid()), "ONLINE", node, port, job_id, ))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_proc_info(proc_id):
+
+    conn = pg.connect(**pgparams)
+    cur = conn.cursor()
+    basic_stuff = cur.execute("SELECT pid, state, node, port from process where id=%s", (proc_id, ))
+    ip = cur.execute("SELECT ip from node where id = %s", (basic_stuff["node"], ))
+    cur.close()
+    conn.close()
+
+    return {"process": basic_stuff, "node": {"ip": ip}}
