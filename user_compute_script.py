@@ -1,9 +1,8 @@
+from __future__ import print_function, with_statement, division, generators
 """ Extremely simple launch script. Should be improved. """
 #!/usr/bin/env python2
 
 PORT = 6000
-
-from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, argparse, time
 import subprocess as sp
 import postgres
