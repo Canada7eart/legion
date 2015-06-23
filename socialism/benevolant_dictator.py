@@ -39,8 +39,6 @@ def launch_multiple(
 
 #PBS -v MOAB_JOBARRAYINDEX
 
-module load compilers/intel/12.0.4
-
 for i in $(seq 0 $(expr {procs_per_job} - 1))
 do
     echo "starting job $i"
@@ -60,9 +58,12 @@ wait
 )
 
     print("Running.")
-    print(launch_template)
+    print("\nmsub will receive:")
+    print(launch_template + "\n")  
 
-    regular = "msub -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log' -t %d-%d" % (lower_bound, upper_bound)
+
+    regular = "qsub -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log' -t {lower_bound}-{upper_bound}" % (lower_bound, upper_bound)
+    print("qsub ")
     process = sp.Popen(regular, shell=True, stdin=sp.PIPE)
     grep_stdout = process.communicate(input=launch_template)[0]    
     print("apres")
