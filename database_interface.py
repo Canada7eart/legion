@@ -102,7 +102,7 @@ class Db(object):
 
     def get_server_ip(self):
         curr = self.conn.cursor()
-        curr.execute("SELECT server_ip, server_port FROM task WHERE task_name = %s", self.task_name)
+        curr.execute("SELECT server_ip, server_port FROM task WHERE task_name = %s", (self.task_name, ))
         ip, port = curr.fetchone()
         curr.commit()
         curr.close()
