@@ -4,7 +4,7 @@ from socialism import benevolant_dictator
 import socket, os, sys
 
 if __name__ == "__main__": 
-    debug = True
+    debug = False
     path = "{here}/user_compute_script.py".format(here=os.path.dirname(__file__))
 
     print(path)
