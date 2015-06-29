@@ -4,9 +4,8 @@ from socialism import benevolant_dictator
 import socket, os, sys
 
 if __name__ == "__main__": 
+
     debug = True
-
-
 
     if debug:
         benevolant_dictator.launch_multiple(
