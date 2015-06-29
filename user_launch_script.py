@@ -5,7 +5,7 @@ import socket, os, sys
 
 if __name__ == "__main__": 
     debug = True
-    path = "{here}/user_compute_script.py".format(here=os.path.dirname(__file__))
+    path = "~/task/user_compute_script.py"
 
     print(path)
 
