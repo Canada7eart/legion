@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     else:
         benevolant_dictator.launch_multiple(
-            script_path="{here}/user_compute_script.py".format(here=os.path.dirname(__file__)), 
+            script_path=path, 
             project_name="jvb-000-aa", 
             walltime=10, 
             number_of_nodes=4, 
