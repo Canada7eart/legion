@@ -93,6 +93,6 @@ wait
 
     else:
         process = sp.Popen("msub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
-        stdout = process.communicate(complete_code)[0]    
+        stdout = process.communicate(launch_template)[0]    
 
     print("apres")
