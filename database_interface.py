@@ -104,7 +104,7 @@ class Db(object):
         curr = self.conn.cursor()
         curr.execute("SELECT server_ip, server_port FROM task WHERE name = %s", (self.task_name, ))
         ip, port = curr.fetchone()
-        curr.commit()
+        conn.commit()
         curr.close()
         return ip, port            
 """
