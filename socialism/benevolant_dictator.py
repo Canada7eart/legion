@@ -1,8 +1,7 @@
+#!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
 
 """ Extremely simple launch script. Should be improved. """
-#!/usr/bin/env python2
-
 import os, sys, re, threading, socket, time
 import subprocess as sp
 
@@ -10,6 +9,12 @@ import subprocess as sp
 
 
 PORT = 5234
+
+def insert_tabs(text):
+    return "\t" + text.replace("\n","\n\t")
+
+def debugs(text):
+    print(text)
 
 def our_ip():
     return socket.gethostbyname(socket.gethostname())
@@ -27,7 +32,7 @@ def launch_multiple(
     procs_per_job, 
     lower_bound, 
     upper_bound, 
-    job_id
+    debug = False
     ):
 
     assert procs_per_job >= 1, "There needs to be at least one process per job."
@@ -44,7 +49,7 @@ def launch_multiple(
 for i in $(seq 0 $(expr {procs_per_job} - 1))
 do
     echo "starting job $i"
-    python '{script_path}' --job_id {job_id} > ./launched_python_script_log_$i.log &
+    python2 '{script_path}' --job_name {job_name} > ./logs/launched_python_script_log_$i.log {debug} &
 done
 wait
 """ \
@@ -56,16 +61,38 @@ wait
     job_name=         job_name,
     procs_per_job=    procs_per_job,
     script_path=      script_path,
-    job_id=           job_id,
+    debug= ("--debug" if debug else "")
 )
 
-    print("Running.")
-    print("\nmsub will receive:")
-    print(launch_template + "\n")  
+    debugs("Running.")
+    debugs("\nmsub will receive:")
+    debugs(insert_tabs(launch_template) + "\n")  
 
+    options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}"\
+        .format(
+            here=os.path.dirname(__file__),
+            lower_bound=lower_bound, 
+            upper_bound=upper_bound,
+            )
 
-    regular = "qsub -o '/home/julesgm/task/out.log' -e '/home/julesgm/task/err.log' -t {lower_bound}-{upper_bound}".format(lower_bound=lower_bound, upper_bound=upper_bound)
-    print("qsub ")
-    process = sp.Popen(regular, shell=True, stdin=sp.PIPE)
-    grep_stdout = process.communicate(input=launch_template)[0]    
+    if debug:
+        env = {
+            "PBS_NODENUM": "0",
+            }
+        env_code = "\n".join(["export {key}={value};".format(key=key, value=value) for key, value in env.items()]) + "\n"
+        complete_code = env_code + "sh" + launch_template
+
+        debugs("Env code:")
+        debugs(insert_tabs(env_code))
+
+        debugs("Complete code:")
+        debugs(insert_tabs(complete_code))
+
+        process = sp.Popen("sh --debug", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+        stdout = process.communicate(complete_code)[0]    
+
+    else:
+        process = sp.Popen("msub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+        stdout = process.communicate(complete_code)[0]    
+
     print("apres")
