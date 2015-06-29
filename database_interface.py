@@ -2,6 +2,7 @@
 from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, time, random, struct, json
 import subprocess as sp
+import pg8000
 
 def our_ip():
     return socket.gethostbyname(socket.gethostname())
@@ -17,11 +18,12 @@ pgparams = {
     }
 
 class Db(object):
-    def __init__(self, db, job_name, conn_params = pgparams):
+    def __init__(self, db, task_name, job_name, conn_params = pgparams):
         
         self.db = db
         self.conn = self.db.connect(**pgparams)
         self.job_name = job_name
+        self.task_name = task_name
 
     def update_proc_state(self, proc_id, new_state):
         """ Can fail. """
@@ -73,7 +75,7 @@ class Db(object):
         else :
             return None
 
-    def check_livess_of_other_nodes(self):
+    def check_liveness_of_other_nodes(self):
 
         cur = self.conn.cursor()
         ips_and_ports = cur.execute("SELECT pid, port, is_server FROM PROCESS WHERE job_name = %s and state = 'ACTIVE', \
@@ -98,13 +100,21 @@ class Db(object):
             else:
                 conn.close()
 
+    def get_server_ip(self):
+        curr = self.conn.cursor()
+        curr.excecute("SELECT server_ip, server_port FROM task WHERE task_name = %s", self.task_name)
+        ip, port = curr.fetchone()
+        curr.commit()
+        curr.close()
+        return ip, port            
+"""
     def start_replacing_server(self):
         # we are initiating the server replacement protocol.
         # it mights gave started elsewhere
 
         cur = self.conn.cursor()
         ips_and_ports = cur.execute("SELECT pid, port FROM PROCESS WHERE job_name = %s and state = 'ACTIVE', \
-            inner join select ip from node where node.id = process.node", (self.job_name,))
+            inner join select ip from node where node.id = process.node", (self.job_name, ))
 
         curr.commit()
         curr.close()
@@ -123,22 +133,21 @@ class Db(object):
                 conns[(ip, port)].send(struct.pact(len(json_text), "i"))
                 conns[(ip, port)].send(struct.pact(json_text, "s"))
 
-                """ 
-                -> disable the starting of other "start_replacing_server" initiative
-                -> answer to other "start_replacing_server" initiatives by a message saying you're already engaged
-                -> 
-                """
+                 
+                # -> disable the starting of other "start_replacing_server" initiative
+                # -> answer to other "start_replacing_server" initiatives by a message saying you're already engaged
+                # -> 
+                
 
             except:
                 assert False, "TODO"
+"""
 
 
-
-
-
-
-
-
+if __name__ == '__main__':
+    db = Db(pg8000, "random_task_name", "0")
+    text = db.get_server_ip()
+    print(text)
 
 
 
