@@ -7,6 +7,8 @@ if __name__ == "__main__":
 
     debug = False
 
+    server_thread = benevolant_dictator.launch_server() 
+
     if debug:
         benevolant_dictator.launch_multiple(
             script_path="/Users/jules/Documents/LISA/task/user_compute_script.py", 
@@ -35,3 +37,5 @@ if __name__ == "__main__":
             lower_bound=0,
             upper_bound=0,
             )
+
+    server_thread.join()
