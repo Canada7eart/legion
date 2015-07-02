@@ -5,7 +5,7 @@ import socket, os, sys
 
 if __name__ == "__main__": 
 
-    debug = True
+    debug = False
 
     if debug:
         benevolant_dictator.launch_multiple(
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     else:
         benevolant_dictator.launch_multiple(
-            script_path="/home/julesgm/task/socialism/user_compute_script.py", 
+            script_path="/home/julesgm/task/user_compute_script.py", 
             project_name="jvb-000-aa", 
             walltime=10, 
             number_of_nodes=4, 
