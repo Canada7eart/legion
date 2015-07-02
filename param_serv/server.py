@@ -30,6 +30,7 @@ class AcceptorThread(threading.Thread):
 
 class ReceptionThread(threading.Thread):
     def __init__(self, conn, meta, meta_rlock, db, db_rlock):
+        super(self.__class__, self).__init__()
         self.conn = conn
         self.db = db
         self.db_rlock = db_rlock

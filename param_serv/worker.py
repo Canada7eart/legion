@@ -11,6 +11,8 @@ from param_utils import *
 
 class ConnectorThread(threading.Thread):
     def __init__(self, meta, meta_rlock, db, db_rlock, ip, port):
+        super(self.__class__, self).__init__()
+        
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
