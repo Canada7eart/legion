@@ -4,7 +4,8 @@ from __future__ import print_function, with_statement, division, generators
 """ Extremely simple launch script. Should be improved. """
 import os, sys, re, threading, socket, time
 import subprocess as sp
-import param_serv
+import param_serv.server
+
 #Benevolant Dictator
 
 
@@ -23,7 +24,7 @@ def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 def launch_server():
-    acceptor = param_serv.server.AcceptorThread()
+    acceptor = server.AcceptorThread()
     acceptor.run()
     return acceptor
 
