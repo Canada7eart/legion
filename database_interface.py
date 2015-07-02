@@ -38,7 +38,7 @@ class Db(object):
         cur.close()
 
 
-    def save_proc_entry(self, node, port):
+    def save_proc_entry(self, port):
         """ Should not fail. If it does, it's a bug; we know we're alive. """
         
         cur = self.conn.cursor()
@@ -47,15 +47,15 @@ class Db(object):
         sys.stdout.flush()
 
         cur.execute(  
-            "INSERT INTO process (id, pid, state, node, port, job_name) \
+            "INSERT INTO process (id, pid, state, ip, port, job_name) \
                           values (%s,  %s,    %s,   %s,   %s,     %s)", 
-            ("{node}::{pid}".format(node=node, pid=os.getpid()), 
-                str(os.getpid()), "ONLINE", node, port, self.job_name, )
+            ("{ip}::{pid}".format(ip=our_ip(), pid=os.getpid()), 
+                str(os.getpid()), "ONLINE", our_ip(), port, self.job_name, )
             )
-
-        self.conn.commit()
+        
         cur.close()
-
+        self.conn.commit()
+        
     def get_proc_info(self, proc_id):
         """ Can fail. """
 
@@ -63,6 +63,7 @@ class Db(object):
         basic_stuff = cur.execute("SELECT pid, state, node, port from process where id=%s", (proc_id, ))
         ip = cur.execute("SELECT ip from node where id = %s", (basic_stuff["node"], ))
         cur.close()
+        self.conn.commit()
 
         if basic_stuff:
             return {
@@ -74,15 +75,15 @@ class Db(object):
 
         else :
             return None
-
+    """
     def check_liveness_of_other_nodes(self):
 
         cur = self.conn.cursor()
         ips_and_ports = cur.execute("SELECT pid, port, is_server FROM PROCESS WHERE job_name = %s and state = 'ACTIVE', \
             inner join select ip from node where node.id = process.node", (self.job_name,))
 
-        curr.commit()
-        curr.close()
+        cur.commit()
+        cur.close()
         
         print(tips_and_portsest)
 
@@ -99,49 +100,15 @@ class Db(object):
                     self.start_replacing_server()
             else:
                 conn.close()
+    """
 
-    def get_server_ip(self):
-        curr = self.conn.cursor()
-        curr.execute("SELECT server_ip, server_port FROM task WHERE name = %s", (self.task_name, ))
-        ip, port = curr.fetchone()
-        self.conn.commit()
-        curr.close()
-        return ip, port            
-"""
-    def start_replacing_server(self):
-        # we are initiating the server replacement protocol.
-        # it mights gave started elsewhere
-
+    def get_server_ip_and_port(self):
         cur = self.conn.cursor()
-        ips_and_ports = cur.execute("SELECT pid, port FROM PROCESS WHERE job_name = %s and state = 'ACTIVE', \
-            inner join select ip from node where node.id = process.node", (self.job_name, ))
-
-        curr.commit()
-        curr.close()
-
-        conns = {}
-
-        for ip, port in ips_and_ports:
-            try:
-                conns[(ip, port)] = socket.create_connection(address=ip, timeout=5, port=port)
-                conns[(ip, port)].send(struct.pact(JSON_HEADER,"i"))
-                json_text = json.dump({
-                    "query": "select_new_server",
-                    "ips": ips_and_ports
-                    })
-
-                conns[(ip, port)].send(struct.pact(len(json_text), "i"))
-                conns[(ip, port)].send(struct.pact(json_text, "s"))
-
-                 
-                # -> disable the starting of other "start_replacing_server" initiative
-                # -> answer to other "start_replacing_server" initiatives by a message saying you're already engaged
-                # -> 
-                
-
-            except:
-                assert False, "TODO"
-"""
+        cur.execute("SELECT server_ip, server_port FROM task WHERE name = %s", (self.task_name, ))
+        ip, port = cur.fetchone()
+        self.conn.commit()
+        cur.close()
+        return ip, port            
 
 
 if __name__ == '__main__':
