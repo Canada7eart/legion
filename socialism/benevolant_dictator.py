@@ -50,7 +50,7 @@ def launch_multiple(
 for i in $(seq 0 $(expr {procs_per_job} - 1))
 do
     echo "starting job $i"
-    python2 '{script_path}' --job_name {job_name} {debug} &
+    python2 '{script_path}' --task_name {task_name} --job_name {job_name} {debug} &
 done
 wait
 """ \
