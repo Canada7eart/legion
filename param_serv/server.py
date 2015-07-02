@@ -22,7 +22,7 @@ class AcceptorThread(threading.Thread):
 
         while True:
             conn, addr = s.accept()
-            print 'Connected by', addr
+            print('Connected by {addr}'.format(addr=addr))
             new_thread = ReceptionThreadThread(conn, meta, meta_rlock, db, db_rlock)
             new_thread.run()
 
