@@ -24,10 +24,16 @@ def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 def launch_server():
-    acceptor = param_serv.server.AcceptorThread()
-    acceptor.run()
-    return acceptor
+    db = {}
+    db_rlock = threading.RLock()
+    meta = {}
+    meta_rlock = threading.RLock()
 
+    acceptor = param_serv.server.AcceptorThread(meta, meta_rlock, db, db_rlock)
+    acceptor.run()
+    
+    return acceptor
+    
 def launch_multiple(
     script_path, 
     project_name, 
