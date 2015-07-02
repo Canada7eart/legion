@@ -4,7 +4,7 @@ from __future__ import print_function, with_statement, division, generators
 """ Extremely simple launch script. Should be improved. """
 import os, sys, re, threading, socket, time
 import subprocess as sp
-
+import param_serv
 #Benevolant Dictator
 
 
@@ -21,6 +21,11 @@ def our_ip():
 
 def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
+
+def launch_server():
+    acceptor = param_serv.server.AcceptorThread()
+    acceptor.run()
+    return acceptor
 
 def launch_multiple(
     script_path, 
@@ -50,7 +55,7 @@ def launch_multiple(
 for i in $(seq 0 $(expr {procs_per_job} - 1))
 do
     echo "starting job $i"
-    python2 '{script_path}' --task_name {task_name} --job_name {job_name} {debug} &
+    python2 '{script_path}' --server_ip {server_ip} --task_name {task_name} --job_name {job_name} {debug} &
 done
 wait
 """ \
@@ -63,6 +68,7 @@ wait
     task_name=        task_name,
     procs_per_job=    procs_per_job,
     script_path=      script_path,
+    server_ip=        our_ip(),
     debug=            ("--debug" if debug else "")
 )
 
