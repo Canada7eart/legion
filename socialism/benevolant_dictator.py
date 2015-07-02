@@ -28,7 +28,8 @@ def launch_multiple(
     walltime, 
     number_of_nodes, 
     number_of_gpus, 
-    job_name, 
+    job_name,
+    task_name,  
     procs_per_job, 
     lower_bound, 
     upper_bound, 
@@ -59,6 +60,7 @@ wait
     number_of_nodes=  number_of_nodes,
     number_of_gpus=   number_of_gpus,
     job_name=         job_name,
+    task_name=        task_name,
     procs_per_job=    procs_per_job,
     script_path=      script_path,
     debug=            ("--debug" if debug else "")

@@ -10,6 +10,9 @@ import pg8000
 import database_interface as dbi
 import param_serv.worker
 
+from traceback import print_exc
+
+
 def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
@@ -27,6 +30,7 @@ def main():
     parser.add_argument('--sql_server_ip',   nargs=1, type=str)
     parser.add_argument('--sql_server_port', nargs=1, type=str)
     parser.add_argument('--job_name',        nargs=1, type=str)
+    parser.add_argument('--task_name',       nargs=1, type=str)
     parser.add_argument('--debug',           action="store_true")
 
     args = parser.parse_args()
@@ -38,12 +42,12 @@ def main():
     while continue_looping:
 
         try:
-            db = dbi.Db(pg8000, args.job_name[0]) 
+            db = dbi.Db(pg8000, args.task_name[0], args.job_name[0]) 
             server_ip, server_port = db.get_server_ip_and_port()
             continue_looping = False
 
         except Exception, err:
-            print err
+            print_exc()
             time.sleep(0.5)
 
     db.save_proc_entry(PORT)
