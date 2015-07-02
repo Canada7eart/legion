@@ -24,7 +24,7 @@ def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 def launch_server():
-    acceptor = server.AcceptorThread()
+    acceptor = param_serv.server.AcceptorThread()
     acceptor.run()
     return acceptor
 
