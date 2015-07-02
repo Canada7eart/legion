@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     server_thread = benevolant_dictator.launch_server() 
 
-    path = os.join(os.path.dirname(__file__), 'user_compute_script.py') 
+    path = os.path.join(os.path.dirname(__file__), 'user_compute_script.py') 
 
     if debug:
         benevolant_dictator.launch_multiple(
