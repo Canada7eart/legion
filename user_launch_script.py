@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     if debug:
         benevolant_dictator.launch_multiple(
-            script_path=path,
+            script_path=path, 
             project_name="jvb-000-aa", 
             walltime=10, 
             number_of_nodes=4, 
