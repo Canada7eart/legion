@@ -10,6 +10,7 @@ from traceback import print_exc
 
 class AcceptorThread(threading.Thread):
     def __init__(self, meta, meta_rlock, db, db_rlock):
+        super(self.__class__, self).__init__()
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
