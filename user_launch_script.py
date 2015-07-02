@@ -5,13 +5,15 @@ import socket, os, sys
 
 if __name__ == "__main__": 
 
-    debug = False
+    debug = True
 
     server_thread = benevolant_dictator.launch_server() 
 
+    path = os.join(os.path.dirname(__file__), 'user_compute_script.py') 
+
     if debug:
         benevolant_dictator.launch_multiple(
-            script_path="/Users/jules/Documents/LISA/task/user_compute_script.py", 
+            script_path=path,
             project_name="jvb-000-aa", 
             walltime=10, 
             number_of_nodes=4, 
@@ -26,7 +28,7 @@ if __name__ == "__main__":
 
     else:
         benevolant_dictator.launch_multiple(
-            script_path="/home/julesgm/task/user_compute_script.py", 
+            script_path=path, 
             project_name="jvb-000-aa", 
             walltime=10, 
             number_of_nodes=4, 
