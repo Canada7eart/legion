@@ -6,26 +6,28 @@ import sys, os, re, argparse, copy, time, datetime
 
 from headers import *
 from param_utils import *
+
 from traceback import print_exc
 
 class AcceptorThread(threading.Thread):
-    def __init__(self, meta, meta_rlock, db, db_rlock):
+    def __init__(self, meta, meta_rlock, db, db_rlock, server_port):
         super(self.__class__, self).__init__()
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
         self.db_rlock = db_rlock
+        self.server_port = server_port
 
-    def start(self):
+    def run(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(('', PORT))
-        s.listen()
+        s.bind(('', self.server_port))
+        s.listen(10000)
 
         while True:
             conn, addr = s.accept()
             print('Connected by {addr}'.format(addr=addr))
             new_thread = ReceptionThreadThread(conn, meta, meta_rlock, db, db_rlock)
-            new_thread.run()
+            new_thread.start()
 
 
 class ReceptionThread(threading.Thread):
@@ -37,7 +39,7 @@ class ReceptionThread(threading.Thread):
         self.meta = meta
         self.meta_rlock = meta_rlock
     
-    def start(self):
+    def run(self):
         while True:
             header = conn.recv(struct.calcsize("i"))
             if header == HEADER_JSON:

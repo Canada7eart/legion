@@ -6,8 +6,9 @@ import socket, os, sys
 if __name__ == "__main__": 
 
     debug = True
+    server_port = 3000
 
-    server_thread = benevolant_dictator.launch_server() 
+    server_thread = benevolant_dictator.launch_server(server_port) 
 
     path = os.path.join(os.path.dirname(__file__), 'user_compute_script.py') 
 
@@ -23,7 +24,8 @@ if __name__ == "__main__":
     	    procs_per_job=1,
             lower_bound=0,
             upper_bound=0,
-            debug = True,
+            debug=True,
+            server_port=server_port,
             )
 
     else:
@@ -38,6 +40,7 @@ if __name__ == "__main__":
             procs_per_job=8,
             lower_bound=0,
             upper_bound=0,
+            server_port=server_port,
             )
 
     server_thread.join()
