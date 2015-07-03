@@ -3,6 +3,25 @@ import socket, json, struct
 import threading
 import sys, os, re, argparse, copy, time, datetime
 
+
+def our_ip():
+   return socket.gethostbyname(socket.gethostname())
+
+def insert_tabs(text):
+    return "\t" + text.replace("\n","\n\t")
+
+def getTOD():
+    return time.strftime("%H:%M:%S", time.gmtime())
+
+def header():
+    return "PBS_NODENUM#%s - %s" % (getTOD(), os.environ["PBS_NODENUM"], )
+
+# print_with_header
+def pwh(text):
+    print("{header}: {text}".format(
+        header=header(), 
+        text=text))
+
 class entry(object):
     def __init__(self, val):
         self.inner = val

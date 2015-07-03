@@ -4,11 +4,7 @@ import os, sys, re, threading, socket, time, random, struct, json
 import subprocess as sp
 import pg8000
 
-def our_ip():
-    return socket.gethostbyname(socket.gethostname())
-
-def getTOD():
-    return time.strftime("%H:%M:%S", time.gmtime())
+from param_serv.param_utils import *
 
 pgparams = {
         "database": "gagnonmj_db",

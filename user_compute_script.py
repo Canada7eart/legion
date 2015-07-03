@@ -11,19 +11,9 @@ import database_interface as dbi
 import param_serv.worker
 
 from traceback import print_exc
+import param_serv.worker
+from param_serv.param_utils import *
 
-
-def getTOD():
-    return time.strftime("%H:%M:%S", time.gmtime())
-
-def header():
-    return "PBS_NODENUM#%s - %s" % (getTOD(), os.environ["PBS_NODENUM"], )
-
-# print_with_header
-def pwh(text):
-    print("{header}: {text}".format(
-        header=header(), 
-        text=text))
 
 def main():
     parser = argparse.ArgumentParser()
@@ -31,6 +21,8 @@ def main():
     parser.add_argument('--sql_server_port', nargs=1, type=str)
     parser.add_argument('--job_name',        nargs=1, type=str)
     parser.add_argument('--task_name',       nargs=1, type=str)
+    parser.add_argument('--server_ip',       nargs=1, type=str)
+    parser.add_argument('--server_port',     nargs=1, type=int)
     parser.add_argument('--debug',           action="store_true")
 
     args = parser.parse_args()
@@ -39,11 +31,12 @@ def main():
     
     continue_looping = True
 
+    """
     while continue_looping:
 
         try:
-            db = dbi.Db(pg8000, args.task_name[0], args.job_name[0]) 
-            server_ip, server_port = db.get_server_ip_and_port()
+            # db = dbi.Db(pg8000, args.task_name[0], args.job_name[0]) 
+            # server_ip, server_port = db.get_server_ip_and_port()
             continue_looping = False
 
         except Exception, err:
@@ -51,6 +44,7 @@ def main():
             time.sleep(0.5)
 
     db.save_proc_entry(PORT)
+    """
 
     # CONNECT TO THE SERVER 
     param_db = {}
@@ -64,11 +58,11 @@ def main():
     }
     meta_rlock = threading.RLock()
 
-    worker.connector_thread = ConnectorThread(meta, meta_rlock, param_db, param_db_rlock)
-    worker.connector_thread.run()
+    worker_connector_thread = param_serv.worker.ConnectorThread(meta, meta_rlock, param_db, param_db_rlock, args.server_ip[0], args.server_port[0])
+    worker_connector_thread.start()
 
     # DIE
-    db.update_proc_state(os.getpid(), "DEAD")
+    # param_db.update_proc_state(os.getpid(), "DEAD")
     pwh("Done.")
 
 if __name__ == '__main__':

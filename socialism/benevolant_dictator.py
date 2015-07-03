@@ -5,32 +5,27 @@ from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, time
 import subprocess as sp
 import param_serv.server
+from param_serv.param_utils import *
 
-#Benevolant Dictator
-
-
-PORT = 5234
-
-def insert_tabs(text):
-    return "\t" + text.replace("\n","\n\t")
 
 def debugs(text):
     print(text)
 
-def our_ip():
-    return socket.gethostbyname(socket.gethostname())
-
-def getTOD():
-    return time.strftime("%H:%M:%S", time.gmtime())
-
-def launch_server():
+def launch_server(server_port):
     db = {}
     db_rlock = threading.RLock()
     meta = {}
     meta_rlock = threading.RLock()
 
-    acceptor = param_serv.server.AcceptorThread(meta, meta_rlock, db, db_rlock)
-    acceptor.run()
+    acceptor = param_serv.server.AcceptorThread(
+        meta=meta, 
+        meta_rlock=meta_rlock, 
+        db=db, 
+        db_rlock=db_rlock, 
+        server_port=server_port
+        )
+
+    acceptor.start()
     
     return acceptor
 
@@ -44,7 +39,8 @@ def launch_multiple(
     task_name,  
     procs_per_job, 
     lower_bound, 
-    upper_bound, 
+    upper_bound,
+    server_port,
     debug = False
     ):
 
@@ -62,7 +58,7 @@ def launch_multiple(
 for i in $(seq 0 $(expr {procs_per_job} - 1))
 do
     echo "starting job $i"
-    python2 '{script_path}' --server_ip \'{server_ip}\' --task_name \'{task_name}\' --job_name \'{job_name}\' {debug} &
+    python2 '{script_path}' --server_ip \'{server_ip}\' --server_port \'{server_port}\' --task_name \'{task_name}\' --job_name \'{job_name}\' {debug} &
 done
 wait
 """ \
@@ -76,12 +72,13 @@ wait
     procs_per_job=    procs_per_job,
     script_path=      script_path,
     server_ip=        our_ip(),
+    server_port=      server_port,
     debug=            ("--debug" if debug else "")
 )
 
-    debugs("Running.")
-    debugs("\nmsub will receive:")
-    debugs(insert_tabs(launch_template) + "\n")  
+    #debugs("Running.")
+    #debugs("\nmsub will receive:")
+    #debugs(insert_tabs(launch_template) + "\n")  
 
     options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}"\
         .format(
@@ -97,11 +94,11 @@ wait
         env_code = "\n".join(["export {key}={value};".format(key=key, value=value) for key, value in env.items()]) + "\n"
         complete_code = env_code + "sh" + launch_template
 
-        debugs("Env code:")
-        debugs(insert_tabs(env_code))
+        #debugs("Env code:")
+        #debugs(insert_tabs(env_code))
 
-        debugs("Complete code:")
-        debugs(insert_tabs(complete_code))
+        #debugs("Complete code:")
+        #debugs(insert_tabs(complete_code))
 
         process = sp.Popen("sh --debug", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
         stdout = process.communicate(complete_code)[0]    
@@ -110,4 +107,3 @@ wait
         process = sp.Popen("msub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
         stdout = process.communicate(launch_template)[0]    
 
-    print("apres")
