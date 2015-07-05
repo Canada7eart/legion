@@ -26,7 +26,7 @@ class AcceptorThread(threading.Thread):
         while True:
             conn, addr = s.accept()
             print('Connected by {addr}'.format(addr=addr))
-            new_thread = ReceptionThreadThread(conn, meta, meta_rlock, db, db_rlock)
+            new_thread = ReceptionThread(conn, meta, meta_rlock, db, db_rlock)
             new_thread.start()
 
 
@@ -41,10 +41,10 @@ class ReceptionThread(threading.Thread):
     
     def run(self):
         while True:
-            header = conn.recv(struct.calcsize("i"))
+            header = self.conn.recv(struct.calcsize("i"))
             if header == HEADER_JSON:
                 # Receive the json
-                data = receive_json(conn)
+                data = receive_json(self.conn)
                 
                 # To make checking less verbose
                 data["query_id"] = data.get("query_id", None)
@@ -52,7 +52,7 @@ class ReceptionThread(threading.Thread):
                 # Check if it's a server query and we are the server
                 if (data["for_server"] or server_compatibility_check(data["query"])) and not self.we_are_the_server:
                     # we only lock when the function doesn't take the lock in argument
-                    send_json(we_are_not_the_server(meta, meta_rlock, data))
+                    send_json(we_are_not_the_server(self.meta, self.meta_rlock, data))
                     continue
 
                 if data["query_id"] == query_HEADER_pull_full_param and data.get("for_server", False):                    
@@ -67,8 +67,8 @@ class ReceptionThread(threading.Thread):
                         "param_dtype": repr(target.dtype)
                     }
 
-                    send_json(conn, answer)
-                    send_raw_numeric(conn, target)
+                    send_json(self.conn, answer)
+                    send_raw_numeric(self.conn, target)
                     continue
 
                 elif data["query_id"] == query_HEADER_pull_part_param :
@@ -83,8 +83,8 @@ class ReceptionThread(threading.Thread):
                         "param_slice":  data["param_slice"],
                     }
 
-                    send_json(conn, answer)
-                    send_raw_numeric(conn, view_from_slice(target, data["param_slice"]))
+                    send_json(self.conn, answer)
+                    send_raw_numeric(self.conn, view_from_slice(target, data["param_slice"]))
                     continue
 
                 elif data["query"] == "who_is_the_server":
@@ -102,7 +102,7 @@ class ReceptionThread(threading.Thread):
 
                 else :
                     print("Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
-                    with meta["exceptions-log"] as exceptions_log:
+                    with self.meta["exceptions-log"] as exceptions_log:
                         exceptions_log.write("Exception: Unsupported query id. closing the socket.")
                     break;
 
