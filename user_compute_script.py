@@ -7,10 +7,9 @@ PORT = 6000
 import os, sys, re, threading, socket, argparse, time, threading
 import subprocess as sp
 import pg8000
-import database_interface as dbi
-import param_serv.worker
-
+#import database_interface as dbi
 from traceback import print_exc
+
 import param_serv.worker
 from param_serv.param_utils import *
 

@@ -35,7 +35,7 @@ class ConnectorThread(threading.Thread):
     def run(self):
 
         #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print("server_ip: {server_ip} [{server_port_type}],\nserver_port: {server_port} [{server_port_type}]".format(
+        print("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]".format(
             server_ip=self.server_ip,
             server_ip_type=type(self.server_ip),
             server_port=self.server_port,
@@ -70,27 +70,3 @@ class ConnectorThread(threading.Thread):
         else:
             print("WE FAILED") 
 
-
-if __name__ == '__main__':
-
-    db = {}
-    db_rlock = threading.RLock()
-    meta = {
-        "server_queries":{
-            "pull_part_param",
-            "pull_full_param",   
-        },
-        "exceptions-log": open("./exceptions.log", "a"),
-    }
-
-    meta_rlock = threading.RLock()
-
-    acceptor_thread = AcceptorThread(meta, meta_rlock, db, db_rlock)
-    acceptor_thread.start()
-
-    connector_thread = ConnectorThread(meta, meta_rlock, db, db_rlock, IP, PORT)
-    connector_thread.start()
-
-    acceptor_thread.join()
-    connector_thread.join()
-    

@@ -26,7 +26,7 @@ class AcceptorThread(threading.Thread):
         while True:
             conn, addr = s.accept()
             print('Connected by {addr}'.format(addr=addr))
-            new_thread = ReceptionThread(conn, meta, meta_rlock, db, db_rlock)
+            new_thread = ReceptionThread(self.conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
             new_thread.start()
 
 
@@ -109,4 +109,4 @@ class ReceptionThread(threading.Thread):
             else:
                 print("UNHANDLED HEADER %d" % (header))
 
-        conn.close()    
+        self.conn.close()    
