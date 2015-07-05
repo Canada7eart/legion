@@ -29,17 +29,22 @@ class entry(object):
     
     def __enter__(self):
         self.rlock.acquicre()    
-        return val
+        return self.inner
 
-    def __exit__(self):
+    def __exit__(self, _type, value, traceback):
         self.rlock.release()
 
 
 def view_from_slice(tensor, _slice):
-    """ I'm 100%% sure there is a better way to do this. """
+    """
+    TODO:: Don't actually use this code, lol. 
+    I'm 100%% sure there is a better way to do this. """
+
+    assert False, "Needs rebuilding. don't use."
+
     formatted_slice = []
     for i in xrange(len(slice.shape)):
-        formatted_slice.append([j for j in xrange(_slice[i, j])])
+        formatted_slice.append([j for j in xrange(_slice[i])])
 
     return tensor.__getitem__(formatted_slice)
 

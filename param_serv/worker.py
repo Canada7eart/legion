@@ -20,6 +20,8 @@ class ConnectorThread(threading.Thread):
         self.server_ip = server_ip
         self.server_port = server_port
 
+    def __send_param    
+
     def run(self):
 
         #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,7 +52,9 @@ class ConnectorThread(threading.Thread):
             #while True:
             for i in range(10):
                 if state == EmissionThread_state_INIT:
-                    print("would be emitting stuff !")
+                    query_dict = {}
+                    query_dict
+                    message = [HEADER_JSON, json_text]
                     time.sleep(0.01)
 
         else:
