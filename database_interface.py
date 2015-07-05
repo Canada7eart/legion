@@ -108,7 +108,7 @@ class Db(object):
 
 
 if __name__ == '__main__':
-    db = Db(pg8000, "random_task_name", "0")
+    db = Db(pg8000, "random_task_name", "0", pgparams)
     text = db.get_server_ip()
     print(text)
 
