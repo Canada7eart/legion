@@ -1,4 +1,4 @@
-pyflakes:
+Pyflakes:
       disable:
           - unused-import
 pylint:
