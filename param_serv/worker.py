@@ -62,9 +62,10 @@ class ConnectorThread(threading.Thread):
             #while True:
             for i in range(10):
                 if state == EmissionThread_state_INIT:
-                    query_dict = {}
-                    query_dict
-                    message = [HEADER_JSON, json_text]
+                    query_dict = {
+                    
+                    }
+                    message = [HEADER_JSON, json.dump(query_dict)]
                     time.sleep(0.01)
 
         else:
