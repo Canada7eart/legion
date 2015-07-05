@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+
 from __future__ import print_function, with_statement, division, generators
 import socket, json, struct
 import threading
@@ -10,7 +11,14 @@ from headers import *
 from param_utils import *
 
 class ConnectorThread(threading.Thread):
-    def __init__(self, meta, meta_rlock, db, db_rlock, server_ip, server_port):
+    def __init__(self, 
+            meta, 
+            meta_rlock, 
+            db, 
+            db_rlock, 
+            server_ip, 
+            server_port
+            ):
         super(self.__class__, self).__init__()
         
         self.meta = meta
@@ -20,7 +28,9 @@ class ConnectorThread(threading.Thread):
         self.server_ip = server_ip
         self.server_port = server_port
 
-    def __send_param    
+    def __send_param(self):    
+        pass
+
 
     def run(self):
 

@@ -14,10 +14,10 @@ pgparams = {
     }
 
 class Db(object):
-    def __init__(self, db, task_name, job_name, conn_params = pgparams):
+    def __init__(self, db, task_name, job_name, conn_params):
         
         self.db = db
-        self.conn = self.db.connect(**pgparams)
+        self.conn = self.db.connect(**conn_params)
         self.job_name = job_name
         self.task_name = task_name
 
