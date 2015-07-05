@@ -1,6 +1,6 @@
-Pyflakes:
+pyflakes:
       disable:
-          - unused-import
+          - F401
 pylint:
     disable:
         - unused-import
