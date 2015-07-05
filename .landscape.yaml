@@ -4,3 +4,4 @@ pyflakes:
 pylint:
     disable:
         - unused-import
+        - unused-wildcard-import
