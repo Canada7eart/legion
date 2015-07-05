@@ -1,3 +1,6 @@
 pyflakes:
       disable:
           - unused-import
+pylint:
+    disable:
+        - unused-import
