@@ -27,7 +27,6 @@ class AcceptorThread(threading.Thread):
 
         while True:
             conn, addr = s.accept()
-            print('Connected by {addr}'.format(addr=addr))
             new_thread = ReceptionThread(conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
             new_thread.start()
 
@@ -51,7 +50,9 @@ class ReceptionThread(threading.Thread):
 
                 # To make checking less verbose
                 if not "query_id" in data:
-                    print("Server received a query without a query id. Killing connection and thread.")
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    print(">>>> server - Server received a query without a query id. Killing connection and thread.")
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     break
 
                 # explicitely cash query_id (hashmap lookups are still expensive; we have an interpreter, not a static, aot or jit compiler)
@@ -110,12 +111,16 @@ class ReceptionThread(threading.Thread):
                         }
                     send_json(self.conn, answer)
                 else :
-                    print("Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    print(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     with self.meta["exceptions-log"] as exceptions_log:
                         exceptions_log.write("Exception: Unsupported query id. closing the socket.")
                     break
 
             else:
-                print("UNHANDLED HEADER '{header}'".format(header=header))
+                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                print(">>>>> server - UNHANDLED HEADER '{header}'".format(header=header))
+                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
         self.conn.close()    

@@ -45,7 +45,9 @@ class ConnectorThread(threading.Thread):
                 shape_string = str(tensor.shape)
 
         except KeyError, err:
-            print("send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing." \
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print("client send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing." \
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 .format(param_name=name))
             print_exc()
             return
@@ -65,7 +67,10 @@ class ConnectorThread(threading.Thread):
             self.conn.sendall(struct.pack("ii", HEADER_NUMERIC, len(numeric_data)) + numeric_data)
 
         except Exception, err:
-            print("send_param error :: conn.sendall failed. The thread is not crashing.")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print(">>>> client send_param error :: conn.sendall failed. The thread is not crashing.")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
             print_exc()
             return
     
@@ -83,9 +88,8 @@ class ConnectorThread(threading.Thread):
 
         except Exception, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print(">>>>> Client send_param error :: conn.sendall failed. The")
-            print(">>>>>                            thread is not crashing. ")
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print(">>>>> client - send_param error :: conn.sendall failed. The thread is not crashing. ")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print_exc()
             return
         try:
@@ -101,6 +105,7 @@ class ConnectorThread(threading.Thread):
     def run(self):
 
         #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        """
         print("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]"\
             .format(
                 server_ip=self.server_ip,
@@ -108,6 +113,7 @@ class ConnectorThread(threading.Thread):
                 server_port=self.server_port,
                 server_port_type=type(self.server_port),
                 ))
+        """
 
         self.conn = None
         for i in range(10):
@@ -116,11 +122,15 @@ class ConnectorThread(threading.Thread):
                 break
             except EnvironmentError, err:
                 if err.errno == 61:
-                    print(">>>> Connection refused.")
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    print(">>>> client - Connection refused.")
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     time.sleep(1)
 
                 else:
-                    print("EXCEPTION: errno: {errno}".format(errno=err.errno))
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    print(">>>> client - EXCEPTION: errno: {errno}".format(errno=err.errno))
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     print_exc()
                     sys.exit(-1)
 
@@ -138,5 +148,5 @@ class ConnectorThread(threading.Thread):
                             .format(inner=str(inner.tolist())))
                     print("client is done")
         else:
-            print("WE FAILED") 
+            print("clietn - WE FAILED") 
 
