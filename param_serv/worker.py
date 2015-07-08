@@ -28,8 +28,11 @@ class ConnectorThread(threading.Thread):
         self.server_ip = server_ip
         self.server_port = server_port
 
-    def __send_param(self):    
-        pass
+    def send_param(self, name, alpha, beta, slice):    
+        self.conn.send()
+
+    def pull_full_param(self, name):
+        
 
 
     def run(self):
@@ -41,10 +44,10 @@ class ConnectorThread(threading.Thread):
             server_port=self.server_port,
             server_port_type=type(self.server_port),
             ))
-        conn = None
+        self.conn = None
         for i in range(10):
             try:
-                conn = socket.create_connection((self.server_ip, self.server_port), timeout=20)
+                self.conn = socket.create_connection((self.server_ip, self.server_port), timeout=20)
                 break
             except EnvironmentError, err:
                 if err.errno == 61:
@@ -56,14 +59,14 @@ class ConnectorThread(threading.Thread):
                     print_exc()
                     sys.exit(-1)
 
-        if conn:
+        if self.conn:
             state = EmissionThread_state_INIT
              
             #while True:
             for i in range(10):
                 if state == EmissionThread_state_INIT:
                     query_dict = {
-                    
+
                     }
                     message = [HEADER_JSON, json.dump(query_dict)]
                     time.sleep(0.01)
