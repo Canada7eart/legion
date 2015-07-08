@@ -99,6 +99,6 @@ class ReceptionThread(threading.Thread):
                     break
 
             else:
-                print("UNHANDLED HEADER %d" % (header))
+                print("UNHANDLED HEADER '{header}'".format(header=header))
 
         self.conn.close()    
