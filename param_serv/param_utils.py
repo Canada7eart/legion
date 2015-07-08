@@ -87,14 +87,22 @@ def server_compatibility_check(meta, meta_rlock, query):
 
     return test    
 
+def brecv(conn, size):
+    # socket.MSG_WAITALL doesnt work on all platforms
+    buff = conn.recv(size, socket.MSG_WAITALL)
+    
+    while len(buff) < size:
+        buff += conn.recv(size - len(buff), socket.MSG_WAITALL)
+
+    return buff
 
 def receive_json(conn):
-    bytes_to_receive = struct.unpack("i", conn.recv(struct.calcsize("i")))[0]
-    str_data = conn.recv(bytes_to_receive)
+    bytes_to_receive = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    str_data = brecv(conn, bytes_to_receive)
     print("receive_json :: got string of size {len}, was expecting {bytes_to_receive}"\
         .format(len=len(str_data), bytes_to_receive=bytes_to_receive))
 
-    raw = struct.unpack("%dc" % bytes_to_receive, conn.recv(bytes_to_receive))[0]
+    raw = struct.unpack("%dc" % bytes_to_receive, str_data)[0]
     data = json.loads(raw)
     print(data)
 
