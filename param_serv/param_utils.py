@@ -2,6 +2,7 @@ from __future__ import print_function, with_statement, division, generators
 import socket, json, struct
 import threading
 import sys, os, re, argparse, copy, time, datetime
+from traceback import print_exc
 from headers import *
 
 def our_ip():
@@ -80,6 +81,9 @@ def receive_json(conn):
     try:
         data = json.loads(raw)
     except ValueError, err:
-        print("Raw: %s" % raw)
-        raise err
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print(">>>>> json conversion failed - Raw: %s" % raw)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print_exc()
+        exit(-1)
     return data
