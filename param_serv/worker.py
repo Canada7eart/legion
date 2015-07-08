@@ -82,7 +82,10 @@ class ConnectorThread(threading.Thread):
             self.conn.sendall(struct.pack("ii%ds" % len(json_txt), HEADER_JSON, len(json_txt), json_txt))
 
         except Exception, err:
-            print("client send_param error :: conn.sendall failed. The thread is not crashing.")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print(">>>>> Client send_param error :: conn.sendall failed. The")
+            print(">>>>>                            thread is not crashing. ")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print_exc()
             return
         try:
@@ -90,7 +93,9 @@ class ConnectorThread(threading.Thread):
             self.db[name].inner = np.fromstring(struct.unpack("%ds" % data_size, self.conn.recv(data_size * struct.calcsize("c")))[0])
 
         except:
-            print("client pull_full_param error :: conn.recv failed")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print(">>>>> client pull_full_param error :: conn.recv failed")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             return
 
     def run(self):
