@@ -98,7 +98,7 @@ class ConnectorThread(threading.Thread):
             reception_json = receive_json(self.conn)
             data_size = struct.unpack("i", brecv(self.conn, struct.calcsize("i")))[0]
             with self.db[name] as inner:
-                self.db[name].inner = np.fromstring(brecv(self.conn, data_size), dtype=np.int64)
+                self.db[name].inner = np.frombuffer(brecv(self.conn, data_size), dtype=np.int64)
 
         except Exception, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -141,7 +141,6 @@ class ConnectorThread(threading.Thread):
         if self.conn:
             state = EmissionThread_state_INIT
             self.db["test"] = Entry(np.zeros((10, 10)))
-
 
             #while True:
             for i in range(1):
