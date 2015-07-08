@@ -2,7 +2,7 @@ from __future__ import print_function, with_statement, division, generators
 import socket, json, struct
 import threading
 import sys, os, re, argparse, copy, time, datetime
-
+from headers import *
 
 def our_ip():
    return socket.gethostbyname(socket.gethostname())
@@ -55,7 +55,7 @@ def now_milliseconds():
 
 
 def send_json(conn, dict_to_transform):
-    data = son.dumps(dict_to_transform)
+    data = json.dumps(dict_to_transform)
     conn.send(HEADER_JSON)
     conn.send(len(data))
     conn.send(data)
@@ -70,7 +70,7 @@ def send_raw_numeric(conn, numeric):
 
 
 def we_are_not_the_server(meta, meta_rlock, orig):
-    with self.meta["server"] as server:
+    with meta["server"] as server:
         server_ip = copy.copy(server)
     
     return {

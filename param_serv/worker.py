@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+
 from __future__ import print_function, with_statement, division, generators
 import socket, json, struct
 import threading
@@ -10,7 +11,14 @@ from headers import *
 from param_utils import *
 
 class ConnectorThread(threading.Thread):
-    def __init__(self, meta, meta_rlock, db, db_rlock, server_ip, server_port):
+    def __init__(self, 
+            meta, 
+            meta_rlock, 
+            db, 
+            db_rlock, 
+            server_ip, 
+            server_port
+            ):
         super(self.__class__, self).__init__()
         
         self.meta = meta
@@ -20,21 +28,26 @@ class ConnectorThread(threading.Thread):
         self.server_ip = server_ip
         self.server_port = server_port
 
-    def __send_param    
+    def send_param(self, name, alpha, beta, slice):    
+        self.conn.send()
+
+    def pull_full_param(self, name):
+        
+
 
     def run(self):
 
         #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print("server_ip: {server_ip} [{server_port_type}],\nserver_port: {server_port} [{server_port_type}]".format(
+        print("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]".format(
             server_ip=self.server_ip,
             server_ip_type=type(self.server_ip),
             server_port=self.server_port,
             server_port_type=type(self.server_port),
             ))
-        conn = None
+        self.conn = None
         for i in range(10):
             try:
-                conn = socket.create_connection((self.server_ip, self.server_port), timeout=20)
+                self.conn = socket.create_connection((self.server_ip, self.server_port), timeout=20)
                 break
             except EnvironmentError, err:
                 if err.errno == 61:
@@ -46,41 +59,18 @@ class ConnectorThread(threading.Thread):
                     print_exc()
                     sys.exit(-1)
 
-        if conn:
+        if self.conn:
             state = EmissionThread_state_INIT
              
             #while True:
             for i in range(10):
                 if state == EmissionThread_state_INIT:
-                    query_dict = {}
-                    query_dict
-                    message = [HEADER_JSON, json_text]
+                    query_dict = {
+
+                    }
+                    message = [HEADER_JSON, json.dump(query_dict)]
                     time.sleep(0.01)
 
         else:
             print("WE FAILED") 
 
-
-if __name__ == '__main__':
-
-    db = {}
-    db_rlock = threading.RLock()
-    meta = {
-        "server_queries":{
-            "pull_part_param",
-            "pull_full_param",   
-        },
-        "exceptions-log": open("./exceptions.log", "a"),
-    }
-
-    meta_rlock = threading.RLock()
-
-    acceptor_thread = AcceptorThread(meta, meta_rlock, db, db_rlock)
-    acceptor_thread.start()
-
-    connector_thread = ConnectorThread(meta, meta_rlock, db, db_rlock, IP, PORT)
-    connector_thread.start()
-
-    acceptor_thread.join()
-    connector_thread.join()
-    

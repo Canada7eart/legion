@@ -14,10 +14,10 @@ pgparams = {
     }
 
 class Db(object):
-    def __init__(self, db, task_name, job_name, conn_params = pgparams):
+    def __init__(self, db, task_name, job_name, conn_params):
         
         self.db = db
-        self.conn = self.db.connect(**pgparams)
+        self.conn = self.db.connect(**conn_params)
         self.job_name = job_name
         self.task_name = task_name
 
@@ -108,7 +108,7 @@ class Db(object):
 
 
 if __name__ == '__main__':
-    db = Db(pg8000, "random_task_name", "0")
+    db = Db(pg8000, "random_task_name", "0", pgparams)
     text = db.get_server_ip()
     print(text)
 
