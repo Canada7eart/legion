@@ -90,9 +90,11 @@ def server_compatibility_check(meta, meta_rlock, query):
 def brecv(conn, size):
     # socket.MSG_WAITALL doesnt work on all platforms
     buff = conn.recv(size, socket.MSG_WAITALL)
-    
+    print("buff is of size {current_size} of expected {expected_size}".format(current_size=len(buff), expected_size=size))
     while len(buff) < size:
         buff += conn.recv(size - len(buff), socket.MSG_WAITALL)
+        print("buff is of size {current_size} of expected {expected_size}".format(current_size=len(buff), expected_size=size))
+
 
     return buff
 
