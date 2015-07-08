@@ -5,6 +5,8 @@ import socket, json, struct
 import threading
 import sys, os, re, argparse, copy, time, datetime
 import errno
+
+import numpy as np
 from traceback import print_exc
 
 from param_serv.headers import *
@@ -39,7 +41,8 @@ class ConnectorThread(threading.Thread):
             with self.db[name] as tensor:
                 # this action copies the data
                 numeric_data = tensor.tobytes("C")
-                type_string = str(tensor.ndtype)
+                type_string = str(tensor.dtype)
+                shape_string = str(tensor.shape)
 
         except KeyError, err:
             print("send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing." \
@@ -48,11 +51,13 @@ class ConnectorThread(threading.Thread):
             return
 
         json_txt = json.dumps({
+            "query_id": query_HEADER_push_param,
             "query_name": "send_param",
             "param_name": name,
             "alpha": alpha,
             "beta": beta,
-            "ndtype": type_string
+            "param_dtype": type_string,
+            "param_shape": shape_string,
             })
 
         try:
@@ -69,6 +74,7 @@ class ConnectorThread(threading.Thread):
 
         json_txt = json.dumps({
             "query_name": "pull_full_param",
+            "query_id" : query_HEADER_pull_full_param,
             "param_name": name,
             })
 
@@ -78,6 +84,13 @@ class ConnectorThread(threading.Thread):
         except Exception, err:
             print("send_param error :: conn.sendall failed. The thread is not crashing.")
             print_exc()
+            return
+        try:
+            data_size = struct.unpack("i", self.conn.recv(4))
+            self.db[name].inner = struct.unpack("s", self.conn.recv(data_size))
+
+        except:
+            print("pull_full_param error :: conn.recv failed")
             return
 
     def run(self):
@@ -108,11 +121,17 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-             
+            self.db["lol"] = Entry(np.zeros((10, 10)))
+
+
             #while True:
             for i in range(10):
                 if state == EmissionThread_state_INIT:
                     self.pull_full_param("lol")
+                    with self.db["lol"] as inner:
+                        print("Client got back value : {inner}" \
+                            .format(inner=str(inner.tolist())))
+                    print("client is done")
         else:
             print("WE FAILED") 
 

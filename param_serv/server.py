@@ -6,6 +6,7 @@ import sys, os, re, argparse, copy, time, datetime
 
 from headers import *
 from param_utils import *
+import numpy as np
 
 from traceback import print_exc
 
@@ -15,18 +16,19 @@ class AcceptorThread(threading.Thread):
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
+        db["lol"] = Entry(np.ones([10, 10]))
         self.db_rlock = db_rlock
         self.server_port = server_port
 
     def run(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', self.server_port))
-        s.listen(10000)
+        s.listen(1000)
 
         while True:
             conn, addr = s.accept()
             print('Connected by {addr}'.format(addr=addr))
-            new_thread = ReceptionThread(self.conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
+            new_thread = ReceptionThread(conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
             new_thread.start()
 
 
@@ -47,15 +49,11 @@ class ReceptionThread(threading.Thread):
                 data = receive_json(self.conn)
                 
                 # To make checking less verbose
-                data["query_id"] = data.get("query_id", None)
+                if not "query_id" in data:
+                    print("Server received a query without a query id. Killing connection and thread.")
+                    break
 
-                # Check if it's a server query and we are the server
-                if (data["for_server"] or server_compatibility_check(data["query"])) and not self.we_are_the_server:
-                    # we only lock when the function doesn't take the lock in argument
-                    send_json(we_are_not_the_server(self.meta, self.meta_rlock, data))
-                    continue
-
-                if data["query_id"] == query_HEADER_pull_full_param and data.get("for_server", False):                    
+                if data["query_id"] == query_HEADER_pull_full_param:                    
                     with self.db[data["param_name"]] as param_name:
                         target = copy.copy(param_name)
                     
@@ -94,17 +92,11 @@ class ReceptionThread(threading.Thread):
                             "server": copy.copy(server)
                         }
                     send_json(self.conn, answer)
-
-                elif data["query_id"] == None :
-                    print("Exception: Received a query without a query_id. Closing the socket.")
-
-                    break;
-
                 else :
                     print("Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
                     with self.meta["exceptions-log"] as exceptions_log:
                         exceptions_log.write("Exception: Unsupported query id. closing the socket.")
-                    break;
+                    break
 
             else:
                 print("UNHANDLED HEADER %d" % (header))

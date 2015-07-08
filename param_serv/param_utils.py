@@ -22,7 +22,7 @@ def pwh(text):
         header=header(), 
         text=text))
 
-class entry(object):
+class Entry(object):
     def __init__(self, val):
         self.inner = val
         self.rlock = threading.RLock()
