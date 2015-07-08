@@ -16,20 +16,19 @@ class AcceptorThread(threading.Thread):
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
-        db["lol"] = Entry(np.ones([10, 10]))
+        db["test"] = Entry(np.ones([10, 10]))
         self.db_rlock = db_rlock
         self.server_port = server_port
 
     def run(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(('', self.server_port))
-        s.listen(1000)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind(('', self.server_port))
+        sock.listen(1000)
 
         while True:
-            conn, addr = s.accept()
+            conn, addr = sock.accept()
             new_thread = ReceptionThread(conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
             new_thread.start()
-
 
 class ReceptionThread(threading.Thread):
     def __init__(self, conn, meta, meta_rlock, db, db_rlock):
@@ -46,7 +45,6 @@ class ReceptionThread(threading.Thread):
             if header == HEADER_JSON:
                 # Receive the json
                 data = receive_json(self.conn)
-                
 
                 # To make checking less verbose
                 if not "query_id" in data:
@@ -76,7 +74,14 @@ class ReceptionThread(threading.Thread):
 
                     send_json(self.conn, answer)
                     
-                    self.conn.sendall(struct.pack("ii%ds" % len(numeric_data), HEADER_NUMERIC, len(numeric_data), numeric_data))
+                    self.conn.sendall(
+                        struct.pack(
+                            "ii%ds" % len(numeric_data), 
+                            HEADER_NUMERIC, 
+                            len(numeric_data), 
+                            numeric_data
+                            )
+                        )
                     
                     continue
 
@@ -88,7 +93,6 @@ class ReceptionThread(threading.Thread):
                         numeric_data = view_from_slice(param, param_slice).tostring()
                         target_shape_str = str(param.shape)
                         target_dtype_str = str(param.dtype)
-
 
                     answer = {
                         "query_id":     query_answer_HEADER_pull_part_param,

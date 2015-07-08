@@ -87,7 +87,7 @@ class ConnectorThread(threading.Thread):
             self.conn.sendall(struct.pack("ii%ds" % len(json_txt), HEADER_JSON, len(json_txt), json_txt))
 
         except Exception, err:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print(">>>>> client - send_param error :: conn.sendall failed. The thread is not crashing. ")
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print_exc()
@@ -98,7 +98,7 @@ class ConnectorThread(threading.Thread):
             reception_json = receive_json(self.conn)
             data_size = struct.unpack("i", brecv(self.conn, struct.calcsize("i")))[0]
             with self.db[name] as inner:
-                self.db[name].inner = np.fromstring(brecv(self.conn, data_size), dtype=np.int64)
+                self.db[name].inner = np.frombuffer(brecv(self.conn, data_size), dtype=np.int64)
 
         except Exception, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -109,7 +109,6 @@ class ConnectorThread(threading.Thread):
 
     def run(self):
 
-        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         """
         print("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]"\
             .format(
@@ -141,14 +140,13 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-            self.db["lol"] = Entry(np.zeros((10, 10)))
-
+            self.db["test"] = Entry(np.zeros((10, 10)))
 
             #while True:
             for i in range(1):
                 if state == EmissionThread_state_INIT:
-                    self.pull_full_param("lol")
-                    with self.db["lol"] as inner:
+                    self.pull_full_param("test")
+                    with self.db["test"] as inner:
                         print("Client got back value : {inner}" \
                             .format(inner=str(inner.tolist())))
                     print("client is done")

@@ -80,10 +80,12 @@ def receive_json(conn):
     raw = struct.unpack("%ds" % bytes_to_receive, str_data)[0]
     try:
         data = json.loads(raw)
+        
     except ValueError, err:
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         print(">>>>> json conversion failed - Raw: %s" % raw)
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         print_exc()
         exit(-1)
+
     return data
