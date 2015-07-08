@@ -54,7 +54,7 @@ class ReceptionThread(threading.Thread):
                     print("Server received a query without a query id. Killing connection and thread.")
                     break
 
-                # explicitely cash query_id (hashmap lookups are still expensive; we have an interpreter, not a compiler)
+                # explicitely cash query_id (hashmap lookups are still expensive; we have an interpreter, not a static, aot or jit compiler)
                 query_id = data["query_id"]
 
                 if query_id == query_HEADER_pull_full_param:
@@ -75,7 +75,7 @@ class ReceptionThread(threading.Thread):
 
                     send_json(self.conn, answer)
                     
-                    conn.sendall(struct.pack("ii%ds" % len(numeric_data), HEADER_NUMERIC, len(numeric_data), numeric_data))
+                    self.conn.sendall(struct.pack("ii%ds" % len(numeric_data), HEADER_NUMERIC, len(numeric_data), numeric_data))
                     
                     continue
 
