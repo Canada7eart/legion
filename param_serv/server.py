@@ -62,7 +62,7 @@ class ReceptionThread(threading.Thread):
                     param_name = data["param_name"]
 
                     with self.db[param_name] as param:
-                        numeric_data = param.tostring()
+                        numeric_data = param.astype(np.int64).tostring()
                         target_shape_str = str(param.shape)
                         target_dtype_str = str(param.dtype)
                     
