@@ -5,6 +5,8 @@ import socket, json, struct
 import threading
 import sys, os, re, argparse, copy, time, datetime
 import errno
+
+import numpy as np
 from traceback import print_exc
 
 from param_serv.headers import *
@@ -49,7 +51,7 @@ class ConnectorThread(threading.Thread):
             return
 
         json_txt = json.dumps({
-            "query_id": query_HEADER_push_full_param,
+            "query_id": query_HEADER_push_param,
             "query_name": "send_param",
             "param_name": name,
             "alpha": alpha,
@@ -85,7 +87,11 @@ class ConnectorThread(threading.Thread):
             return
         try:
             data_size = struct.unpack("i", self.conn.recv(4))
-            db[name].inner = struct.unpack("s", self.conn.recv(data_size))
+            self.db[name].inner = struct.unpack("s", self.conn.recv(data_size))
+
+        except:
+            print("pull_full_param error :: conn.recv failed")
+            return
 
     def run(self):
 
@@ -115,7 +121,7 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-            self.db["lol"] = Entry(np.zeros(10, 10))
+            self.db["lol"] = Entry(np.zeroes(10, 10))
 
 
             #while True:
