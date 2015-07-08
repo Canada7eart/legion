@@ -90,6 +90,10 @@ def server_compatibility_check(meta, meta_rlock, query):
 
 def receive_json(conn):
     bytes_to_receive = struct.unpack("i", conn.recv(struct.calcsize("i")))[0]
+    str_data = conn.recv(bytes_to_receive)
+    print("receive_json :: got string of size {len}, was expecting {bytes_to_receive}"\
+        .format(len=len(str_data), bytes_to_receive=bytes_to_receive))
+
     raw = struct.unpack("%dc" % bytes_to_receive, conn.recv(bytes_to_receive))[0]
     data = json.loads(raw)
     print(data)
