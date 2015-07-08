@@ -22,7 +22,7 @@ class AcceptorThread(threading.Thread):
     def run(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', self.server_port))
-        s.listen(10000)
+        s.listen(1000)
 
         while True:
             conn, addr = s.accept()
