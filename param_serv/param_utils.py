@@ -102,7 +102,8 @@ def receive_json(conn):
     print("receive_json :: got string of size {len}, was expecting {bytes_to_receive}"\
         .format(len=len(str_data), bytes_to_receive=bytes_to_receive))
 
-    raw = struct.unpack("%dc" % bytes_to_receive, str_data)[0]
+    raw = struct.unpack("%ds" % bytes_to_receive, str_data)[0]
+    print("string received : %s" % raw)
     data = json.loads(raw)
     print(data)
 
