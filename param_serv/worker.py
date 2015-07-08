@@ -93,13 +93,14 @@ class ConnectorThread(threading.Thread):
             print_exc()
             return
         try:
-            data_size = struct.unpack("i", self.conn.recv(struct.calcsize("i")))
+            data_size = struct.unpack("i", self.conn.recv(struct.calcsize("i")))[0]
             self.db[name].inner = np.fromstring(struct.unpack("%ds" % data_size, self.conn.recv(data_size * struct.calcsize("c")))[0])
 
-        except:
+        except Exception, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print(">>>>> client - pull_full_param error :: conn.recv failed")
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print_exc()
             return
 
     def run(self):
