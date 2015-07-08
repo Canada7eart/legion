@@ -58,9 +58,6 @@ def send_json(conn, dict_to_transform):
     data = json.dumps(dict_to_transform)
     conn.sendall(struct.pack("ii%ds" % len(data), HEADER_JSON, len(data), data))
 
-def send_raw_numeric(conn, numeric):
-    conn.sendall(struct.pack("ii%ds" % len(data), HEADER_NUMERIC, len(data), numeric.tostring()))
-
 def we_are_not_the_server(meta, meta_rlock, orig):
     with meta["server"] as server:
         server_ip = copy.copy(server)
