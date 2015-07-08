@@ -115,14 +115,17 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-            self.db["lol"] = Entry("lol")
+            self.db["lol"] = Entry(np.zeros(10, 10))
 
 
             #while True:
             for i in range(10):
                 if state == EmissionThread_state_INIT:
                     self.pull_full_param("lol")
-                    print 
+                    with self.db["lol"] as inner:
+                        print("Client got back value : {inner}" \
+                            .format(inner=str(inner.tolist())))
+                    print("client is done")
         else:
             print("WE FAILED") 
 
