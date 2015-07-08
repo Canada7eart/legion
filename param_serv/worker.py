@@ -39,7 +39,8 @@ class ConnectorThread(threading.Thread):
             with self.db[name] as tensor:
                 # this action copies the data
                 numeric_data = tensor.tobytes("C")
-                type_string = str(tensor.ndtype)
+                type_string = str(tensor.dtype)
+                shape_string = str(tensor.shape)
 
         except KeyError, err:
             print("send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing." \
@@ -48,11 +49,13 @@ class ConnectorThread(threading.Thread):
             return
 
         json_txt = json.dumps({
+            "query_id": query_HEADER_push_full_param,
             "query_name": "send_param",
             "param_name": name,
             "alpha": alpha,
             "beta": beta,
-            "ndtype": type_string
+            "param_dtype": type_string,
+            "param_shape": shape_string,
             })
 
         try:
@@ -69,6 +72,7 @@ class ConnectorThread(threading.Thread):
 
         json_txt = json.dumps({
             "query_name": "pull_full_param",
+            "query_id" : query_HEADER_pull_full_param,
             "param_name": name,
             })
 
@@ -79,6 +83,9 @@ class ConnectorThread(threading.Thread):
             print("send_param error :: conn.sendall failed. The thread is not crashing.")
             print_exc()
             return
+        try:
+            data_size = struct.unpack("i", self.conn.recv(4))
+            db[name].inner = struct.unpack("s", self.conn.recv(data_size))
 
     def run(self):
 
@@ -108,11 +115,14 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-             
+            self.db["lol"] = Entry("lol")
+
+
             #while True:
             for i in range(10):
                 if state == EmissionThread_state_INIT:
                     self.pull_full_param("lol")
+                    print 
         else:
             print("WE FAILED") 
 
