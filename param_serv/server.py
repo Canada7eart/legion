@@ -6,6 +6,7 @@ import sys, os, re, argparse, copy, time, datetime
 
 from headers import *
 from param_utils import *
+import numpy as np
 
 from traceback import print_exc
 
@@ -27,7 +28,7 @@ class AcceptorThread(threading.Thread):
         while True:
             conn, addr = s.accept()
             print('Connected by {addr}'.format(addr=addr))
-            new_thread = ReceptionThread(self.conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
+            new_thread = ReceptionThread(conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
             new_thread.start()
 
 
@@ -95,7 +96,7 @@ class ReceptionThread(threading.Thread):
                     print("Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
                     with self.meta["exceptions-log"] as exceptions_log:
                         exceptions_log.write("Exception: Unsupported query id. closing the socket.")
-                    break;
+                    break
 
             else:
                 print("UNHANDLED HEADER %d" % (header))
