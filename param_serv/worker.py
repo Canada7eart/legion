@@ -46,9 +46,9 @@ class ConnectorThread(threading.Thread):
 
         except KeyError, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print("client send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing." \
+            print("client send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing.".format(param_name=name))
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                .format(param_name=name))
+                
             print_exc()
             return
 
