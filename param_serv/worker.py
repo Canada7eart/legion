@@ -86,8 +86,8 @@ class ConnectorThread(threading.Thread):
             print_exc()
             return
         try:
-            data_size = struct.unpack("i", self.conn.recv(4))
-            self.db[name].inner = struct.unpack("s", self.conn.recv(data_size))
+            data_size = struct.unpack("i", self.conn.recv(struct.calcsize("i")))
+            self.db[name].inner = struct.unpack("s", self.conn.recv(data_size * struct.calcsize("c")))
 
         except:
             print("pull_full_param error :: conn.recv failed")

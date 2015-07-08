@@ -43,7 +43,7 @@ class ReceptionThread(threading.Thread):
     
     def run(self):
         while True:
-            header = self.conn.recv(struct.calcsize("i"))
+            header = struct.unpack("i", self.conn.recv(struct.calcsize("i")))
             if header == HEADER_JSON:
                 # Receive the json
                 data = receive_json(self.conn)
