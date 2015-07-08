@@ -109,7 +109,6 @@ class ConnectorThread(threading.Thread):
 
     def run(self):
 
-
         """
         print("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]"\
             .format(
@@ -141,14 +140,14 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-            self.db["lol"] = Entry(np.zeros((10, 10)))
+            self.db["test"] = Entry(np.zeros((10, 10)))
 
 
             #while True:
             for i in range(1):
                 if state == EmissionThread_state_INIT:
-                    self.pull_full_param("lol")
-                    with self.db["lol"] as inner:
+                    self.pull_full_param("test")
+                    with self.db["test"] as inner:
                         print("Client got back value : {inner}" \
                             .format(inner=str(inner.tolist())))
                     print("client is done")
