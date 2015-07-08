@@ -46,7 +46,7 @@ class ConnectorThread(threading.Thread):
 
         except KeyError, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print("client send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing.".format(param_name=name))
+            print("client - send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing.".format(param_name=name))
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 
             print_exc()
@@ -68,7 +68,7 @@ class ConnectorThread(threading.Thread):
 
         except Exception, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print(">>>> client send_param error :: conn.sendall failed. The thread is not crashing.")
+            print(">>>> client - send_param error :: conn.sendall failed. The thread is not crashing.")
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
             print_exc()
@@ -98,7 +98,7 @@ class ConnectorThread(threading.Thread):
 
         except:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print(">>>>> client pull_full_param error :: conn.recv failed")
+            print(">>>>> client - pull_full_param error :: conn.recv failed")
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             return
 
