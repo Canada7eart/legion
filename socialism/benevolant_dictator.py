@@ -99,7 +99,7 @@ wait
         #debugs(insert_tabs(env_code))
 
         #debugs("Complete code:")
-        debugs(insert_tabs(complete_code))
+        #debugs(insert_tabs(complete_code))
 
         process = sp.Popen("sh --debug", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
         stdout = process.communicate(complete_code)[0]    

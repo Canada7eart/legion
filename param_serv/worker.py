@@ -140,7 +140,7 @@ class ConnectorThread(threading.Thread):
 
 
             #while True:
-            for i in range(10):
+            for i in range(1):
                 if state == EmissionThread_state_INIT:
                     self.pull_full_param("lol")
                     with self.db["lol"] as inner:
