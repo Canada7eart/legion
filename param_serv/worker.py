@@ -79,7 +79,7 @@ class ConnectorThread(threading.Thread):
             })
 
         try:
-            self.conn.sendall(struct.pack("iis", HEADER_JSON, len(json_txt), json_txt))
+            self.conn.sendall(struct.pack("ii%ds" % len(json_txt), HEADER_JSON, len(json_txt), json_txt))
 
         except Exception, err:
             print("send_param error :: conn.sendall failed. The thread is not crashing.")
