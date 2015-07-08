@@ -56,18 +56,10 @@ def now_milliseconds():
 
 def send_json(conn, dict_to_transform):
     data = json.dumps(dict_to_transform)
-    conn.send(HEADER_JSON)
-    conn.send(len(data))
-    conn.send(data)
-
+    conn.sendall(struct.pack("ii%ds" % len(data), HEADER_JSON, len(data), data))
 
 def send_raw_numeric(conn, numeric):
-    flat = numeric.flatten()
-    data = struct.pack(flat)
-    conn.send(HEADER_NUMERIC)
-    conn.send(len(data))
-    conn.send(data)
-
+    conn.sendall(struct.pack("ii%ds" % len(data), HEADER_NUMERIC, len(data), numeric.tostring())
 
 def we_are_not_the_server(meta, meta_rlock, orig):
     with meta["server"] as server:
