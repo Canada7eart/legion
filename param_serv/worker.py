@@ -93,9 +93,9 @@ class ConnectorThread(threading.Thread):
             print_exc()
             return
         try:
-            data_size = struct.unpack("i", self.conn.recv(struct.calcsize("i")))[0]
+            data_size = struct.unpack("i", brecv(self.conn, struct.calcsize("i")))[0]
             with self.db[name] as inner :
-                self.db[name].inner = np.fromstring(self.conn.recv(data_size * struct.calcsize("c")))
+                self.db[name].inner = np.fromstring(brecv(self.conn, data_size * struct.calcsize("c")))
 
         except Exception, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
