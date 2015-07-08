@@ -28,11 +28,23 @@ class ConnectorThread(threading.Thread):
         self.server_ip = server_ip
         self.server_port = server_port
 
-    def send_param(self, name, alpha, beta, slice):    
-        self.conn.send()
-
-    def pull_full_param(self, name):
+    def send_param(self, name, alpha, beta):
+        json_txt = json.dump({
+            "query_name": "send_param",
+            "param_name": name,
+            })
         
+        self.conn.sendall(struct.pack("iis", HEADER_JSON, len(json_txt), json_txt))
+        
+        with db[name] as array:
+            # this action copies the data
+            numeric_data = array.tobytes("C")
+        
+        self.conn.sendall(struct.pack("ii", HEADER_NUMERIC, len(numeric_data)), numeric_data)
+
+    
+    def pull_full_param(self, name):
+            
 
 
     def run(self):
