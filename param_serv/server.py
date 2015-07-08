@@ -15,6 +15,7 @@ class AcceptorThread(threading.Thread):
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
+        db["lol"] = Entry("hihihihi")
         self.db_rlock = db_rlock
         self.server_port = server_port
 
