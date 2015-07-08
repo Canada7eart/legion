@@ -121,7 +121,7 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-            self.db["lol"] = Entry(np.zeroes(10, 10))
+            self.db["lol"] = Entry(np.zeros((10, 10)))
 
 
             #while True:
