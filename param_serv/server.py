@@ -48,44 +48,61 @@ class ReceptionThread(threading.Thread):
                 # Receive the json
                 data = receive_json(self.conn)
                 
+
                 # To make checking less verbose
                 if not "query_id" in data:
                     print("Server received a query without a query id. Killing connection and thread.")
                     break
 
-                if data["query_id"] == query_HEADER_pull_full_param:                    
-                    with self.db[data["param_name"]] as param_name:
-                        target = copy.copy(param_name)
+                # explicitely cash query_id (hashmap lookups are still expensive; we have an interpreter, not a compiler)
+                query_id = data["query_id"]
+
+                if query_id == query_HEADER_pull_full_param:
+                    param_name = data["param_name"]
+
+                    with self.db[param_name] as param:
+                        numeric_data = param.tostring()
+                        target_shape_str = str(param.shape)
+                        target_dtype_str = str(param.dtype)
                     
                     answer = {
                         "query_id":    query_answer_HEADER_pull_full_param,
                         "query_name":  "answer_pull_full_param",
-                        "param_name":  data["param_name"],
-                        "param_shape": target.shape,
-                        "param_dtype": repr(target.dtype)
+                        "param_name":  param_name,
+                        "param_shape": target_shape_str,
+                        "param_dtype": target_dtype_str
                     }
 
                     send_json(self.conn, answer)
-                    send_raw_numeric(self.conn, target)
+                    
+                    conn.sendall(struct.pack("ii%ds" % len(numeric_data), HEADER_NUMERIC, len(numeric_data), numeric_data))
+                    
                     continue
 
-                elif data["query_id"] == query_HEADER_pull_part_param :
-                    with self.db[data["param_name"]] as param_name:
-                        target = copy.copy(param_name)
+                elif query_id == query_HEADER_pull_part_param :
+                    param_name = data["param_name"]
+                    param_slice = data["param_slice"]
+
+                    with self.db[param_name] as param:
+                        numeric_data = view_from_slice(param, param_slice).tostring()
+                        target_shape_str = str(param.shape)
+                        target_dtype_str = str(param.dtype)
+
 
                     answer = {
                         "query_id":     query_answer_HEADER_pull_part_param,
                         "query_name":   "answer_pull_part_param",
-                        "param_name":   data["param_name"],
-                        "param_dtype":  repr(target.dtype),
-                        "param_slice":  data["param_slice"],
+                        "param_name":   param_name,
+                        "param_dtype":  target_dtype_str,
+                        "param_slice":  param_slice,
                     }
 
                     send_json(self.conn, answer)
-                    send_raw_numeric(self.conn, view_from_slice(target, data["param_slice"]))
+                    send_raw_numeric(self.conn, )
+
                     continue
 
-                elif data["query"] == "who_is_the_server":
+                elif query_id == "who_is_the_server":
                     with self.meta["server"] as server:
                         answer = {
                             "query": "answer_who_is_the_server",

@@ -82,7 +82,7 @@ class ConnectorThread(threading.Thread):
             self.conn.sendall(struct.pack("ii%ds" % len(json_txt), HEADER_JSON, len(json_txt), json_txt))
 
         except Exception, err:
-            print("send_param error :: conn.sendall failed. The thread is not crashing.")
+            print("client send_param error :: conn.sendall failed. The thread is not crashing.")
             print_exc()
             return
         try:
@@ -90,7 +90,7 @@ class ConnectorThread(threading.Thread):
             self.db[name].inner = struct.unpack("s", self.conn.recv(data_size * struct.calcsize("c")))
 
         except:
-            print("pull_full_param error :: conn.recv failed")
+            print("client pull_full_param error :: conn.recv failed")
             return
 
     def run(self):
