@@ -77,5 +77,9 @@ def receive_json(conn):
     bytes_to_receive = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     str_data = brecv(conn, bytes_to_receive)
     raw = struct.unpack("%ds" % bytes_to_receive, str_data)[0]
-    data = json.loads(raw)
+    try:
+        data = json.loads(raw)
+    except ValueError, err:
+        print("Raw: %s" % raw)
+        raise err
     return data
