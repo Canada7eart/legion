@@ -76,7 +76,14 @@ class ReceptionThread(threading.Thread):
 
                     send_json(self.conn, answer)
                     
-                    self.conn.sendall(struct.pack("ii%ds" % len(numeric_data), HEADER_NUMERIC, len(numeric_data), numeric_data))
+                    self.conn.sendall(
+                        struct.pack(
+                            "ii%ds" % len(numeric_data), 
+                            HEADER_NUMERIC, 
+                            len(numeric_data), 
+                            numeric_data
+                            )
+                        )
                     
                     continue
 

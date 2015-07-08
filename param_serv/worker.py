@@ -87,7 +87,7 @@ class ConnectorThread(threading.Thread):
             self.conn.sendall(struct.pack("ii%ds" % len(json_txt), HEADER_JSON, len(json_txt), json_txt))
 
         except Exception, err:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print(">>>>> client - send_param error :: conn.sendall failed. The thread is not crashing. ")
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print_exc()
@@ -109,7 +109,7 @@ class ConnectorThread(threading.Thread):
 
     def run(self):
 
-        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         """
         print("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]"\
             .format(

@@ -6,12 +6,6 @@ import pg8000
 
 from param_serv.param_utils import *
 
-pgparams = {
-        "database": "gagnonmj_db",
-        "user":     "gagnonmj",
-        "password": "a365c5e839",
-        "host":     "opter.iro.umontreal.ca",
-    }
 
 class Db(object):
     def __init__(self, db, task_name, job_name, conn_params):
@@ -71,32 +65,6 @@ class Db(object):
 
         else :
             return None
-    """
-    def check_liveness_of_other_nodes(self):
-
-        cur = self.conn.cursor()
-        ips_and_ports = cur.execute("SELECT pid, port, is_server FROM PROCESS WHERE job_name = %s and state = 'ACTIVE', \
-            inner join select ip from node where node.id = process.node", (self.job_name,))
-
-        cur.commit()
-        cur.close()
-        
-        print(tips_and_portsest)
-
-        for pid, ip, port, is_server in ips_and_ports:
-            try:
-                conn = socket.create_connection(address=ip, timeout=5, port=port)
-
-            except Exception, err:
-                if not is_server:
-                    # this can fail
-                    self.update_proc_state(pid, "POTENTIALLY_DEAD")
-
-                else:
-                    self.start_replacing_server()
-            else:
-                conn.close()
-    """
 
     def get_server_ip_and_port(self):
         cur = self.conn.cursor()
