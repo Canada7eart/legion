@@ -9,6 +9,7 @@ import param_serv.server
 from param_serv.param_utils import *
 
 
+
 def debugs(text):
     print(text)
 
@@ -45,6 +46,15 @@ def launch_multiple(
     debug = False
     ):
 
+    sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/pydevd.py")
+    import pydevd
+    import re
+    res = os.popen("ps -A | grep pydevd").read().split("\n")[0];
+    port = re.findall("--port \w+", res)[0].split()[1]
+    print("trying port {port}".format(port=port))
+
+
+
     assert procs_per_job >= 1, "There needs to be at least one process per job."
     launch_template = \
 """
@@ -56,15 +66,19 @@ def launch_multiple(
 
 #PBS -v MOAB_JOBARRAYINDEX
 
+export PYTHONPATH="$PYTHONPATH":"{pydev}"
+
 for i in $(seq 0 $(expr {procs_per_job} - 1))
 do
     echo "starting job $i"
-    python2 '{script_path}' --server_ip \'{server_ip}\' --server_port \'{server_port}\' --task_name \'{task_name}\' --job_name \'{job_name}\' {debug} &
+    {executable} '{script_path}' --pycharm_debug --server_ip \'{server_ip}\' --server_port \'{server_port}\' --task_name \'{task_name}\' --job_name \'{job_name}\' {debug} &
 done
 wait
 """ \
 .format(
-    project_name=     project_name,
+    pydev='/Applications/PyCharm CE.app/Contents/helpers/pydev/',
+    executable="python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port),
+    project_name=project_name,
     walltime=         walltime,
     number_of_nodes=  number_of_nodes,
     number_of_gpus=   number_of_gpus,

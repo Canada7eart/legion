@@ -87,11 +87,9 @@ class ConnectorThread(threading.Thread):
             return
         try:
             # ignore the json header bytes
-            brecv(self.conn, struct.calcsize("i"))
             reception_json = receive_json(self.conn)
-            data_size = struct.unpack("i", brecv(self.conn, struct.calcsize("i")))[0]
-            data = brecv(self.conn, data_size)
-            print(">>>>>>>>>> %d" % data_size)
+            reception_numeric = receive_numeric(self.conn)
+
             with self.db[name] as inner:
                 self.db[name].inner = np.fromstring(data, dtype=np.int32)
 

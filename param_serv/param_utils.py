@@ -7,7 +7,7 @@ import os
 import time
 import datetime
 from traceback import print_exc
-
+import numpy as np
 from headers import *
 
 
@@ -60,13 +60,19 @@ def now_milliseconds():
     now = datetime.datetime.now()
     return (now.days * 24. * 60. * 60. + now.seconds) * 1000. + now.microseconds / 1000.
 
-def send_numeric_from_bytes(conn, bytes):
-    conn.sendall(struct.pack("ii%ds" % len(bytes), HEADER_NUMERIC, len(bytes), bytes))
-    # conn.sendall(struct.pack("ii", HEADER_NUMERIC, len(bytes)) + bytes)
+def send_numeric_from_bytes(conn, array_bytes):
+    pwh("send_numeric_from_bytes - {size}".format(size=len(array_bytes)))
+    bytes = struct.pack("ii%ds" % len(array_bytes), HEADER_NUMERIC, len(array_bytes), array_bytes)
+    assert len(bytes) == 4+4+len(array_bytes)
+    assert len(bytes) == 408
+    conn.sendall(bytes)
+
 
 def send_json(conn, dict_to_transform):
     data = json.dumps(dict_to_transform)
-    conn.sendall(struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data))
+    bytes = struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data)
+    assert len(bytes) == 4+4+len(data)
+    conn.sendall(bytes)
 
 def server_compatibility_check(meta, meta_rlock, query):
     with meta["server-queries"] as server_queries:
@@ -80,12 +86,21 @@ def brecv(conn, size):
     while len(buff) < size:
         temp = conn.recv(size - len(buff), socket.MSG_WAITALL)
         buff += temp
+
+    assert len(buff) == size
     return buff
 
+def receive_numeric(conn):
+    data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    data = brecv(conn, data_size)
+    return data
+
 def receive_json(conn):
-    bytes_to_receive = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
-    str_data = brecv(conn, bytes_to_receive)
-    raw = struct.unpack("%ds" % bytes_to_receive, str_data)[0]
+    header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    assert header == HEADER_JSON, "expecter {header_json}, got {header}".format(header_json=HEADER_JSON, header=header)
+    number_of_bytes_to_receive = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    str_data = brecv(conn, number_of_bytes_to_receive)
+    raw = struct.unpack("%ds" % number_of_bytes_to_receive, str_data)[0]
     try:
         data = json.loads(raw)
         
