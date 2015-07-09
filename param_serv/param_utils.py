@@ -21,7 +21,7 @@ def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 def header():
-    return "PBS_NODENUM #%s - %s" % (getTOD(), os.environ["PBS_NODENUM"], )
+    return "{tod} - {pid}".format(tod=getTOD(), pid=os.getpid())
 
 # print_with_header
 def pwh(text):
