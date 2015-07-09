@@ -3,7 +3,8 @@
 from __future__ import print_function, with_statement, division, generators
 
 import numpy as np
-
+import sys
+from traceback import format_exc
 from param_serv.param_utils import *
 
 class ConnectorThread(threading.Thread):
@@ -46,7 +47,7 @@ class ConnectorThread(threading.Thread):
             print_exc()
             return
 
-        json_txt = json.dumps({
+        query_metadata = {
             "query_id":     query_HEADER_push_param,
             "query_name":   "send_param",
             "param_name":   name,
@@ -54,11 +55,11 @@ class ConnectorThread(threading.Thread):
             "beta":         beta,
             "param_dtype":  type_string,
             "param_shape":  shape_string,
-            })
+            }
 
         try:
-            self.conn.sendall(struct.pack("iis", HEADER_JSON,    len(json_txt), json_txt))
-            self.conn.sendall(struct.pack("ii",  HEADER_NUMERIC, len(numeric_data)) + numeric_data)
+            send_json(self.conn, query_metadata)
+            send_numeric_from_bytes(self.conn, numeric_data)
 
         except Exception, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -69,16 +70,14 @@ class ConnectorThread(threading.Thread):
             return
     
     def pull_full_param(self, name):
-        """ Pull full parameter from server """                           
+        """ Pull full parameter from server """
 
-        json_txt = json.dumps({
+        try:
+            send_json(self.conn, {
             "query_name": "pull_full_param",
             "query_id" : query_HEADER_pull_full_param,
             "param_name": name,
             })
-
-        try:
-            self.conn.sendall(struct.pack("ii%ds" % len(json_txt), HEADER_JSON, len(json_txt), json_txt))
 
         except Exception, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -91,8 +90,10 @@ class ConnectorThread(threading.Thread):
             brecv(self.conn, struct.calcsize("i"))
             reception_json = receive_json(self.conn)
             data_size = struct.unpack("i", brecv(self.conn, struct.calcsize("i")))[0]
+            data = brecv(self.conn, data_size)
+            print(">>>>>>>>>> %d" % data_size)
             with self.db[name] as inner:
-                self.db[name].inner = np.frombuffer(brecv(self.conn, data_size), dtype=np.int64)
+                self.db[name].inner = np.fromstring(data, dtype=np.int32)
 
         except Exception, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -129,7 +130,7 @@ class ConnectorThread(threading.Thread):
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     pwh(">>>> client - EXCEPTION: errno: {errno}".format(errno=err.errno))
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    print_exc()
+                    pwh(format_exc())
                     sys.exit(-1)
 
         if self.conn:
@@ -141,9 +142,9 @@ class ConnectorThread(threading.Thread):
                 if state == EmissionThread_state_INIT:
                     self.pull_full_param("test")
                     with self.db["test"] as inner:
-                        pwh("Client got back value : {inner}"
+                        pwh("client - This client got back the value : {inner}"
                             .format(inner=str(inner.tolist())))
-                    pwh("client is done")
+                    pwh("client - This client is done")
         else:
             pwh("client - WE FAILED")
 

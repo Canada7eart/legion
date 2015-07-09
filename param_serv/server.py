@@ -19,6 +19,7 @@ class AcceptorThread(threading.Thread):
         self.server_port = server_port
 
     def run(self):
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind(('', self.server_port))
         sock.listen(1000)
@@ -69,7 +70,7 @@ class ReceptionThread(threading.Thread):
                     param_name = data["param_name"]
 
                     with self.db[param_name] as param:
-                        numeric_data = param.astype(np.int64).tostring()
+                        numeric_data = param.astype(np.int32).tobytes()
                         target_shape_str = str(param.shape)
                         target_dtype_str = str(param.dtype)
                     
@@ -82,15 +83,8 @@ class ReceptionThread(threading.Thread):
                     }
 
                     send_json(self.conn, answer)
-                    
-                    self.conn.sendall(
-                        struct.pack(
-                            "ii%ds" % len(numeric_data), 
-                            HEADER_NUMERIC, 
-                            len(numeric_data), 
-                            numeric_data
-                            )
-                        )
+                    print(">>>>> server - numeric_data size: %i" % len(numeric_data))
+                    send_numeric_from_bytes(self.conn, numeric_data)
                     
                     continue
 

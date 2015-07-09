@@ -12,16 +12,16 @@ from headers import *
 
 
 def our_ip():
-   return socket.gethostbyname(socket.gethostname())
+    return socket.gethostbyname(socket.gethostname())
 
 def insert_tabs(text):
     return "\t" + text.replace("\n","\n\t")
 
-def getTOD():
+def get_tod():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 def header():
-    return "tod::{tod} - pid::{pid}".format(tod=getTOD(), pid=os.getpid())
+    return "tod::{tod} - pid::{pid}".format(tod=get_tod(), pid=os.getpid())
 
 # print_with_header
 def pwh(text):
@@ -60,10 +60,13 @@ def now_milliseconds():
     now = datetime.datetime.now()
     return (now.days * 24. * 60. * 60. + now.seconds) * 1000. + now.microseconds / 1000.
 
+def send_numeric_from_bytes(conn, bytes):
+    conn.sendall(struct.pack("ii%ds" % len(bytes), HEADER_NUMERIC, len(bytes), bytes))
+    # conn.sendall(struct.pack("ii", HEADER_NUMERIC, len(bytes)) + bytes)
 
 def send_json(conn, dict_to_transform):
     data = json.dumps(dict_to_transform)
-    conn.sendall(struct.pack("ii%ds" % len(data), HEADER_JSON, len(data), data))
+    conn.sendall(struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data))
 
 def server_compatibility_check(meta, meta_rlock, query):
     with meta["server-queries"] as server_queries:
@@ -73,11 +76,10 @@ def server_compatibility_check(meta, meta_rlock, query):
 
 def brecv(conn, size):
     # socket.MSG_WAITALL doesnt work on all platforms
-    buff = conn.recv(size)
-    #print("buff is of size {current_size} of expected {expected_size}".format(current_size=len(buff), expected_size=size))
+    buff = conn.recv(size, socket.MSG_WAITALL)
     while len(buff) < size:
-        buff += conn.recv(size - len(buff))
-        #print("buff is of size {current_size} of expected {expected_size}".format(current_size=len(buff), expected_size=size))
+        temp = conn.recv(size - len(buff), socket.MSG_WAITALL)
+        buff += temp
     return buff
 
 def receive_json(conn):
