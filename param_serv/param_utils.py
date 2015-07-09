@@ -21,7 +21,7 @@ def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 def header():
-    return "{tod} - {pid}".format(tod=getTOD(), pid=os.getpid())
+    return "tod::{tod} - pid::{pid}".format(tod=getTOD(), pid=os.getpid())
 
 # print_with_header
 def pwh(text):

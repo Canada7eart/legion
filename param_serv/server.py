@@ -44,11 +44,11 @@ class ReceptionThread(threading.Thread):
                 header = struct.unpack("i", header_bytes)[0]
             except socket.error, serr:
                 if serr.errno == 104:
-                    pwh(">>>> server - recv failed; most likely, the client closed the connection.")
+                    pwh(">>>> server - The client closed the connection.")
                 else :
                     pwh(">>>> server - recv failed; unknown error of no {errno}".format(errno=serr.errno))
-                pwh(format_exc())
-                return serr
+                    raise serr
+                return
 
             if header == HEADER_JSON:
                 # Receive the json
