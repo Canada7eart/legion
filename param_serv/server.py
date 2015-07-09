@@ -43,7 +43,7 @@ class ReceptionThread(threading.Thread):
                 header_bytes = brecv(self.conn, struct.calcsize("i"))
                 header = struct.unpack("i", header_bytes)[0]
             except socket.error, serr:
-                if serr.errno == 64:
+                if serr.errno == 104:
                     pwh(">>>> server - recv failed; most likely, the client closed the connection.")
                 else :
                     pwh(">>>> server - recv failed; unknown error of no {errno}".format(errno=serr.errno))
