@@ -40,11 +40,15 @@ class ReceptionThread(threading.Thread):
     def run(self):
         while True:
             try:
-                header = struct.unpack("i", self.conn.recv(struct.calcsize("i")))[0]
-            except Exception, err:
-                pwh(">>>> server - recv failed; most likely, the client closed the connection.")
+                header_bytes = brecv(self.conn, struct.calcsize("i"))
+                header = struct.unpack("i", header_bytes)[0]
+            except socket.error, serr:
+                if serr.errno == 64:
+                    pwh(">>>> server - recv failed; most likely, the client closed the connection.")
+                else :
+                    pwh(">>>> server - recv failed; unknown error of no {errno}".format(errno=serr.errno))
                 pwh(format_exc())
-                return
+                return serr
 
             if header == HEADER_JSON:
                 # Receive the json
@@ -57,7 +61,8 @@ class ReceptionThread(threading.Thread):
                     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     break
 
-                # explicitely cash query_id (hashmap lookups are still expensive; we have an interpreter, not a static, aot or jit compiler)
+                # explicitly cash query_id (hash map lookups are still expensive;
+                # we have an interpreter, not a static, aot or jit compiler)
                 query_id = data["query_id"]
 
                 if query_id == query_HEADER_pull_full_param:
@@ -120,16 +125,16 @@ class ReceptionThread(threading.Thread):
                         }
                     send_json(self.conn, answer)
                 else :
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    print(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     with self.meta["exceptions-log"] as exceptions_log:
                         exceptions_log.write("Exception: Unsupported query id. closing the socket.")
                     break
 
             else:
-                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                print(">>>>> server - UNHANDLED HEADER '{header}'".format(header=header))
-                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                pwh(">>>>> server - UNHANDLED HEADER '{header}'".format(header=header))
+                pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
         self.conn.close()    

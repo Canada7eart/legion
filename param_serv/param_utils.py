@@ -1,9 +1,15 @@
 from __future__ import print_function, with_statement, division, generators
-import socket, json, struct
+import socket
+import json
+import struct
 import threading
-import sys, os, re, argparse, copy, time, datetime
+import os
+import time
+import datetime
 from traceback import print_exc
+
 from headers import *
+
 
 def our_ip():
    return socket.gethostbyname(socket.gethostname())
@@ -15,7 +21,7 @@ def getTOD():
     return time.strftime("%H:%M:%S", time.gmtime())
 
 def header():
-    return "PBS_NODENUM#%s - %s" % (getTOD(), os.environ["PBS_NODENUM"], )
+    return "PBS_NODENUM #%s - %s" % (getTOD(), os.environ["PBS_NODENUM"], )
 
 # print_with_header
 def pwh(text):
