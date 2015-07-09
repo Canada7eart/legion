@@ -1,15 +1,9 @@
 #!/usr/bin/env python2
 """ Client worker. """
 from __future__ import print_function, with_statement, division, generators
-import socket, json, struct
-import threading
-import sys, os, re, argparse, copy, time, datetime
-import errno
 
 import numpy as np
-from traceback import print_exc
 
-from param_serv.headers import *
 from param_serv.param_utils import *
 
 class ConnectorThread(threading.Thread):
@@ -45,31 +39,31 @@ class ConnectorThread(threading.Thread):
                 shape_string = str(tensor.shape)
 
         except KeyError, err:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print("client - send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing.".format(param_name=name))
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh("client - send_param error :: param of name '{param_name}' doesn't exist. The thread is not crashing.".format(param_name=name))
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 
             print_exc()
             return
 
         json_txt = json.dumps({
-            "query_id": query_HEADER_push_param,
-            "query_name": "send_param",
-            "param_name": name,
-            "alpha": alpha,
-            "beta": beta,
-            "param_dtype": type_string,
-            "param_shape": shape_string,
+            "query_id":     query_HEADER_push_param,
+            "query_name":   "send_param",
+            "param_name":   name,
+            "alpha":        alpha,
+            "beta":         beta,
+            "param_dtype":  type_string,
+            "param_shape":  shape_string,
             })
 
         try:
-            self.conn.sendall(struct.pack("iis", HEADER_JSON, len(json_txt), json_txt))
-            self.conn.sendall(struct.pack("ii", HEADER_NUMERIC, len(numeric_data)) + numeric_data)
+            self.conn.sendall(struct.pack("iis", HEADER_JSON,    len(json_txt), json_txt))
+            self.conn.sendall(struct.pack("ii",  HEADER_NUMERIC, len(numeric_data)) + numeric_data)
 
         except Exception, err:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print(">>>> client - send_param error :: conn.sendall failed. The thread is not crashing.")
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh(">>>> client - send_param error :: conn.sendall failed. The thread is not crashing.")
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
             print_exc()
             return
@@ -87,9 +81,9 @@ class ConnectorThread(threading.Thread):
             self.conn.sendall(struct.pack("ii%ds" % len(json_txt), HEADER_JSON, len(json_txt), json_txt))
 
         except Exception, err:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print(">>>>> client - send_param error :: conn.sendall failed. The thread is not crashing. ")
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh(">>>>> client - send_param error :: conn.sendall failed. The thread is not crashing. ")
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print_exc()
             return
         try:
@@ -101,16 +95,16 @@ class ConnectorThread(threading.Thread):
                 self.db[name].inner = np.frombuffer(brecv(self.conn, data_size), dtype=np.int64)
 
         except Exception, err:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            print(">>>>> client - pull_full_param error :: conn.recv failed")
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            pwh(">>>>> client - pull_full_param error :: conn.recv failed")
+            pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print_exc()
             return
 
     def run(self):
 
         """
-        print("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]"\
+        pwh("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]"\
             .format(
                 server_ip=self.server_ip,
                 server_ip_type=type(self.server_ip),
@@ -126,15 +120,15 @@ class ConnectorThread(threading.Thread):
                 break
             except EnvironmentError, err:
                 if err.errno == 61:
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    print(">>>> client - Connection refused.")
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>> client - Connection refused.")
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     time.sleep(1)
 
                 else:
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    print(">>>> client - EXCEPTION: errno: {errno}".format(errno=err.errno))
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>> client - EXCEPTION: errno: {errno}".format(errno=err.errno))
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     print_exc()
                     sys.exit(-1)
 
@@ -142,14 +136,14 @@ class ConnectorThread(threading.Thread):
             state = EmissionThread_state_INIT
             self.db["test"] = Entry(np.zeros((10, 10)))
 
-            #while True:
+            # while True:
             for i in range(1):
                 if state == EmissionThread_state_INIT:
                     self.pull_full_param("test")
                     with self.db["test"] as inner:
-                        print("Client got back value : {inner}" \
+                        pwh("Client got back value : {inner}"
                             .format(inner=str(inner.tolist())))
-                    print("client is done")
+                    pwh("client is done")
         else:
-            print("clietn - WE FAILED") 
+            pwh("client - WE FAILED")
 

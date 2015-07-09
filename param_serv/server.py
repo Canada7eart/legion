@@ -1,14 +1,12 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-import socket, json, struct
-import threading
-import sys, os, re, argparse, copy, time, datetime
 
-from headers import *
-from param_utils import *
+from traceback import format_exc
+
 import numpy as np
 
-from traceback import print_exc
+from param_utils import *
+
 
 class AcceptorThread(threading.Thread):
     def __init__(self, meta, meta_rlock, db, db_rlock, server_port):
@@ -41,7 +39,17 @@ class ReceptionThread(threading.Thread):
     
     def run(self):
         while True:
-            header = struct.unpack("i", self.conn.recv(struct.calcsize("i")))[0]
+            try:
+                header_bytes = brecv(self.conn, struct.calcsize("i"))
+                header = struct.unpack("i", header_bytes)[0]
+            except socket.error, serr:
+                if serr.errno == 104:
+                    pwh(">>>> server - recv failed; most likely, the client closed the connection.")
+                else :
+                    pwh(">>>> server - recv failed; unknown error of no {errno}".format(errno=serr.errno))
+                pwh(format_exc())
+                return serr
+
             if header == HEADER_JSON:
                 # Receive the json
                 data = receive_json(self.conn)
@@ -53,7 +61,8 @@ class ReceptionThread(threading.Thread):
                     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     break
 
-                # explicitely cash query_id (hashmap lookups are still expensive; we have an interpreter, not a static, aot or jit compiler)
+                # explicitly cash query_id (hash map lookups are still expensive;
+                # we have an interpreter, not a static, aot or jit compiler)
                 query_id = data["query_id"]
 
                 if query_id == query_HEADER_pull_full_param:
@@ -103,7 +112,8 @@ class ReceptionThread(threading.Thread):
                     }
 
                     send_json(self.conn, answer)
-                    send_raw_numeric(self.conn, )
+                    assert False, "TODO"
+                    #send_raw_numeric(self.conn, )
 
                     continue
 
@@ -115,16 +125,16 @@ class ReceptionThread(threading.Thread):
                         }
                     send_json(self.conn, answer)
                 else :
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    print(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    pwh(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
+                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     with self.meta["exceptions-log"] as exceptions_log:
                         exceptions_log.write("Exception: Unsupported query id. closing the socket.")
                     break
 
             else:
-                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                print(">>>>> server - UNHANDLED HEADER '{header}'".format(header=header))
-                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                pwh(">>>>> server - UNHANDLED HEADER '{header}'".format(header=header))
+                pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
         self.conn.close()    
