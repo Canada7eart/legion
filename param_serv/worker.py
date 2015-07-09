@@ -1,15 +1,9 @@
 #!/usr/bin/env python2
 """ Client worker. """
 from __future__ import print_function, with_statement, division, generators
-import socket, json, struct
-import threading
-import sys, os, re, argparse, copy, time, datetime
-import errno
 
 import numpy as np
-from traceback import print_exc
 
-from param_serv.headers import *
 from param_serv.param_utils import *
 
 class ConnectorThread(threading.Thread):
@@ -53,18 +47,18 @@ class ConnectorThread(threading.Thread):
             return
 
         json_txt = json.dumps({
-            "query_id": query_HEADER_push_param,
-            "query_name": "send_param",
-            "param_name": name,
-            "alpha": alpha,
-            "beta": beta,
-            "param_dtype": type_string,
-            "param_shape": shape_string,
+            "query_id":     query_HEADER_push_param,
+            "query_name":   "send_param",
+            "param_name":   name,
+            "alpha":        alpha,
+            "beta":         beta,
+            "param_dtype":  type_string,
+            "param_shape":  shape_string,
             })
 
         try:
-            self.conn.sendall(struct.pack("iis", HEADER_JSON, len(json_txt), json_txt))
-            self.conn.sendall(struct.pack("ii", HEADER_NUMERIC, len(numeric_data)) + numeric_data)
+            self.conn.sendall(struct.pack("iis", HEADER_JSON,    len(json_txt), json_txt))
+            self.conn.sendall(struct.pack("ii",  HEADER_NUMERIC, len(numeric_data)) + numeric_data)
 
         except Exception, err:
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

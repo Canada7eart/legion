@@ -4,11 +4,7 @@ from __future__ import print_function, with_statement, division, generators
 
 
 PORT = 6000
-import os, sys, re, threading, socket, argparse, time, threading
-import subprocess as sp
-import pg8000
 #import database_interface as dbi
-from traceback import print_exc
 
 import param_serv.worker
 from param_serv.param_utils import *
@@ -26,7 +22,7 @@ def main():
 
     args = parser.parse_args()
 
-    pwh("Saving ip to database.")
+    #pwh("Saving ip to database.")
     
     continue_looping = True
 

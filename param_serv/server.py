@@ -1,14 +1,12 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-import socket, json, struct
-import threading
-import sys, os, re, argparse, copy, time, datetime
 
-from headers import *
-from param_utils import *
+from traceback import format_exc
+
 import numpy as np
 
-from traceback import print_exc
+from param_utils import *
+
 
 class AcceptorThread(threading.Thread):
     def __init__(self, meta, meta_rlock, db, db_rlock, server_port):
@@ -41,7 +39,13 @@ class ReceptionThread(threading.Thread):
     
     def run(self):
         while True:
-            header = struct.unpack("i", self.conn.recv(struct.calcsize("i")))[0]
+            try:
+                header = struct.unpack("i", self.conn.recv(struct.calcsize("i")))[0]
+            except Exception, err:
+                pwh(">>>> server - recv failed; most likely, the client closed the connection.")
+                pwh(format_exc())
+                return
+
             if header == HEADER_JSON:
                 # Receive the json
                 data = receive_json(self.conn)
@@ -103,7 +107,8 @@ class ReceptionThread(threading.Thread):
                     }
 
                     send_json(self.conn, answer)
-                    send_raw_numeric(self.conn, )
+                    assert False, "TODO"
+                    #send_raw_numeric(self.conn, )
 
                     continue
 
