@@ -63,15 +63,12 @@ def now_milliseconds():
 def send_numeric_from_bytes(conn, array_bytes):
     pwh("send_numeric_from_bytes - {size}".format(size=len(array_bytes)))
     bytes = struct.pack("ii%ds" % len(array_bytes), HEADER_NUMERIC, len(array_bytes), array_bytes)
-    assert len(bytes) == 4+4+len(array_bytes)
-    assert len(bytes) == 408
     conn.sendall(bytes)
 
 
 def send_json(conn, dict_to_transform):
     data = json.dumps(dict_to_transform)
     bytes = struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data)
-    assert len(bytes) == 4+4+len(data)
     conn.sendall(bytes)
 
 def server_compatibility_check(meta, meta_rlock, query):
@@ -91,6 +88,7 @@ def brecv(conn, size):
     return buff
 
 def receive_numeric(conn):
+    header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data = brecv(conn, data_size)
     return data

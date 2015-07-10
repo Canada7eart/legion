@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-
+import copy
 from traceback import format_exc
 
 import numpy as np
@@ -19,10 +19,14 @@ class AcceptorThread(threading.Thread):
         self.server_port = server_port
 
     def run(self):
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(('', self.server_port))
-        sock.listen(1000)
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.bind(('', self.server_port))
+            sock.listen(1000)
+        except socket.error, serr:
+            if serr.errno == 48:
+                pwh(format_exc())
+                exit(-1)
 
         while True:
             conn, addr = sock.accept()
@@ -65,8 +69,8 @@ class ReceptionThread(threading.Thread):
                 param_name = data["param_name"]
 
                 with self.db[param_name] as param:
-                    numeric_data = param.astype(np.int32).tobytes()
-                    target_shape_str = str(param.shape)
+                    numeric_data = param.tobytes()
+                    target_shape_str = copy.copy(param.shape)
                     target_dtype_str = str(param.dtype)
 
                 answer = {
@@ -102,7 +106,7 @@ class ReceptionThread(threading.Thread):
 
                 send_json(self.conn, answer)
                 assert False, "TODO"
-                #send_raw_numeric(self.conn, )
+                # send_raw_numeric(self.conn, )
 
                 continue
 
@@ -112,6 +116,7 @@ class ReceptionThread(threading.Thread):
                         "query": "answer_who_is_the_server",
                         "server": copy.copy(server)
                     }
+
                 send_json(self.conn, answer)
             else :
                 pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

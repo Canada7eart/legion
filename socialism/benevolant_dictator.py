@@ -43,17 +43,27 @@ def launch_multiple(
     lower_bound, 
     upper_bound,
     server_port,
-    debug = False
+    debug = False,
+    debug_pycharm = False
     ):
 
-    sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/pydevd.py")
-    import pydevd
-    import re
-    res = os.popen("ps -A | grep pydevd").read().split("\n")[0];
-    port = re.findall("--port \w+", res)[0].split()[1]
-    print("trying port {port}".format(port=port))
+    pydev=""
+    executable="python2"
+    if debug_pycharm:
+        # ... the homemade hack to run a remote debugger without de pro version:
+        sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
+        import pydevd
+        import re
+        debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
+        debugger_is_running = debug_procs[0] != ''
 
-
+        if debugger_is_running:
+            print("< app found a debugger >")
+            res = debug_procs[0] # there could be more than one. eventually, we could use this if we need to
+            port = re.findall("--port \w+", res)[0].split()[1]
+            print("trying port {port}".format(port=port))
+            pydev='/Applications/PyCharm CE.app/Contents/helpers/pydev/'
+            executable="python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
     assert procs_per_job >= 1, "There needs to be at least one process per job."
     launch_template = \
@@ -76,8 +86,8 @@ done
 wait
 """ \
 .format(
-    pydev='/Applications/PyCharm CE.app/Contents/helpers/pydev/',
-    executable="python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port),
+    pydev=pydev,
+    executable=executable,
     project_name=project_name,
     walltime=         walltime,
     number_of_nodes=  number_of_nodes,

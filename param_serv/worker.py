@@ -85,13 +85,19 @@ class ConnectorThread(threading.Thread):
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print_exc()
             return
+
         try:
             # ignore the json header bytes
             reception_json = receive_json(self.conn)
             reception_numeric = receive_numeric(self.conn)
 
             with self.db[name] as inner:
-                self.db[name].inner = np.fromstring(data, dtype=np.int32)
+                init = np.frombuffer(reception_numeric, dtype=reception_json["param_dtype"])
+                new_shape = reception_json["param_shape"] # hash map calls are costly
+                print("old shape:{old_shape},\nnew shape:{new_shape}"\
+                      .format(old_shape=init.shape, new_shape=new_shape)
+                      )
+                self.db[name].inner = init.reshape(new_shape)
 
         except Exception, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
