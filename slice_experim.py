@@ -7,37 +7,46 @@ class _Sketchy(object):
 MAGIC_selector_generator = _Sketchy()
 
 def ser_str(sel):
-    return str(sel)
+    temp = str(sel)
+    return temp[1:len(temp) - 1]
+
+def syn_err(s, i):
+    raise SyntaxError("deserialization of selector string failed -> bad syntax; s:{s}, i:{i}, s[i]:{s_i}".format(s=s, i=i, s_i=("\"%s\"" % s[i] if i < len(s) else "[out of bounds]")))
 
 # get the digits from a tuple. starts after the first '('
-def from_tuple(s, i):
+def from_tuple(s, i, handle_none = False):
     numbers = []
     j = 0
 
     # accum digits from tuple
     while True:
-        if s[i].isdigit():
-            if len(numbers) < j:
-                numbers.push(s[i])
+        print("numbers:{numbers}".format(numbers=numbers))
+        if s[i].isdigit() or (s[i] == "-" and len(numbers[j]) == 0):
+            if len(numbers) <= j:
+                numbers.append(s[i])
             else:
                 numbers[j] += s[i]
-            i+=1
+            i += 1
             continue
 
-        if s[i] == ",":
-            i+=1
-            j+=1
+        elif handle_none and len(s)>=i+4 and s[i:i+4] == "None":
+            j += 1
+            numbers.append(None)
+
+        elif s[i] == ",":
+            i += 1
+            j += 1
             continue
 
-        if s[i] == ")":
-            i+=1
+        elif s[i] == ")":
+            i += 1
             break
 
         else:
-            raise SyntaxError("deserialization of selector string failed -> bad syntax")
+            syn_err(s, i)
 
     i += 1
-    numbers = [int(number) for number in numbers]
+    numbers = [(int(number) if not number is None else None) for number in numbers]
     return {"index": i, "numbers": numbers}
 
 
@@ -60,29 +69,32 @@ def deser_str(s):
         if s[i:i+6] == "slice(":
             i += 6
 
-            res = from_tuple(s, i)
+            res = from_tuple(s, i, handle_none=True)
             i = res["index"]
             numbers = res["numbers"]
+
             if len(numbers) < 1:
-                raise SyntaxError("deserialization of selector string failed -> bad syntax")
+                syn_err(s, i)
 
             # we're either done or moving to another selector member
-            if not i < len(s) or s[i] != ",":
-                raise SyntaxError("deserialization of selector string failed -> bad syntax")
+
+            if i <= len(s) and s[i] != ",":
+                syn_err(s, i)
 
             if len(numbers) > 3:
-                raise SyntaxError("deserialization of selector string failed -> bad syntax")
+                syn_err(s, i)
 
-            selector.push(slice(*numbers))
+            selector.append(slice(*numbers))
             continue
 
         # parse tuple
         elif s[i] == "(":
+            i += 1
             res = from_tuple(s, i)
             i = res["index"]
             numbers = res["numbers"]
             if len(numbers) < 1:
-                raise SyntaxError("deserialization of selector string failed -> bad syntax")
+                syn_err(s, i)
 
             selector.append(numbers)
             continue
@@ -92,7 +104,7 @@ def deser_str(s):
             i += 1
 
             while i < len(s):
-                if s[i].isdigit():
+                if s[i].isdigit() or (s[i] == "-" and len(number) == 0):
                     number += s[i]
                     i += 1
                     continue
@@ -102,12 +114,32 @@ def deser_str(s):
                     break
 
                 else:
-                    raise SyntaxError("deserialization of selector string failed -> bad syntax")
+                    syn_err(s, i)
 
-        else :
-            raise SyntaxError("deserialization of selector string failed -> bad syntax")
+            selector.append(int(number))
+        else:
+            syn_err(s, i)
 
     return selector
 
 
 if __name__ == "__main__":
+    print("base case")
+    serd = ser_str((123, 123, slice(12, 120)))
+    print(serd)
+    print(deser_str(serd))
+
+    print("base case 2")
+    serd = ser_str((123, 123, slice(12, 120, 10)))
+    print(serd)
+    print(deser_str(serd))
+
+    print("negative number")
+    serd = ser_str((123, -123, slice(12, 120)))
+    print(serd)
+    print(deser_str(serd))
+
+    print("negative step")
+    serd = ser_str((123, 123, slice(12, 120, -1)))
+    print(serd)
+    print(deser_str(serd))
