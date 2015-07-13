@@ -87,7 +87,7 @@ class ReceptionThread(threading.Thread):
 
                 continue
 
-            elif query_id == query_HEADER_pull_part_param :
+            elif query_id == query_HEADER_pull_part_param:
                 param_name = data["param_name"]
                 param_slice = data["param_slice"]
 
@@ -97,11 +97,11 @@ class ReceptionThread(threading.Thread):
                     target_dtype_str = str(param.dtype)
 
                 answer = {
-                    "query_id":     query_answer_HEADER_pull_part_param,
-                    "query_name":   "answer_pull_part_param",
-                    "param_name":   param_name,
-                    "param_dtype":  target_dtype_str,
-                    "param_slice":  param_slice,
+                    "query_id":    query_answer_HEADER_pull_part_param,
+                    "query_name":  "answer_pull_part_param",
+                    "param_name":  param_name,
+                    "param_dtype": target_dtype_str,
+                    "param_slice": param_slice,
                 }
 
                 send_json(self.conn, answer)
@@ -110,15 +110,7 @@ class ReceptionThread(threading.Thread):
 
                 continue
 
-            elif query_id == "who_is_the_server":
-                with self.meta["server"] as server:
-                    answer = {
-                        "query": "answer_who_is_the_server",
-                        "server": copy.copy(server)
-                    }
-
-                send_json(self.conn, answer)
-            else :
+            else:
                 pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 pwh(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
                 pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

@@ -9,7 +9,11 @@ import datetime
 from traceback import print_exc
 import numpy as np
 from headers import *
+from itertools import product
 
+def from_axis_numbers(arr, axis_numbers):
+        temp = np.array([arr[x] for x in product(*axis_numbers)])
+        return temp.reshape([len(x) for x in axis_numbers])
 
 def our_ip():
     return socket.gethostbyname(socket.gethostname())

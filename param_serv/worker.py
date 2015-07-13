@@ -30,12 +30,12 @@ class ConnectorThread(threading.Thread):
         self.server_ip = server_ip
         self.server_port = server_port
 
-    def send_param(self, name, alpha, beta):
+    def send_param_by_axis_numbers(self, name, axis_numbers, alpha, beta):
         """ Send parameter to server """
         try:
             with self.db[name] as tensor:
                 # this action copies the data
-                numeric_data = tensor.tobytes("C")
+                numeric_data = tensor[selector].tobytes("C")
                 type_string = str(tensor.dtype)
                 shape_string = str(tensor.shape)
 
