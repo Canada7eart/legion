@@ -51,31 +51,11 @@ class Socialism(object):
         debug_pycharm = False
         ):
 
+########################################################
+# grunt work
+########################################################
         pydev=""
         executable="python2"
-
-########################################################
-# pycharm remote debugging
-########################################################
-        if debug_pycharm:
-
-            # find the debugging process
-            sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
-            import pydevd
-            import re
-            debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
-            debugger_is_running = debug_procs[0] != ''
-
-            if debugger_is_running:
-                # extract the port of the debug server
-                print("< app found a debugger >")
-                res = debug_procs[0] # there could be more than one. eventually, we could use this if we need to
-                port = re.findall("--port \w+", res)[0].split()[1]
-                print("trying port {port}".format(port=port))
-                pydev='/Applications/PyCharm CE.app/Contents/helpers/pydev/'
-
-                # run the script with the debugging server
-                executable="python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
         assert procs_per_job >= 1, "There needs to be at least one process per job."
         launch_template = \
@@ -113,10 +93,6 @@ class Socialism(object):
         debug=            ("--debug" if debug else "")
     )
 
-        #debugs("Running.")
-        #debugs("\nmsub will receive:")
-        #debugs(insert_tabs(launch_template) + "\n")
-
         options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}"\
             .format(
                 here=os.path.dirname(__file__),
@@ -124,20 +100,39 @@ class Socialism(object):
                 upper_bound=upper_bound,
                 )
 
+########################################################
+# pycharm remote debugging
+########################################################
+        if debug_pycharm:
+
+            # find the debugging process
+            sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
+            import pydevd
+            import re
+            debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
+            debugger_is_running = debug_procs[0] != ''
+
+            if debugger_is_running:
+                # extract the port of the debug server
+                print("< app found a debugger >")
+                res = debug_procs[0] # there could be more than one. eventually, we could use this if we need to
+                port = re.findall("--port \w+", res)[0].split()[1]
+                print("trying port {port}".format(port=port))
+                pydev = '/Applications/PyCharm CE.app/Contents/helpers/pydev/'
+
+                # change the executable
+                executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
+
         if debug:
             env = {
                 "PBS_NODENUM": "0",
                 }
-            
+
+            # add some fake qsub env variables to emulate those that would be present at the time of execution
             env_code = "\n".join(["export {key}={value};".format(key=key, value=value) for key, value in env.items()]) + "\n"
             complete_code = env_code + "sh" + launch_template
 
-            #debugs("Env code:")
-            #debugs(insert_tabs(env_code))
-
-            #debugs("Complete code:")
-            #debugs(insert_tabs(complete_code))
-
+            # run the script
             process = sp.Popen("sh --debug", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(complete_code)[0]
 
