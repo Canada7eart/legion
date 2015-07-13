@@ -5,7 +5,7 @@ import socket, os, sys
 from param_serv.param_utils import *
 
 if __name__ == "__main__":
-    server_port = 3000
+    server_port = 2001
     debug = True
     debug_pycharm = True
     soc = benevolant_dictator.Socialism(our_ip(), server_port)

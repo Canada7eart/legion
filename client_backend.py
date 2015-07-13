@@ -31,8 +31,7 @@ def main():
         },
         "exceptions-log": open("./exceptions.log", "a"),
     }
-    meta_rlock = threading.RLock()
-
+    param_db = {}
     worker_connector_thread = param_serv.worker.ConnectorThread(meta, param_db, args.server_ip[0], args.server_port[0])
     worker_connector_thread.start()
 

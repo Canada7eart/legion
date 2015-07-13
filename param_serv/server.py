@@ -115,8 +115,10 @@ class ReceptionThread(threading.Thread):
                 pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 pwh(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
                 pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
                 with self.meta["exceptions-log"] as exceptions_log:
                     exceptions_log.write("Exception: Unsupported query id. closing the socket.")
+
                 break
 
         self.conn.close()    

@@ -13,24 +13,20 @@ class ConnectorThread(threading.Thread):
     def __init__(
         self,
         meta,
-        meta_rlock,
         db,
-        db_rlock,
         server_ip,
         server_port
         ):
 
         super(self.__class__, self).__init__()
-        
+        self.task_queue = []
         self.conn = None
         self.meta = meta
-        self.meta_rlock = meta_rlock
         self.db = db
-        self.db_rlock = db_rlock
         self.server_ip = server_ip
         self.server_port = server_port
 
-    def send_param_by_axis_numbers(self, name, axis_numbers, alpha, beta):
+    def push_param_by_axis_numbers(self, name, axis_numbers, alpha, beta):
         """ Send parameter to server """
         try:
             tensor = self.db[name]
@@ -70,7 +66,11 @@ class ConnectorThread(threading.Thread):
 
             print_exc()
             return
-    
+
+
+    def push_full_param(self, self, name):
+        pass
+
     def pull_full_param(self, name):
         """ Pull full parameter from server """
 
@@ -93,13 +93,10 @@ class ConnectorThread(threading.Thread):
             reception_json = receive_json(self.conn)
             reception_numeric = receive_numeric(self.conn)
 
-            with self.db[name] as inner:
-                init = np.frombuffer(reception_numeric, dtype=reception_json["param_dtype"])
-                new_shape = reception_json["param_shape"] # hash map calls are costly
-                print("old shape:{old_shape},\nnew shape:{new_shape}"\
-                      .format(old_shape=init.shape, new_shape=new_shape)
-                      )
-                self.db[name].inner = init.reshape(new_shape)
+            inner = self.db[name]
+            init = np.frombuffer(reception_numeric, dtype=reception_json["param_dtype"])
+            new_shape = reception_json["param_shape"] # hash map calls are costly
+            self.db[name] = init.reshape(new_shape)
 
         except Exception, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -109,18 +106,17 @@ class ConnectorThread(threading.Thread):
             return
 
     def run(self):
-
         self.conn = None
-        for i in range(10):
+        for i in range(3):
             try:
                 self.conn = socket.create_connection((self.server_ip, self.server_port), timeout=20)
                 break
+
             except EnvironmentError, err:
                 if err.errno == 61:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     pwh(">>>> client - Connection refused.")
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    time.sleep(1)
 
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -131,16 +127,47 @@ class ConnectorThread(threading.Thread):
 
         if self.conn:
             state = EmissionThread_state_INIT
-            self.db["test"] = Entry(np.zeros((10, 10)))
+            self.db["test"] = np.zeros((10, 10))
+            self.task_queue.append(
+                {
+                    "query_name": "pull_full_param",
+                    "param_name": "test"
+                })
+            self.task_queue.append({
+                    "query_name": "print_param",
+                    "param_name": "test"
+                })
 
-            # while True:
-            for i in range(1):
-                if state == EmissionThread_state_INIT:
-                    self.pull_full_param("test")
-                    with self.db["test"] as inner:
-                        pwh("client - This client got back the value : {inner}"
-                            .format(inner=str(inner.tolist())))
-                    pwh("client - This client is done")
+            # main loop
+            while True:
+                if self.task_queue:
+                    task = self.task_queue.pop(0)
+                    query = task["query_name"]
+                    param_name = task["param_name"]
+
+                    if query == "pull_full_param":
+                        print(query)
+                        self.pull_full_param(param_name)
+
+                    elif query == "pull_param_from_axe_indices":
+                        print(query)
+                        self.pull_param_by_axe_numbers(param_name, task["axe_indices"])
+
+                    elif query == "push_full_param":
+                        print(query)
+                        self.push_full_param(param_name, task["alpha"], task["beta"])
+
+                    elif query == "pull_param_from_axe_indices":
+                        print(query)
+                        self.pull_param_by_axe_numbers(param_name, task["axe_indices"], task["alpha"], task["beta"])
+
+                    if query == "print_param":
+                        print(query)
+                        print(self.db[param_name])
+
+                else:
+                    time.sleep(0.2)
+
         else:
             pwh("client - WE FAILED")
 
