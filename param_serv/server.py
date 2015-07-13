@@ -23,6 +23,7 @@ class AcceptorThread(threading.Thread):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.bind(('', self.server_port))
             sock.listen(1000)
+
         except socket.error, serr:
             if serr.errno == 48:
                 pwh(format_exc())

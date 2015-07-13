@@ -31,6 +31,8 @@ def launch_server(server_port):
     
     return acceptor
 
+
+
 def launch_multiple(
     script_path, 
     project_name, 
@@ -50,7 +52,6 @@ def launch_multiple(
     pydev=""
     executable="python2"
     if debug_pycharm:
-        # ... the homemade hack to run a remote debugger without de pro version:
         sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
         import pydevd
         import re

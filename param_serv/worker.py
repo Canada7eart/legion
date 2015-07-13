@@ -35,9 +35,10 @@ class ConnectorThread(threading.Thread):
         try:
             with self.db[name] as tensor:
                 # this action copies the data
-                numeric_data = tensor[selector].tobytes("C")
-                type_string = str(tensor.dtype)
-                shape_string = str(tensor.shape)
+                transformed_view = from_axis_numbers(tensor, axis_numbers)
+                numeric_data = transformed_view.tobytes("C")
+                type_string = str(transformed_view.dtype)
+                sub_param_shape_string = str(transformed_view.shape)
 
         except KeyError, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -48,13 +49,14 @@ class ConnectorThread(threading.Thread):
             return
 
         query_metadata = {
-            "query_id":     query_HEADER_push_param,
-            "query_name":   "send_param",
-            "param_name":   name,
-            "alpha":        alpha,
-            "beta":         beta,
-            "param_dtype":  type_string,
-            "param_shape":  shape_string,
+            "query_id":         query_HEADER_push_param,
+            "query_name":       "send_param",
+            "param_name":       name,
+            "alpha":            alpha,
+            "beta":             beta,
+            "param_type":       type_string,
+            "sub_param_shape":  sub_param_shape_string,
+            "axis_numbers":     axis_numbers
             }
 
         try:

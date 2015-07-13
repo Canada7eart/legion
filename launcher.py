@@ -40,12 +40,13 @@ class Socialism(object):
                 server_port=server_port,
                 )
 
-
     def pull_param(self, name):
         self.server.push_query(
             {
                 "query_name": "pull_full_param",
                 "param_name": name
             })
+
+
 if __name__ == "__main__": 
     soc = Socialism()
