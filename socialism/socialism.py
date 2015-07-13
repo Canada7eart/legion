@@ -8,10 +8,28 @@ import param_serv.server
 
 from param_serv.param_utils import *
 
+class Client(object):
+    def __init__(self):
+        # we minimise the number of hash map lookups by saving refs to values used more than once
+        server_ip = os.environ["SOCIALISM_server_ip"]
+        server_port = os.environ["SOCIALISM_server_port"]
+
+        debug = os.environ.get("SOCIALISM_debug", False)
+        pycharm_debug = os.environ.get("SOCIALISM_pycharm_debug", False)
+
+        meta = {
+            "job_name": os.environ["SOCIALISM_job_name"],
+            "task_name": os.environ["SOCIALISM_task_name"],
+            "server_ip": server_ip,
+            "server_port": server_port
+        }
+
+        param_db = {}
+        self.worker_connector_thread = param_serv.worker.ConnectorThread(meta, param_db, server_ip, server_port)
+        self.worker_connector_thread.start()
 
 
-
-class Socialism(object):
+class Server(object):
     def __init__(self, server, port):
         pass
 

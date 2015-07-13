@@ -1,17 +1,17 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-from socialism import benevolant_dictator
-import socket, os, sys
+from socialism import socialism
+import socket, os, sys, argparse
 from param_serv.param_utils import *
 
 if __name__ == "__main__":
-    server_port = 2001
+    server_port = 2000
     debug = True
     debug_pycharm = True
-    soc = benevolant_dictator.Socialism(our_ip(), server_port)
+    soc = socialism.Server(our_ip(), server_port)
     server = soc._launch_server(server_port)
 
-    path = os.path.join(os.path.dirname(__file__), 'client_backend.py')
+    path = os.path.join(os.path.dirname(__file__), 'user_script.py')
 
     if debug:
         soc._launch_multiple(
