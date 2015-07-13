@@ -33,12 +33,12 @@ class ConnectorThread(threading.Thread):
     def send_param_by_axis_numbers(self, name, axis_numbers, alpha, beta):
         """ Send parameter to server """
         try:
-            with self.db[name] as tensor:
-                # this action copies the data
-                transformed_view = from_axis_numbers(tensor, axis_numbers)
-                numeric_data = transformed_view.tobytes("C")
-                type_string = str(transformed_view.dtype)
-                sub_param_shape_string = str(transformed_view.shape)
+            tensor = self.db[name]
+            # this action copies the data
+            transformed_view = from_axis_numbers(tensor, axis_numbers)
+            numeric_data = transformed_view.tobytes("C")
+            type_string = str(transformed_view.dtype)
+            sub_param_shape_string = str(transformed_view.shape)
 
         except KeyError, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -109,16 +109,6 @@ class ConnectorThread(threading.Thread):
             return
 
     def run(self):
-
-        """
-        pwh("server_ip: {server_ip} [{server_ip_type}],\nserver_port: {server_port} [{server_port_type}]"\
-            .format(
-                server_ip=self.server_ip,
-                server_ip_type=type(self.server_ip),
-                server_port=self.server_port,
-                server_port_type=type(self.server_port),
-                ))
-        """
 
         self.conn = None
         for i in range(10):

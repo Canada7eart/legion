@@ -12,7 +12,7 @@ from param_serv.param_utils import *
 
 
 class Socialism(object):
-    def __init__(self):
+    def __init__(self, server, port):
         pass
 
     def _launch_server(server, port):
@@ -26,16 +26,14 @@ class Socialism(object):
             meta_rlock=meta_rlock,
             db=db,
             db_rlock=db_rlock,
-            server_port=server_port
+            server_port=port
             )
 
         acceptor.start()
 
         return acceptor
 
-
-
-    def _launch_multiple(
+    def _launch_multiple(self,
         script_path,
         project_name,
         walltime,
@@ -57,48 +55,60 @@ class Socialism(object):
         pydev=""
         executable="python2"
 
+        ############
+        # function argument/param consistency check; this is a directly user exposed function.
+        # TODO: this, tightly, when we have consistent basic functionality
+        ############
         assert procs_per_job >= 1, "There needs to be at least one process per job."
+
+        ############
+        # Create the shell script that is going to be used to launch the jobs.
+        # TODO: add jobdispatch integration
+        ############
+
+        # putting raw text like this in a source file is really ugly, but is easier for development, right now.
+        # will be modified to add jobdispatch, and then, might be moved to an external file.
         launch_template = \
-    """
-    #PBS -A {project_name}
-    #PBS -l walltime={walltime}
-    #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
-    #PBS -r n
-    #PBS -N {job_name}
+"""
+#PBS -A {project_name}
+#PBS -l walltime={walltime}
+#PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
+#PBS -r n
+#PBS -N {job_name}
 
-    #PBS -v MOAB_JOBARRAYINDEX
+#PBS -v MOAB_JOBARRAYINDEX
 
-    export PYTHONPATH="$PYTHONPATH":"{pydev}"
+export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
-    for i in $(seq 0 $(expr {procs_per_job} - 1))
-    do
-        echo "starting job $i"
-        {executable} '{script_path}' --pycharm_debug --server_ip \'{server_ip}\' --server_port \'{server_port}\' --task_name \'{task_name}\' --job_name \'{job_name}\' {debug} &
-    done
-    wait
-    """ \
-    .format(
-        pydev=            pydev,
-        executable=       executable,
-        project_name=     project_name,
-        walltime=         walltime,
-        number_of_nodes=  number_of_nodes,
-        number_of_gpus=   number_of_gpus,
-        job_name=         job_name,
-        task_name=        task_name,
-        procs_per_job=    procs_per_job,
-        script_path=      script_path,
-        server_ip=        our_ip(),
-        server_port=      server_port,
-        debug=            ("--debug" if debug else "")
-    )
-
-        options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}"\
+for i in $(seq 0 $(expr {procs_per_job} - 1))
+do
+    echo "starting job $i"
+    {executable} '{script_path}' --pycharm_debug --server_ip \'{server_ip}\' --server_port \'{server_port}\' --task_name \'{task_name}\' --job_name \'{job_name}\' {debug} &
+done
+wait
+""" \
             .format(
-                here=os.path.dirname(__file__),
-                lower_bound=lower_bound,
-                upper_bound=upper_bound,
-                )
+                pydev=            pydev,
+                executable=       executable,
+                project_name=     project_name,
+                walltime=         walltime,
+                number_of_nodes=  number_of_nodes,
+                number_of_gpus=   number_of_gpus,
+                job_name=         job_name,
+                task_name=        task_name,
+                procs_per_job=    procs_per_job,
+                script_path=      script_path,
+                server_ip=        our_ip(),
+                server_port=      server_port,
+                debug=            ("--debug" if debug else ""),
+            )
+
+        options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}" \
+            .format(
+                here=           os.path.dirname(__file__),
+                lower_bound=    lower_bound,
+                upper_bound=    upper_bound,
+            )
 
 ########################################################
 # pycharm remote debugging
