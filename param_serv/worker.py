@@ -68,7 +68,7 @@ class ConnectorThread(threading.Thread):
             return
 
 
-    def push_full_param(self, self, name):
+    def push_full_param(self, name, alpha, beta):
         pass
 
     def pull_full_param(self, name):
