@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-from socialism import socialism
+from socialism import server
 import socket, os, sys, argparse
 from param_serv.param_utils import *
 
@@ -8,7 +8,7 @@ if __name__ == "__main__":
     server_port = 2006
     debug = True
     debug_pycharm = True
-    soc = socialism.Server(our_ip(), server_port)
+    soc = server.Server(our_ip(), server_port)
     server = soc._launch_server(server_port)
 
     path = os.path.join(os.path.dirname(__file__), 'user_script.py')

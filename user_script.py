@@ -3,10 +3,10 @@ from __future__ import print_function, with_statement, division, generators
 import sys, argparse
 
 from param_serv.param_utils import *
-import socialism.socialism as ss
+from socialism import client
 
 def main():
-    soc = ss.Client()
+    soc = client.Client()
     soc.pull_full("test")
     print(soc.get("test"))
     print("done")

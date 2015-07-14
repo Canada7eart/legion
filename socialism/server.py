@@ -5,48 +5,11 @@ from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, time
 import subprocess as sp
 import param_serv.server
-import param_serv.worker
+
 
 from param_serv.param_utils import *
 
-class Client(object):
-    def __init__(self):
-        # we minimise the number of hash map lookups by saving refs to values used more than once
-        server_ip = os.environ["SOCIALISM_server_ip"]
-        server_port = os.environ["SOCIALISM_server_port"]
-
-        self._meta = {
-            "job_name": os.environ["SOCIALISM_job_name"],
-            "task_name": os.environ["SOCIALISM_task_name"],
-            "server_ip": server_ip,
-            "server_port": server_port
-        }
-
-        self._db = {}
-
-        self._worker = param_serv.worker.ConnectorThread(self._meta, self._db, server_ip, server_port)
-        self._worker.run() # TODO: we are aware that this does not start a new thread. this is done on purpose.
-
-    def push_full(self, name, alpha, beta):
-        self._worker.push_full(name, alpha, beta)
-
-    def push_part(self, name, axis_numbers, alpha, beta):
-        self._worker.pull_part(name, axis_numbers, alpha, beta)
-
-    def pull_full(self, name):
-        self._worker.pull_full(name)
-
-    def pull_part(self, name, axis_numbers):
-        self._worker.pull_part(name, axis_numbers)
-
-    def __getitem__(self, item):
-        return self._db[item]
-
-    def __setitem__(self, key, value):
-        self._db[key] = value
-
-    def get(self, name):
-        return self._db[name]
+from traceback import format_exc
 
 class Server(object):
     def __init__(self, server, port):
