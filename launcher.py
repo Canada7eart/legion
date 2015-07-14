@@ -11,7 +11,10 @@ if __name__ == "__main__":
     soc = benevolant_dictator.Server(our_ip(), server_port)
     server = soc._launch_server(server_port)
 
-    path = os.path.join(os.path.dirname(__file__), 'user_script.py')
+    if len(sys.argv) > 1:
+        path = sys.argv[1]
+    else:
+        path = os.path.join(os.path.dirname(__file__), 'user_script.py')
 
     if debug:
         soc._launch_multiple(

@@ -111,9 +111,9 @@ class ReceptionThread(threading.Thread):
                     answer = {
                         "query_id":    query_answer_HEADER_pull_part,
                         "query_name":  "answer_pull_part",
-                        "name":  param_name,
-                        "dtype": target_dtype_str,
-                        "slice": param_slice,
+                        "name":        param_name,
+                        "dtype":       target_dtype_str,
+                        "slice":       param_slice,
                     }
 
                     send_json(self.conn, answer)
@@ -122,13 +122,14 @@ class ReceptionThread(threading.Thread):
 
                     continue
                 elif query_id == query_HEADER_push_full:
-                    numeric_data = receive_numeric(self.conn)
-                    numeric_data = numeric_data.reshape(data["shape"])
-                    numeric_data = numeric_data.astype(data["dtype"])
                     param_name = data["name"]
+                    numeric_data = receive_numeric(self.conn)
 
-                    with self.db[param_name] as param:
-                        self.db[param_name].inner = numeric_data
+                    with self.db[param_name] as _:
+                        numeric_data = numeric_data.reshape(data.get("shape", self.db[param_name].inner.shape))
+                        numeric_data = numeric_data.astype(data.get("dtype", self.db[param_name].inner.dtype))
+                        self.db[param_name].inner = data["alpha"] * self.db[param_name].inner + \
+                            data["beta"] * numeric_data
 
                     continue
                 elif query_id == query_HEADER_push_part:
