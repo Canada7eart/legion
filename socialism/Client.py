@@ -88,9 +88,7 @@ class Client(object):
             "query_id": query_HEADER_push_full,
             "name": name,
             "alpha": alpha,
-            "beta": beta,
-            "dtype": str(self._db[name].dtype),
-            "shape": self._db[name].shape
+            "beta": beta
             })
 
         send_numeric_from_bytes(self._conn, self._db[name].tobytes())

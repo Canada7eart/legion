@@ -125,15 +125,23 @@ class ReceptionThread(threading.Thread):
                     param_name = data["name"]
                     numeric_data = receive_numeric(self.conn)
 
-                    with self.db[param_name] as _:
-                        numeric_data = numeric_data.reshape(data.get("shape", self.db[param_name].inner.shape))
-                        numeric_data = numeric_data.astype(data.get("dtype", self.db[param_name].inner.dtype))
-                        self.db[param_name].inner = data["alpha"] * self.db[param_name].inner + \
+                    with self.db[param_name] as param:
+                        numeric_data = numeric_data.reshape(param.shape)
+                        numeric_data = numeric_data.astype(param.dtype)
+                        param[:] = data["alpha"] * param + \
                             data["beta"] * numeric_data
 
                     continue
                 elif query_id == query_HEADER_push_part:
-                    print("server push_part -> not yet supported")
+                    param_name = data["name"]
+                    numeric_data = receive_numeric(self.conn)
+
+                    with self.db[param_name] as _:
+                        numeric_data = numeric_data.reshape(self.db[param_name].inner.shape)
+                        numeric_data = numeric_data.astype(self.db[param_name].inner.dtype)
+                        self.db[param_name].inner = data["alpha"] * self.db[param_name].inner + \
+                            data["beta"] * numeric_data
+
                     continue
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

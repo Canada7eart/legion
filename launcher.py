@@ -5,7 +5,7 @@ import socket, os, sys, argparse
 from param_serv.param_utils import *
 
 if __name__ == "__main__":
-    server_port = 2007
+    server_port = 2008
     debug = True
     debug_pycharm = True
     soc = benevolant_dictator.Server(our_ip(), server_port)

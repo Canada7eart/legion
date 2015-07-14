@@ -11,7 +11,7 @@ def main():
     print(soc.get("test"))
 
     soc["test"] = np.random.random(soc["test"].shape)
-    soc.push_full("test", 0.5, 0.5)
+    soc.push_full("test", 1, 0.5)
     soc.pull_full("test")
     print(soc.get("test"))
 
