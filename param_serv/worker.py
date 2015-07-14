@@ -19,15 +19,14 @@ class ConnectorThread(threading.Thread):
         ):
 
         super(self.__class__, self).__init__()
-        self.task_queue = []
         self.conn = None
         self.meta = meta
         self.db = db
         self.server_ip = server_ip
         self.server_port = server_port
 
-    def push_param_by_axis_numbers(self, name, axis_numbers, alpha, beta):
-        """ Send parameter to server """
+    def push_part(self, name, axis_numbers, alpha, beta):
+        print("worker.push_part")
         try:
             tensor = self.db[name]
             # this action copies the data
@@ -45,8 +44,8 @@ class ConnectorThread(threading.Thread):
             return
 
         query_metadata = {
-            "query_id":         query_HEADER_pull_param_by_axis_number,
-            "query_name":       "send_param",
+            "query_id":         query_HEADER_push_part,
+            "query_name":       "push_part",
             "param_name":       name,
             "alpha":            alpha,
             "beta":             beta,
@@ -67,10 +66,12 @@ class ConnectorThread(threading.Thread):
             print_exc()
             return
 
-    def push_param_by_axis_numbers(self, name, axis_numbers, alpha, beta):
+    def push_full(self, name, alpha, beta):
+        print("worker.pull_full")
+
         send_json(self.conn, {
-            "query_name": "pull_param_by_axis_number",
-            "query_id": query_HEADER_push_param_by_axis_number,
+            "query_name": "push_full",
+            "query_id": query_HEADER_push_full,
             "param_name": name,
             "alpha": alpha,
             "beta": beta
@@ -78,10 +79,13 @@ class ConnectorThread(threading.Thread):
 
         send_numeric_from_bytes(self.conn, self.db[name].tobytes())
 
-    def push_full_param(self, name, alpha, beta):
+    def pull_part(self, name, alpha, beta):
+        #TODO: far from functionnal
+
+        print("worker.pull_part")
         send_json(self.conn, {
-            "query_name": "pull_full_param",
-            "query_id": query_HEADER_push_full_param,
+            "query_name": "pull_part",
+            "query_id": query_HEADER_pull_part,
             "param_name": name,
             "alpha": alpha,
             "beta": beta
@@ -89,13 +93,13 @@ class ConnectorThread(threading.Thread):
 
         send_numeric_from_bytes(self.conn, self.db[name].tobytes())
 
-    def pull_full_param(self, name):
+    def pull_full(self, name):
         """ Pull full parameter from server """
-
+        print("worker.pull_full")
         try:
             send_json(self.conn, {
-            "query_name": "pull_full_param",
-            "query_id" : query_HEADER_pull_full_param,
+            "query_name": "pull_full",
+            "query_id" : query_HEADER_pull_full,
             "param_name": name,
             })
 
@@ -143,52 +147,4 @@ class ConnectorThread(threading.Thread):
                     pwh(format_exc())
                     sys.exit(-1)
 
-        if self.conn:
-            try:
-                self.db["test"] = np.zeros((10, 10))
-                self.task_queue.append(
-                    {
-                        "query_name": "pull_full_param",
-                        "param_name": "test"
-                    })
-                self.task_queue.append(
-                    {
-                        "query_name": "print_param",
-                        "param_name": "test"
-                    })
-
-                # main loop
-                while True:
-                    if self.task_queue:
-                        task = self.task_queue.pop(0)
-                        query = task["query_name"]
-                        param_name = task["param_name"]
-
-                        if query == "pull_full_param":
-                            print(query)
-                            self.pull_full_param(param_name)
-
-                        elif query == "pull_param_from_axe_indices":
-                            print(query)
-                            self.pull_param_by_axe_numbers(param_name, task["axe_indices"])
-
-                        elif query == "push_full_param":
-                            print(query)
-                            self.push_full_param(param_name, task["alpha"], task["beta"])
-
-                        elif query == "pull_param_from_axe_indices":
-                            print(query)
-                            self.pull_param_by_axe_numbers(param_name, task["axe_indices"], task["alpha"], task["beta"])
-
-                        if query == "print_param":
-                            print(query)
-                            print(self.db[param_name])
-
-                    else:
-                        time.sleep(0.2)
-            finally:
-                self.conn.close()
-
-        else:
-            pwh("client - WE FAILED")
-
+        self.db["test"] = np.zeros((10, 10))

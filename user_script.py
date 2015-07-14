@@ -3,14 +3,17 @@ from __future__ import print_function, with_statement, division, generators
 import sys, argparse
 
 from param_serv.param_utils import *
-import socialism.Client
+import socialism.socialism as ss
 
 def main():
-    soc = socialism.Client()
-    soc.pull_full_param("test")
-    soc.push_param_from_axis_numbers("test", (3, 2, 1), (3, 2, 1))
-    soc.pull_full_param("test")
-    print(soc.db["test"])
+    soc = ss.Client()
+    soc.pull_full("test")
+    print(soc.get("test"))
+    print("done")
+    #soc["test"] = np.random.random(soc["test"].shape)
+    #soc.push_full("test", 0.5, 0.5)
+    #soc.pull_full("test")
+
 
 if __name__ == "__main__":
     main()

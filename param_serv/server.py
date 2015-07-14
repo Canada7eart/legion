@@ -54,6 +54,7 @@ class ReceptionThread(threading.Thread):
             while True:
                 try:
                     data = receive_json(self.conn)
+
                 except socket.error, serr:
                     if serr.errno == 104:
                         pwh(">>>> server - The client closed the connection.")
@@ -73,7 +74,7 @@ class ReceptionThread(threading.Thread):
                 # we have an interpreter, not a static, aot or jit compiler)
                 query_id = data["query_id"]
 
-                if query_id == query_HEADER_pull_full_param:
+                if query_id == query_HEADER_pull_full:
                     param_name = data["param_name"]
 
                     with self.db[param_name] as param:
@@ -82,8 +83,8 @@ class ReceptionThread(threading.Thread):
                         target_dtype_str = str(param.dtype)
 
                     answer = {
-                        "query_id":    query_answer_HEADER_pull_full_param,
-                        "query_name":  "answer_pull_full_param",
+                        "query_id":    query_answer_HEADER_pull_full,
+                        "query_name":  "answer_pull_full",
                         "param_name":  param_name,
                         "param_shape": target_shape_str,
                         "param_dtype": target_dtype_str
@@ -95,7 +96,7 @@ class ReceptionThread(threading.Thread):
 
                     continue
 
-                elif query_id == query_HEADER_pull_part_param:
+                elif query_id == query_HEADER_pull_part:
                     param_name = data["param_name"]
                     param_slice = data["param_slice"]
 
@@ -105,8 +106,8 @@ class ReceptionThread(threading.Thread):
                         target_dtype_str = str(param.dtype)
 
                     answer = {
-                        "query_id":    query_answer_HEADER_pull_part_param,
-                        "query_name":  "answer_pull_part_param",
+                        "query_id":    query_answer_HEADER_pull_part,
+                        "query_name":  "answer_pull_part",
                         "param_name":  param_name,
                         "param_dtype": target_dtype_str,
                         "param_slice": param_slice,
@@ -117,10 +118,15 @@ class ReceptionThread(threading.Thread):
                     # send_raw_numeric(self.conn, )
 
                     continue
-
+                elif query_id == query_HEADER_push_full:
+                    print("server push_full -> not yet supported")
+                    continue
+                elif query_id == query_HEADER_push_part:
+                    print("server push_part -> not yet supported")
+                    continue
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    pwh(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get(["query_name"], "[Query name not specified]")))
+                    pwh(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get("[query_name]", "[Query name not specified]")))
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
                     with self.meta["exceptions-log"] as exceptions_log:

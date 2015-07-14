@@ -5,6 +5,7 @@ from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, time
 import subprocess as sp
 import param_serv.server
+import param_serv.worker
 
 from param_serv.param_utils import *
 
@@ -14,20 +15,38 @@ class Client(object):
         server_ip = os.environ["SOCIALISM_server_ip"]
         server_port = os.environ["SOCIALISM_server_port"]
 
-        debug = os.environ.get("SOCIALISM_debug", False)
-        pycharm_debug = os.environ.get("SOCIALISM_pycharm_debug", False)
-
-        meta = {
+        self._meta = {
             "job_name": os.environ["SOCIALISM_job_name"],
             "task_name": os.environ["SOCIALISM_task_name"],
             "server_ip": server_ip,
             "server_port": server_port
         }
 
-        param_db = {}
-        self.worker_connector_thread = param_serv.worker.ConnectorThread(meta, param_db, server_ip, server_port)
-        self.worker_connector_thread.start()
+        self._db = {}
 
+        self._worker = param_serv.worker.ConnectorThread(self._meta, self._db, server_ip, server_port)
+        self._worker.run() # TODO: we are aware that this does not start a new thread. this is done on purpose.
+
+    def push_full(self, name, alpha, beta):
+        self._worker.push_full(name, alpha, beta)
+
+    def push_part(self, name, axis_numbers, alpha, beta):
+        self._worker.pull_part(name, axis_numbers, alpha, beta)
+
+    def pull_full(self, name):
+        self._worker.pull_full(name)
+
+    def pull_part(self, name, axis_numbers):
+        self._worker.pull_part(name, axis_numbers)
+
+    def __getitem__(self, item):
+        return self._db[item]
+
+    def __setitem__(self, key, value):
+        self._db[key] = value
+
+    def get(self, name):
+        return self._db[name]
 
 class Server(object):
     def __init__(self, server, port):
@@ -63,6 +82,7 @@ class Server(object):
         lower_bound,
         upper_bound,
         server_port,
+        user_args = "",
         debug = False,
         debug_pycharm = False
         ):
@@ -70,8 +90,8 @@ class Server(object):
 ########################################################
 # grunt work
 ########################################################
-        pydev=""
-        executable="python2"
+        pydev = ""
+        executable = "python2"
 
         ############
         # function argument/param consistency check; this is a directly user exposed function.
@@ -84,55 +104,23 @@ class Server(object):
         # TODO: add jobdispatch integration
         ############
 
-        # putting raw text like this in a source file is really ugly, but is easier for development, right now.
-        # will be modified to add jobdispatch, and then, might be moved to an external file.
-        launch_template = \
-"""
-#PBS -A {project_name}
-#PBS -l walltime={walltime}
-#PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
-#PBS -r n
-#PBS -N {job_name}
+        os.environ["SOCIALISM_project_name"] =     project_name
+        os.environ["SOCIALISM_walltime"] =         str(walltime)
+        os.environ["SOCIALISM_number_of_nodes"] =  str(number_of_nodes)
+        os.environ["SOCIALISM_number_of_gpus"] =   str(number_of_gpus)
+        os.environ["SOCIALISM_job_name"] =         job_name
+        os.environ["SOCIALISM_task_name"] =        task_name
+        os.environ["SOCIALISM_procs_per_job"] =    str(procs_per_job)
+        os.environ["SOCIALISM_script_path"] =      script_path
+        os.environ["SOCIALISM_server_ip"] =        our_ip()
+        os.environ["SOCIALISM_server_port"] =      str(server_port)
+        os.environ["SOCIALISM_debug"] =            str(debug).lower()
 
-#PBS -v MOAB_JOBARRAYINDEX
-
-export PYTHONPATH="$PYTHONPATH":"{pydev}"
-
-for i in $(seq 0 $(expr {procs_per_job} - 1))
-do
-    echo "starting job $i"
-    {executable} '{script_path}' --pycharm_debug --server_ip \'{server_ip}\' --server_port \'{server_port}\' --task_name \'{task_name}\' --job_name \'{job_name}\' {debug} &
-done
-wait
-""" \
-            .format(
-                pydev=            pydev,
-                executable=       executable,
-                project_name=     project_name,
-                walltime=         walltime,
-                number_of_nodes=  number_of_nodes,
-                number_of_gpus=   number_of_gpus,
-                job_name=         job_name,
-                task_name=        task_name,
-                procs_per_job=    procs_per_job,
-                script_path=      script_path,
-                server_ip=        our_ip(),
-                server_port=      server_port,
-                debug=            ("--debug" if debug else ""),
-            )
-
-        options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}" \
-            .format(
-                here=           os.path.dirname(__file__),
-                lower_bound=    lower_bound,
-                upper_bound=    upper_bound,
-            )
 
 ########################################################
 # pycharm remote debugging
 ########################################################
         if debug_pycharm:
-
             # find the debugging process
             sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
             import pydevd
@@ -150,6 +138,45 @@ wait
 
                 # change the executable
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
+
+        launch_template = \
+"""
+#PBS -A {project_name}
+#PBS -l walltime={walltime}
+#PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
+#PBS -r n
+#PBS -N {job_name}
+
+#PBS -v MOAB_JOBARRAYINDEX
+
+export PYTHONPATH="$PYTHONPATH":"{pydev}"
+
+for i in $(seq 0 $(expr {procs_per_job} - 1))
+do
+    echo "starting job $i"
+    {executable} '{script_path}' '{user_args}' &
+done
+wait
+""" \
+            .format(
+                executable=       executable,
+                user_args=        user_args,
+                project_name=     project_name,
+                walltime=         walltime,
+                number_of_nodes=  number_of_nodes,
+                number_of_gpus=   number_of_gpus,
+                job_name=         job_name,
+                pydev=            pydev,
+                procs_per_job=    procs_per_job,
+                script_path=      script_path,
+            )
+
+        options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}" \
+            .format(
+                here=           os.path.dirname(__file__),
+                lower_bound=    lower_bound,
+                upper_bound=    upper_bound,
+            )
 
         if debug:
             env = {

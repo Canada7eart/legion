@@ -5,7 +5,7 @@ import socket, os, sys, argparse
 from param_serv.param_utils import *
 
 if __name__ == "__main__":
-    server_port = 2000
+    server_port = 2006
     debug = True
     debug_pycharm = True
     soc = socialism.Server(our_ip(), server_port)
