@@ -60,10 +60,10 @@ class Client(object):
         query_metadata = {
             "query_id":         query_HEADER_push_part,
             "query_name":       "push_part",
-            "param_name":       name,
+            "name":       name,
             "alpha":            alpha,
             "beta":             beta,
-            "param_type":       type_string,
+            "dtype":       type_string,
             "sub_param_shape":  sub_param_shape_string,
             "axis_numbers":     axis_numbers
             }
@@ -86,9 +86,11 @@ class Client(object):
         send_json(self._conn, {
             "query_name": "push_full",
             "query_id": query_HEADER_push_full,
-            "param_name": name,
+            "name": name,
             "alpha": alpha,
-            "beta": beta
+            "beta": beta,
+            "dtype": str(self._db[name].dtype),
+            "shape": self._db[name].shape
             })
 
         send_numeric_from_bytes(self._conn, self._db[name].tobytes())
@@ -100,7 +102,7 @@ class Client(object):
         send_json(self._conn, {
             "query_name": "pull_part",
             "query_id": query_HEADER_pull_part,
-            "param_name": name,
+            "name": name,
             "alpha": alpha,
             "beta": beta
             })
@@ -114,7 +116,7 @@ class Client(object):
             send_json(self._conn, {
             "query_name": "pull_full",
             "query_id" : query_HEADER_pull_full,
-            "param_name": name,
+            "name": name,
             })
 
         except Exception, err:
@@ -129,8 +131,8 @@ class Client(object):
             reception_json = receive_json(self._conn)
             reception_numeric = receive_numeric(self._conn)
 
-            init = np.frombuffer(reception_numeric, dtype=reception_json["param_dtype"])
-            new_shape = reception_json["param_shape"] # hash map calls are costly
+            init = np.frombuffer(reception_numeric, dtype=reception_json["dtype"])
+            new_shape = reception_json["shape"] # hash map calls are costly
             self._db[name] = init.reshape(new_shape)
 
         except Exception, err:

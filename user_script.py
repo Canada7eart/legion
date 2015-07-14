@@ -9,11 +9,13 @@ def main():
     soc = client.Client()
     soc.pull_full("test")
     print(soc.get("test"))
-    print("done")
-    #soc["test"] = np.random.random(soc["test"].shape)
-    #soc.push_full("test", 0.5, 0.5)
-    #soc.pull_full("test")
 
+    soc["test"] = np.random.random(soc["test"].shape)
+    soc.push_full("test", 0.5, 0.5)
+    soc.pull_full("test")
+    print(soc.get("test"))
+
+    print("user script - done")
 
 if __name__ == "__main__":
     main()

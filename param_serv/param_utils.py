@@ -95,11 +95,11 @@ def receive_numeric(conn):
     header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data = brecv(conn, data_size)
-    return data
+    return np.frombuffer(data)
 
 def receive_json(conn):
     header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
-    assert header == HEADER_JSON, "expecter {header_json}, got {header}".format(header_json=HEADER_JSON, header=header)
+    assert header == HEADER_JSON, "expected {header_json}, got {header}".format(header_json=HEADER_JSON, header=header)
     number_of_bytes_to_receive = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     str_data = brecv(conn, number_of_bytes_to_receive)
     raw = struct.unpack("%ds" % number_of_bytes_to_receive, str_data)[0]

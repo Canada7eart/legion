@@ -5,7 +5,7 @@ import socket, os, sys, argparse
 from param_serv.param_utils import *
 
 if __name__ == "__main__":
-    server_port = 2006
+    server_port = 2007
     debug = True
     debug_pycharm = True
     soc = benevolant_dictator.Server(our_ip(), server_port)
@@ -46,3 +46,4 @@ if __name__ == "__main__":
             )
 
 
+    print("launcher - done")

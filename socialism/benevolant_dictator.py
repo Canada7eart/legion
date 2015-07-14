@@ -120,6 +120,7 @@ do
     {executable} '{script_path}' '{user_args}' &
 done
 wait
+echo "qsub like script done"
 """ \
             .format(
                 executable=       executable,
@@ -158,3 +159,5 @@ wait
             process = sp.Popen("msub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(launch_template)[0]
 
+
+        print("benevolent_dictator - done")

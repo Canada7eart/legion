@@ -23,7 +23,7 @@ class AcceptorThread(threading.Thread):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.bind(('', self.server_port))
-            self.sock.listen(1000)
+            self.sock.listen(100)
 
         except socket.error, serr:
             if serr.errno == 48:
@@ -32,7 +32,9 @@ class AcceptorThread(threading.Thread):
 
         try:
             while True:
+                print("waiting for a connection")
                 conn, addr = self.sock.accept()
+                print("established new connection")
                 new_thread = ReceptionThread(conn, self.meta, self.meta_rlock, self.db, self.db_rlock)
                 new_thread.start()
 
@@ -53,8 +55,9 @@ class ReceptionThread(threading.Thread):
         try:
             while True:
                 try:
+                    print("waiting for a query")
                     data = receive_json(self.conn)
-
+                    print("received a query")
                 except socket.error, serr:
                     if serr.errno == 104:
                         pwh(">>>> server - The client closed the connection.")
@@ -75,7 +78,7 @@ class ReceptionThread(threading.Thread):
                 query_id = data["query_id"]
 
                 if query_id == query_HEADER_pull_full:
-                    param_name = data["param_name"]
+                    param_name = data["name"]
 
                     with self.db[param_name] as param:
                         numeric_data = param.tobytes()
@@ -85,9 +88,9 @@ class ReceptionThread(threading.Thread):
                     answer = {
                         "query_id":    query_answer_HEADER_pull_full,
                         "query_name":  "answer_pull_full",
-                        "param_name":  param_name,
-                        "param_shape": target_shape_str,
-                        "param_dtype": target_dtype_str
+                        "name":  param_name,
+                        "shape": target_shape_str,
+                        "dtype": target_dtype_str
                     }
 
                     send_json(self.conn, answer)
@@ -97,8 +100,8 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_pull_part:
-                    param_name = data["param_name"]
-                    param_slice = data["param_slice"]
+                    param_name = data["name"]
+                    param_slice = data["slice"]
 
                     with self.db[param_name] as param:
                         numeric_data = view_from_slice(param, param_slice).tostring()
@@ -108,9 +111,9 @@ class ReceptionThread(threading.Thread):
                     answer = {
                         "query_id":    query_answer_HEADER_pull_part,
                         "query_name":  "answer_pull_part",
-                        "param_name":  param_name,
-                        "param_dtype": target_dtype_str,
-                        "param_slice": param_slice,
+                        "name":  param_name,
+                        "dtype": target_dtype_str,
+                        "slice": param_slice,
                     }
 
                     send_json(self.conn, answer)
@@ -119,7 +122,14 @@ class ReceptionThread(threading.Thread):
 
                     continue
                 elif query_id == query_HEADER_push_full:
-                    print("server push_full -> not yet supported")
+                    numeric_data = receive_numeric(self.conn)
+                    numeric_data = numeric_data.reshape(data["shape"])
+                    numeric_data = numeric_data.astype(data["dtype"])
+                    param_name = data["name"]
+
+                    with self.db[param_name] as param:
+                        self.db[param_name].inner = numeric_data
+
                     continue
                 elif query_id == query_HEADER_push_part:
                     print("server push_part -> not yet supported")
@@ -133,5 +143,7 @@ class ReceptionThread(threading.Thread):
                         exceptions_log.write("Exception: Unsupported query id. closing the socket.")
 
                     break
+
         finally:
             self.conn.close()
+            print("finally")
