@@ -5,11 +5,11 @@ import socket, os, sys, argparse
 from param_serv.param_utils import *
 
 if __name__ == "__main__":
-    server_port = 2011
+
     debug = True
     debug_pycharm = True
-    soc = benevolant_dictator.Server(our_ip(), server_port)
-    server = soc._launch_server(server_port)
+    soc = benevolant_dictator.Server()
+    server = soc._launch_server()
 
     if len(sys.argv) > 1:
         path = sys.argv[1]
@@ -28,7 +28,6 @@ if __name__ == "__main__":
             procs_per_job=1,
             lower_bound=0,
             upper_bound=0,
-            server_port=server_port,
             debug=True,
             debug_pycharm=debug_pycharm
             )
@@ -45,7 +44,6 @@ if __name__ == "__main__":
             procs_per_job=8,
             lower_bound=0,
             upper_bound=0,
-            server_port=server_port,
             )
 
 

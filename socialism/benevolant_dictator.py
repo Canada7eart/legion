@@ -12,10 +12,10 @@ from param_serv.param_utils import *
 from traceback import format_exc
 
 class Server(object):
-    def __init__(self, server, port):
+    def __init__(self):
         pass
 
-    def _launch_server(server, port):
+    def _launch_server(self):
         db = {}
         db_rlock = threading.RLock()
         meta = {}
@@ -26,8 +26,9 @@ class Server(object):
             meta_rlock=meta_rlock,
             db=db,
             db_rlock=db_rlock,
-            server_port=port
             )
+
+        self.port = acceptor.bind()
         acceptor.start()
         return acceptor
 
@@ -43,7 +44,6 @@ class Server(object):
         procs_per_job,
         lower_bound,
         upper_bound,
-        server_port,
         user_args = "",
         debug = False,
         debug_pycharm = False
@@ -75,7 +75,7 @@ class Server(object):
         os.environ["SOCIALISM_procs_per_job"] =    str(procs_per_job)
         os.environ["SOCIALISM_script_path"] =      script_path
         os.environ["SOCIALISM_server_ip"] =        our_ip()
-        os.environ["SOCIALISM_server_port"] =      str(server_port)
+        os.environ["SOCIALISM_server_port"] =      str(self.port)
         os.environ["SOCIALISM_debug"] =            str(debug).lower()
 
 

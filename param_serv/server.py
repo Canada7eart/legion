@@ -9,27 +9,34 @@ from param_utils import *
 
 
 class AcceptorThread(threading.Thread):
-    def __init__(self, meta, meta_rlock, db, db_rlock, server_port):
+    def __init__(self, meta, meta_rlock, db, db_rlock):
         super(self.__class__, self).__init__()
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
         db["test"] = Entry(np.ones([10, 10]))
         self.db_rlock = db_rlock
-        self.server_port = server_port
         self.sock = None
 
-    def run(self):
+    def bind(self):
         try:
+
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.bind(('', self.server_port))
+            self.sock.bind(('', 0))
+            self.sock.getsockname()[1]
             self.sock.listen(100)
 
         except socket.error, serr:
             if serr.errno == 48:
                 pwh(format_exc())
-                exit(-1)
+                return None
+            else:
+                raise serr
 
+        return self.sock.getsockname()[1]
+
+
+    def run(self):
         try:
             while True:
                 print("waiting for a connection")
