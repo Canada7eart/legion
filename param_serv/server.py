@@ -124,7 +124,27 @@ class ReceptionThread(threading.Thread):
                         "name":          param_name,
                         "dtype":         target_dtype_str,
                         "shape":         target_shape_str,
-                        "index numbers": axis_numbers
+                        "axis_numbers": axis_numbers
+                    }
+
+                    send_json(self.conn, answer)
+                    send_numeric_from_bytes(self.conn, numeric_data)
+
+                    continue
+
+                elif query_id == query_HEADER_pull_from_indices:
+                    param_name = data["name"]
+                    indices = receive_numeric(self.conn)
+                    with self.db[param_name] as param:
+                        pack = [param.__getitem__(*x) for x in indices]
+
+                    answer = {
+                        "query_id":      query_answer_HEADER_pull_part,
+                        "query_name":    "answer_pull_part",
+                        "name":          param_name,
+                        "dtype":         target_dtype_str,
+                        "shape":         target_shape_str,
+                        "axis_numbers": axis_numbers
                     }
 
                     send_json(self.conn, answer)
@@ -150,6 +170,19 @@ class ReceptionThread(threading.Thread):
                     with self.db[param_name] as param:
                         numeric_data = numeric_data.astype(param.dtype).reshape(data["shape"])
                         set_submatrix_from_axis_numbers(param, numeric_data, data["alpha"], data["beta"], data["axis_numbers"])
+                    continue
+
+                elif query_id == query_HEADER_push_from_indices:
+                    param_name = data["name"]
+                    indices = receive_numeric(self.conn)
+                    numeric_data = receive_numeric(self.conn)
+
+                    with self.db[param_name] as param:
+                        indices = indices.astype(int)
+                        numeric_data = numeric_data.astype(data["dtype"])
+                        for i in indices.shape[0]:
+                            index = indices[i, :]
+                            param[index] = data["alpha"] * param[index] + data["beta"] * numeric_data[i]
                     continue
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

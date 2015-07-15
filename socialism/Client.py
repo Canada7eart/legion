@@ -65,7 +65,8 @@ class Client(object):
             "beta":             beta,
             "dtype":            type_string,
             "sub_param_shape":  sub_param_shape_string,
-            "axis_numbers":     axis_numbers
+            "axis_numbers":     axis_numbers,
+            "shape":            transformed_view.shape
             }
 
         try:
@@ -89,23 +90,26 @@ class Client(object):
             "name":         name,
             "alpha":        alpha,
             "beta":         beta
+
             })
 
         send_numeric_from_bytes(self._conn, self._db[name].tobytes())
 
-    def pull_part(self, name, alpha, beta):
+    def pull_part(self, name, axis_numbers):
         #TODO: far from functionnal
 
-        print("worker.pull_part")
-        send_json(self._conn, {
+        send_json(self._conn,
+            {
             "query_name":   "pull_part",
             "query_id":     query_HEADER_pull_part,
             "name":         name,
-            "alpha":        alpha,
-            "beta":         beta
+            "axis_numbers": axis_numbers,
             })
 
-        send_numeric_from_bytes(self._conn, self._db[name].tobytes())
+        meta = receive_json(self._conn)
+        numeric = receive_numeric(self._conn).reshape([len(x) for x in axis_numbers])
+
+        set_submatrix_from_axis_numbers(self._db[name], numeric, 0, 1, axis_numbers)
 
     def pull_full(self, name):
         """ Pull full parameter from server """

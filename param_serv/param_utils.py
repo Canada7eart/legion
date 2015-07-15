@@ -10,35 +10,74 @@ from traceback import print_exc
 import numpy as np
 from headers import *
 from itertools import product
+import copy
 
 def get_submatrix_from_axis_numbers(arr, axis_numbers):
     temp = np.array([arr[x] for x in product(*axis_numbers)])
     return temp.reshape([len(x) for x in axis_numbers])
 
-def set_submatrix_from_axis_numbers(src, dst, alpha, beta, axis_numbers):
-    print (src)
-    print (dst)
-    for x in product(*axis_numbers):
-        print("x={x}".format(x=x))
-        dst[x] = alpha * dst[x] + beta * src[x]
+
+def nested_loop(indices, param, addition, alpha, beta):
+    stack = [[]]
+    max_level = len(indices.shape)
+    print(max_level)
+    while stack:
+        active = stack.pop(0)
+        level = len(active)
+        if level < max_level:
+            for i in xrange(indices.shape[level]):
+                add = copy.copy(active)
+                add.append([i])
+                stack.append(add)
+                print(stack)
+        else:
+            active_tuple = tuple(active)
+            ind = tuple(indices[active_tuple])
+            print(ind)
+            a = alpha * param[ind]
+            print(addition)
+            b = beta * addition[active_tuple]
+            param[indices[active_tuple]] = a + b
+
+def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
+    indices = np.array(list(product(* axis_numbers)))
+    new_shape = [len(x) for x in axis_numbers] + [2]
+    indices = indices.reshape(tuple(new_shape))
+
+    ranges_of_positions_in_indices_table = [range(len(x)) for x in axis_numbers]
+
+    possible_positions_in_indices_table = list(product(*ranges_of_positions_in_indices_table))
+
+    for position in possible_positions_in_indices_table:
+        tind = tuple(indices[position])
+        a = alpha * param[tind]
+        b = beta * addition[position]
+        param[tind] = a + b
+
+
 
 def our_ip():
     return socket.gethostbyname(socket.gethostname())
 
+
 def insert_tabs(text):
-    return "\t" + text.replace("\n","\n\t")
+    return "\t" + text.replace("\n", "\n\t")
+
 
 def get_tod():
     return time.strftime("%H:%M:%S", time.gmtime())
 
+
 def header():
     return "tod::{tod} - pid::{pid}".format(tod=get_tod(), pid=os.getpid())
+
 
 # print_with_header
 def pwh(text):
     print("{header}: {text}".format(
         header=header(), 
         text=text))
+
 
 class Entry(object):
     def __init__(self, val):
@@ -65,9 +104,11 @@ def view_from_slice(tensor, _slice):
     return tensor.__getitem__(formatted_slice)
 """
 
+
 def now_milliseconds():
     now = datetime.datetime.now()
     return (now.days * 24. * 60. * 60. + now.seconds) * 1000. + now.microseconds / 1000.
+
 
 def send_numeric_from_bytes(conn, array_bytes):
     pwh("send_numeric_from_bytes - {size}".format(size=len(array_bytes)))
@@ -80,11 +121,13 @@ def send_json(conn, dict_to_transform):
     bytes = struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data)
     conn.sendall(bytes)
 
+
 def server_compatibility_check(meta, meta_rlock, query):
     with meta["server-queries"] as server_queries:
         test = query in server_queries
 
     return test    
+
 
 def brecv(conn, size):
     # socket.MSG_WAITALL doesnt work on all platforms
@@ -96,11 +139,13 @@ def brecv(conn, size):
     assert len(buff) == size
     return buff
 
+
 def receive_numeric(conn):
     header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data = brecv(conn, data_size)
     return np.frombuffer(data)
+
 
 def receive_json(conn):
     header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]

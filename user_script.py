@@ -7,13 +7,10 @@ from socialism import client
 
 def main():
     soc = client.Client()
-    soc.pull_full("test")
-    print(soc.get("test"))
-
     soc["test"] = -np.ones(soc["test"].shape)
-    soc.push_part("test", ((0, 1, 2, 3), (0, 1, 2, 3)), 0, 1)
-    soc["test"] = np.zeros(soc["test"].shape)
-    soc.pull_full("test")
+    soc.push_full("test", 0, 1)
+    soc["test"] = np.ones(soc["test"].shape)
+    soc.pull_part("test", ((1, 2, 4), (2, 3, 9)))
     print(soc.get("test"))
 
     print("user script - done")
