@@ -10,8 +10,9 @@ def main():
     soc.pull_full("test")
     print(soc.get("test"))
 
-    soc["test"] = np.random.random(soc["test"].shape)
-    soc.push_full("test", 1, 0.5)
+    soc["test"] = -np.ones(soc["test"].shape)
+    soc.push_part("test", ((0, 1, 2, 3), (0, 1, 2, 3)), 0, 1)
+    soc["test"] = np.zeros(soc["test"].shape)
     soc.pull_full("test")
     print(soc.get("test"))
 

@@ -11,9 +11,16 @@ import numpy as np
 from headers import *
 from itertools import product
 
-def from_axis_numbers(arr, axis_numbers):
-        temp = np.array([arr[x] for x in product(*axis_numbers)])
-        return temp.reshape([len(x) for x in axis_numbers])
+def get_submatrix_from_axis_numbers(arr, axis_numbers):
+    temp = np.array([arr[x] for x in product(*axis_numbers)])
+    return temp.reshape([len(x) for x in axis_numbers])
+
+def set_submatrix_from_axis_numbers(src, dst, alpha, beta, axis_numbers):
+    print (src)
+    print (dst)
+    for x in product(*axis_numbers):
+        print("x={x}".format(x=x))
+        dst[x] = alpha * dst[x] + beta * src[x]
 
 def our_ip():
     return socket.gethostbyname(socket.gethostname())
@@ -45,11 +52,9 @@ class Entry(object):
     def __exit__(self, _type, value, traceback):
         self.rlock.release()
 
-
+"""
 def view_from_slice(tensor, _slice):
-    """
-    TODO:: Don't actually use this code, lol. 
-    I'm 100%% sure there is a better way to do this. """
+    assert False, "Dead code."
 
     assert False, "Needs rebuilding. don't use."
 
@@ -58,7 +63,7 @@ def view_from_slice(tensor, _slice):
         formatted_slice.append([j for j in xrange(_slice[i])])
 
     return tensor.__getitem__(formatted_slice)
-
+"""
 
 def now_milliseconds():
     now = datetime.datetime.now()

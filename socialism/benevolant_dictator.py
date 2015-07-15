@@ -28,12 +28,11 @@ class Server(object):
             db_rlock=db_rlock,
             server_port=port
             )
-
         acceptor.start()
-
         return acceptor
 
-    def _launch_multiple(self,
+    def _launch_multiple(
+        self,
         script_path,
         project_name,
         walltime,
@@ -48,7 +47,7 @@ class Server(object):
         user_args = "",
         debug = False,
         debug_pycharm = False
-        ):
+    ):
 
 ########################################################
 # grunt work
@@ -158,6 +157,5 @@ echo "qsub like script done"
         else:
             process = sp.Popen("msub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(launch_template)[0]
-
 
         print("benevolent_dictator - done")

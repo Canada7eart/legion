@@ -61,13 +61,15 @@ class ReceptionThread(threading.Thread):
                 except socket.error, serr:
                     if serr.errno == 104:
                         pwh(">>>> server - The client closed the connection.")
-                    else :
+
+                    else:
                         pwh(">>>> server - recv failed; unknown error of no {errno}".format(errno=serr.errno))
                         raise serr
+
                     return
 
                 # To make checking less verbose
-                if not "query_id" in data:
+                if "query_id" not in data:
                     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     print(">>>> server - Server received a query without a query id. Killing connection and thread.")
                     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -88,9 +90,9 @@ class ReceptionThread(threading.Thread):
                     answer = {
                         "query_id":    query_answer_HEADER_pull_full,
                         "query_name":  "answer_pull_full",
-                        "name":  param_name,
-                        "shape": target_shape_str,
-                        "dtype": target_dtype_str
+                        "name":        param_name,
+                        "shape":       target_shape_str,
+                        "dtype":       target_dtype_str
                     }
 
                     send_json(self.conn, answer)
@@ -101,27 +103,29 @@ class ReceptionThread(threading.Thread):
 
                 elif query_id == query_HEADER_pull_part:
                     param_name = data["name"]
-                    param_slice = data["slice"]
+                    axis_numbers = data["axis_numbers"]
 
                     with self.db[param_name] as param:
-                        numeric_data = view_from_slice(param, param_slice).tostring()
+                        reshaped = get_submatrix_from_axis_numbers(param, axis_numbers)
+                        numeric_data = reshaped.tobytes()
                         target_shape_str = str(param.shape)
                         target_dtype_str = str(param.dtype)
 
                     answer = {
-                        "query_id":    query_answer_HEADER_pull_part,
-                        "query_name":  "answer_pull_part",
-                        "name":        param_name,
-                        "dtype":       target_dtype_str,
-                        "slice":       param_slice,
+                        "query_id":      query_answer_HEADER_pull_part,
+                        "query_name":    "answer_pull_part",
+                        "name":          param_name,
+                        "dtype":         target_dtype_str,
+                        "shape":         target_shape_str,
+                        "index numbers": axis_numbers
                     }
 
                     send_json(self.conn, answer)
-                    assert False, "TODO"
-                    # send_raw_numeric(self.conn, )
+                    send_numeric_from_bytes(self.conn, numeric_data)
 
                     continue
                 elif query_id == query_HEADER_push_full:
+
                     param_name = data["name"]
                     numeric_data = receive_numeric(self.conn)
 
@@ -136,12 +140,9 @@ class ReceptionThread(threading.Thread):
                     param_name = data["name"]
                     numeric_data = receive_numeric(self.conn)
 
-                    with self.db[param_name] as _:
-                        numeric_data = numeric_data.reshape(self.db[param_name].inner.shape)
-                        numeric_data = numeric_data.astype(self.db[param_name].inner.dtype)
-                        self.db[param_name].inner = data["alpha"] * self.db[param_name].inner + \
-                            data["beta"] * numeric_data
-
+                    with self.db[param_name] as param:
+                        numeric_data = numeric_data.astype(param.dtype)
+                        set_submatrix_from_axis_numbers(param, numeric_data, data["alpha"], data["beta"], data["axis_numbers"])
                     continue
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

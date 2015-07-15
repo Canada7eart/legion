@@ -44,7 +44,7 @@ class Client(object):
         try:
             tensor = self._db[name]
             # this action copies the data
-            transformed_view = from_axis_numbers(tensor, axis_numbers)
+            transformed_view = get_submatrix_from_axis_numbers(tensor, axis_numbers)
             numeric_data = transformed_view.tobytes()
             type_string = str(transformed_view.dtype)
             sub_param_shape_string = str(transformed_view.shape)
@@ -60,10 +60,10 @@ class Client(object):
         query_metadata = {
             "query_id":         query_HEADER_push_part,
             "query_name":       "push_part",
-            "name":       name,
+            "name":             name,
             "alpha":            alpha,
             "beta":             beta,
-            "dtype":       type_string,
+            "dtype":            type_string,
             "sub_param_shape":  sub_param_shape_string,
             "axis_numbers":     axis_numbers
             }
@@ -84,11 +84,11 @@ class Client(object):
         print("worker.pull_full")
 
         send_json(self._conn, {
-            "query_name": "push_full",
-            "query_id": query_HEADER_push_full,
-            "name": name,
-            "alpha": alpha,
-            "beta": beta
+            "query_name":   "push_full",
+            "query_id":     query_HEADER_push_full,
+            "name":         name,
+            "alpha":        alpha,
+            "beta":         beta
             })
 
         send_numeric_from_bytes(self._conn, self._db[name].tobytes())
@@ -98,11 +98,11 @@ class Client(object):
 
         print("worker.pull_part")
         send_json(self._conn, {
-            "query_name": "pull_part",
-            "query_id": query_HEADER_pull_part,
-            "name": name,
-            "alpha": alpha,
-            "beta": beta
+            "query_name":   "pull_part",
+            "query_id":     query_HEADER_pull_part,
+            "name":         name,
+            "alpha":        alpha,
+            "beta":         beta
             })
 
         send_numeric_from_bytes(self._conn, self._db[name].tobytes())
@@ -112,9 +112,9 @@ class Client(object):
         print("worker.pull_full")
         try:
             send_json(self._conn, {
-            "query_name": "pull_full",
-            "query_id" : query_HEADER_pull_full,
-            "name": name,
+            "query_name":   "pull_full",
+            "query_id" :    query_HEADER_pull_full,
+            "name":         name,
             })
 
         except Exception, err:
