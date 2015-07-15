@@ -14,7 +14,6 @@ class AcceptorThread(threading.Thread):
         self.meta = meta
         self.meta_rlock = meta_rlock
         self.db = db
-        db["test"] = Entry(np.ones([10, 10]))
         self.db_rlock = db_rlock
         self.sock = None
 
@@ -184,6 +183,10 @@ class ReceptionThread(threading.Thread):
                             index = indices[i, :]
                             param[index] = data["alpha"] * param[index] + data["beta"] * numeric_data[i]
                     continue
+                elif query_id == query_HEADER_create:
+                    param_name = data["name"]
+
+
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     pwh(">>>> server - Exception: Unsupported query id #%d with name %s. closing the socket." % (data["query_id"], data.get("[query_name]", "[Query name not specified]")))

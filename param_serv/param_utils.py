@@ -17,28 +17,6 @@ def get_submatrix_from_axis_numbers(arr, axis_numbers):
     return temp.reshape([len(x) for x in axis_numbers])
 
 
-def nested_loop(indices, param, addition, alpha, beta):
-    stack = [[]]
-    max_level = len(indices.shape)
-    print(max_level)
-    while stack:
-        active = stack.pop(0)
-        level = len(active)
-        if level < max_level:
-            for i in xrange(indices.shape[level]):
-                add = copy.copy(active)
-                add.append([i])
-                stack.append(add)
-                print(stack)
-        else:
-            active_tuple = tuple(active)
-            ind = tuple(indices[active_tuple])
-            print(ind)
-            a = alpha * param[ind]
-            print(addition)
-            b = beta * addition[active_tuple]
-            param[indices[active_tuple]] = a + b
-
 def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
     indices = np.array(list(product(* axis_numbers)))
     new_shape = [len(x) for x in axis_numbers] + [2]
@@ -53,7 +31,6 @@ def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
         a = alpha * param[tind]
         b = beta * addition[position]
         param[tind] = a + b
-
 
 
 def our_ip():
