@@ -148,7 +148,7 @@ class ReceptionThread(threading.Thread):
                     numeric_data = receive_numeric(self.conn)
 
                     with self.db[param_name] as param:
-                        numeric_data = numeric_data.astype(param.dtype)
+                        numeric_data = numeric_data.astype(param.dtype).reshape(data["shape"])
                         set_submatrix_from_axis_numbers(param, numeric_data, data["alpha"], data["beta"], data["axis_numbers"])
                     continue
                 else:
