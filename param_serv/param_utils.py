@@ -103,7 +103,9 @@ def receive_numeric(conn):
     header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data = brecv(conn, data_size)
-    return np.frombuffer(data, dtype=meta["dtype"]).reshape(meta["shape"])
+    final_data = np.frombuffer(data, dtype=meta["dtype"]).reshape(meta["shape"])
+    final_data.flags.writeable = True
+    return final_data
 
 
 def send_json(conn, dict_to_transform):

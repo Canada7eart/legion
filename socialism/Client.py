@@ -40,9 +40,6 @@ class Client(object):
             tensor = self._db[name]
             # this action copies the data
             transformed_view = get_submatrix_from_axis_numbers(tensor, axis_numbers)
-            numeric_data = transformed_view.tobytes()
-            type_string = str(transformed_view.dtype)
-            sub_param_shape_string = str(transformed_view.shape)
 
         except KeyError, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -58,15 +55,12 @@ class Client(object):
             "name":             name,
             "alpha":            alpha,
             "beta":             beta,
-            "dtype":            type_string,
-            "sub_param_shape":  sub_param_shape_string,
-            "axis_numbers":     axis_numbers,
-            "shape":            transformed_view.shape
+            "axis_numbers":     axis_numbers
             }
 
         try:
             send_json(self._conn, query_metadata)
-            send_numeric_from_bytes(self._conn, numeric_data)
+            send_numeric_from_bytes(self._conn, transformed_view)
 
         except Exception, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -102,51 +96,42 @@ class Client(object):
             })
 
         meta = receive_json(self._conn)
-        shape = [len(x) for x in axis_numbers] # len(x): number of axises in a dimension
-        numeric = receive_numeric(self._conn).reshape(shape)
+        # shape = [len(x) for x in axis_numbers] # len(x): number of axises in a dimension
+        numeric = receive_numeric(self._conn)
 
         set_submatrix_from_axis_numbers(self._db[name], numeric, 0, 1, axis_numbers)
 
     def pull_full(self, name):
         """ Pull full parameter from server """
         send_json(self._conn, {
-        "query_name":   "pull_full",
-        "query_id" :    query_HEADER_pull_full,
-        "name":         name,
+            "query_name":   "pull_full",
+            "query_id":    query_HEADER_pull_full,
+            "name":         name,
         })
 
-        # ignore the json header bytes
-        json_data = receive_json(self._conn)
+        # ignore the json
+        receive_json(self._conn)
         reception_numeric = receive_numeric(self._conn)
+        reception_numeric.flags.writeable = True
 
-        param_dtype = json_data["dtype"]
-        param_shape = json_data["shape"]
-
-        init = np.frombuffer(reception_numeric, dtype=param_dtype)
-        init.flags.writeable = True
-        self._db[name] = init.reshape(param_shape)
+        self._db[name] = reception_numeric
 
     def push_from_indices(self, name, indices, alpha, beta):
         np_indices = np.array(indices)
         values = np.zeros(shape=np_indices.shape)
 
-        with self._db as param:
-            for i in xrange(np_indices.shape[0]):
-                values[i, :] = param[np_indices[i, :]]
+        param = self._db[name]
+        values = param[np_indices.T.tolist()]
 
-        send_json({
+        send_json(self._conn, {
             "query_id":         query_HEADER_push_from_indices,
             "name":             name,
-            "shape":            values.shape,
-            "indices_shape":    indices.shape,
-            "indices_dtype":    str(indices.dtype),
-            "dtype":            str(values.dtype),
             "beta":             beta,
             "alpha":            alpha
         })
 
-        send_numeric_from_bytes(np_indices)
-        send_numeric_from_bytes(values)
+        send_numeric_from_bytes(self._conn, np_indices)
+        send_numeric_from_bytes(self._conn, values)
 
     def pull_from_indices(self, name, indices):
 
@@ -154,23 +139,17 @@ class Client(object):
         first = len(indices[0])
         assert all([len(t) == first for t in indices]), "index tuples need to all have the same len"
 
-        np_indices = np.array(indices)
-        # print(np_indices)
+        print(indices)
+        np_indices = np.array(indices).T
 
         send_json(self._conn, {
             "query_id":         query_HEADER_pull_from_indices,
-            "name":             name,
-            "indices_shape":    np_indices.shape,
-            "indices_dtype":    str(np_indices.dtype)
+            "name":             name
         })
 
-        send_numeric_from_bytes(self._conn, np_indices.tobytes())
-        data = receive_json(self._conn)
+        send_numeric_from_bytes(self._conn, np_indices)
         values = receive_numeric(self._conn)
-
         param = self._db[name]
-        np_indices = np_indices.astype(int)
-        numeric_data = values.astype(data["dtype"])
 
         """
         for i in xrange(np_indices.shape[0]):
@@ -178,10 +157,7 @@ class Client(object):
             param[index] = numeric_data[i]
         """
 
-        print (numeric_data[:])
-
-        param[np_indices] = numeric_data[:]
-
+        param[np_indices.tolist()] = values[:]
 
     def create_if_doesnt_exist(self, name, arr=None):
         if arr is not None:
@@ -193,14 +169,12 @@ class Client(object):
         send_json(self._conn, {
             "query_id": query_HEADER_create_if_doesnt_exist,
             "name":     name,
-            "shape":    arr.shape,
-            "dtype":    str(arr.dtype)
         })
 
         test = receive_json(self._conn)
 
         if test["requesting_param"]:
-            send_numeric_from_bytes(self._conn, arr.tobytes())
+            send_numeric_from_bytes(self._conn, arr)
 
     def __getitem__(self, item):
         return self._db[item]

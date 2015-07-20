@@ -100,8 +100,7 @@ class ReceptionThread(threading.Thread):
                     send_json(self.conn, answer)
 
                     with self.db[param_name] as param:
-                        send_numeric_from_bytes(self.conn, numeric_data)
-
+                        send_numeric_from_bytes(self.conn, param)
                     continue
 
                 elif query_id == query_HEADER_pull_part:
@@ -130,10 +129,9 @@ class ReceptionThread(threading.Thread):
                     numeric_data = receive_numeric(self.conn)
 
                     with self.db[param_name] as param:
-                        numeric_data = numeric_data.reshape(param.shape)
-                        numeric_data = numeric_data.astype(param.dtype)
                         param[:] = alpha * param + beta * numeric_data
                     continue
+
                 elif query_id == query_HEADER_push_part:
                     param_name =    data["name"]
                     axis_numbers =  data["axis_numbers"]
@@ -166,11 +164,10 @@ class ReceptionThread(threading.Thread):
                     indices = receive_numeric(self.conn)
                     numeric_data = receive_numeric(self.conn)
 
+                    formatted_indices = indices.T.tolist()
+
                     with self.db[name] as param:
-                        for i in indices.shape[0]:
-                            index = indices[i, :]
-                            param[index] = alpha * param[index] + \
-                                beta * numeric_data[i]
+                        param[formatted_indices] = alpha * param[formatted_indices] + beta * numeric_data[:]
                     continue
 
                 elif query_id == query_HEADER_pull_from_indices:
@@ -184,15 +181,8 @@ class ReceptionThread(threading.Thread):
                     name = data["name"]
                     indices = receive_numeric(self.conn)
 
-                    def disp(text, values):
-                        print("server - %s :\n%s" % (text, values))
-
-                    disp("indices", indices.tolist())
-
                     with self.db[name] as param:
-                        disp("param", param[indices.tolist()])
                         send_numeric_from_bytes(self.conn, param[indices.tolist()])
-
 
                     continue
 
