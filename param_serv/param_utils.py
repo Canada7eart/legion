@@ -7,10 +7,12 @@ import os
 import time
 import datetime
 from traceback import print_exc
-import numpy as np
-from headers import *
 from itertools import product
-import copy
+
+import numpy as np
+
+from headers import *
+
 
 def get_submatrix_from_axis_numbers(arr, axis_numbers):
     temp = np.array([arr[x] for x in product(*axis_numbers)])
@@ -87,10 +89,21 @@ def now_milliseconds():
     return (now.days * 24. * 60. * 60. + now.seconds) * 1000. + now.microseconds / 1000.
 
 
-def send_numeric_from_bytes(conn, array_bytes):
-    pwh("send_numeric_from_bytes - {size}".format(size=len(array_bytes)))
+def send_numeric_from_bytes(conn, array):
+    send_json(conn, {
+        "shape": array.shape,
+        "dtype": str(array.dtype)
+    })
+    array_bytes = array.tobytes()
     bytes = struct.pack("ii%ds" % len(array_bytes), HEADER_NUMERIC, len(array_bytes), array_bytes)
     conn.sendall(bytes)
+
+def receive_numeric(conn):
+    meta = receive_json(conn)
+    header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    data = brecv(conn, data_size)
+    return np.frombuffer(data, dtype=meta["dtype"]).reshape(meta["shape"])
 
 
 def send_json(conn, dict_to_transform):
@@ -117,11 +130,6 @@ def brecv(conn, size):
     return buff
 
 
-def receive_numeric(conn):
-    header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
-    data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
-    data = brecv(conn, data_size)
-    return np.frombuffer(data)
 
 
 def receive_json(conn):

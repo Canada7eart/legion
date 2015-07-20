@@ -1,7 +1,9 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
 from traceback import format_exc
+
 from param_utils import *
+
 
 class AcceptorThread(threading.Thread):
     def __init__(self, meta, meta_rlock, db, db_rlock):
@@ -72,6 +74,7 @@ class ReceptionThread(threading.Thread):
                             .format(errno=s_err.errno))
                         raise s_err
                     return
+
                 if "query_id" not in data:
 
                     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -88,49 +91,36 @@ class ReceptionThread(threading.Thread):
                     pwh("server - pull full")
                     param_name = data["name"]
 
-                    with self.db[param_name] as param:
-                        numeric_data = param.tobytes()
-                        # we copy this very small tuple to not have to keep the lock
-                        # on param until the answer is sent
-                        target_shape_str = copy.copy(param.shape)
-                        target_dtype_str = str(param.dtype)
-
                     answer = {
                         "query_id":    query_answer_HEADER_pull_full,
                         "query_name":  "answer_pull_full",
                         "name":        param_name,
-                        "shape":       target_shape_str,
-                        "dtype":       target_dtype_str
                     }
 
                     send_json(self.conn, answer)
 
-                    print(">>>>> server - numeric_data size: %i" % len(numeric_data))
-                    send_numeric_from_bytes(self.conn, numeric_data)
+                    with self.db[param_name] as param:
+                        send_numeric_from_bytes(self.conn, numeric_data)
+
                     continue
+
                 elif query_id == query_HEADER_pull_part:
                     param_name = data["name"]
                     axis_numbers = data["axis_numbers"]
-
-                    with self.db[param_name] as param:
-                        reshaped = get_submatrix_from_axis_numbers(param, axis_numbers)
-                        numeric_data = reshaped.tobytes()
-                        # we copy this very small tuple to not have to keep the lock
-                        # on param until the answer is sent
-                        target_shape_str = copy.copy(param.shape)
-                        target_dtype_str = str(param.dtype)
 
                     answer = {
                         "query_id":      query_answer_HEADER_pull_part,
                         "query_name":    "answer_pull_part",
                         "name":          param_name,
-                        "dtype":         target_dtype_str,
-                        "shape":         target_shape_str,
                         "axis_numbers":  axis_numbers
                     }
 
                     send_json(self.conn, answer)
-                    send_numeric_from_bytes(self.conn, numeric_data)
+
+                    with self.db[param_name] as param:
+                        reshaped = get_submatrix_from_axis_numbers(param, axis_numbers)
+                        send_numeric_from_bytes(self.conn, reshaped)
+
                     continue
                 elif query_id == query_HEADER_push_full:
                     param_name =    data["name"]
@@ -149,19 +139,20 @@ class ReceptionThread(threading.Thread):
                     axis_numbers =  data["axis_numbers"]
                     alpha =         data["alpha"]
                     beta =          data["beta"]
-                    shape =         data["shape"]
 
                     numeric_data = receive_numeric(self.conn)
 
                     with self.db[param_name] as param:
-                        numeric_data = numeric_data.astype(param.dtype).reshape(shape)
+                        numeric_data = numeric_data
                         set_submatrix_from_axis_numbers(
                             param,
                             numeric_data,
                             alpha,
                             beta,
                             axis_numbers)
+
                     continue
+
                 elif query_id == query_HEADER_push_from_indices:
                     """ we receive the param data, then we receive the indices,
                         then we iterate through the indices and assign the associated
@@ -169,21 +160,19 @@ class ReceptionThread(threading.Thread):
                     """
 
                     name = data["name"]
-                    _type = data["dtype"]
                     alpha = data["alpha"]
                     beta = data["beta"]
 
                     indices = receive_numeric(self.conn)
                     numeric_data = receive_numeric(self.conn)
-                    indices = indices.astype(int)
 
                     with self.db[name] as param:
-                        numeric_data = numeric_data.astype(_type)
                         for i in indices.shape[0]:
                             index = indices[i, :]
                             param[index] = alpha * param[index] + \
                                 beta * numeric_data[i]
                     continue
+
                 elif query_id == query_HEADER_pull_from_indices:
                     """ We receive an array with the indices, allocate the array
                         for the values, iterate through the indices & assign
@@ -191,26 +180,22 @@ class ReceptionThread(threading.Thread):
 
                         We then send the array.
                     """
-                    name = data["name"]
-                    indices_shape = data["indices_shape"]
-                    indices_dtype = data["indices_dtype"]
 
-                    indices = receive_numeric(self.conn).astype(indices_dtype) \
-                        .reshape(indices_shape)
-                    values = np.empty(shape=indices.shape)
+                    name = data["name"]
+                    indices = receive_numeric(self.conn)
+
+                    def disp(text, values):
+                        print("server - %s :\n%s" % (text, values))
+
+                    disp("indices", indices.tolist())
 
                     with self.db[name] as param:
-                        for i in xrange(indices.shape[0]):
-                            ind_t = tuple(indices[i, :])
-                            values[i, :] = param[ind_t]
+                        disp("param", param[indices.tolist()])
+                        send_numeric_from_bytes(self.conn, param[indices.tolist()])
 
-                    send_json(self.conn, {
-                        "dtype": str(values.dtype),
-                        "shape": values.shape,
-                    })
 
-                    send_numeric_from_bytes(self.conn, values.tobytes())
                     continue
+
                 elif query_id == query_HEADER_create_if_doesnt_exist:
                     """ So the main reasonning here is that we want this query to finish after
                         the param was initiated to simplify parallel work.
@@ -219,15 +204,12 @@ class ReceptionThread(threading.Thread):
                         be released very quickly.
                     """
                     name = data["name"]
-                    _type = data["dtype"]
-                    shape = data["shape"]
 
                     with self.db_insertion_mutex:
                         if name not in self.db:
                             send_json(self.conn, {"requesting_param": True})
-                            param = receive_numeric(self.conn).astype(_type).reshape(shape)
+                            param = receive_numeric(self.conn)
                             self.db[name] = Entry(param)
-                            pwh("server - added '%s'" % name)
                         else:
                             send_json(self.conn, {"requesting_param": False})
                     continue
