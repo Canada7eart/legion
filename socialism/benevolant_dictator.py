@@ -132,12 +132,7 @@ echo "qsub like script done"
             script_path=      script_path,
             )
 
-        options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}" \
-            .format(
-                here=           os.path.dirname(__file__),
-                lower_bound=    lower_bound,
-                upper_bound=    upper_bound,
-            )
+
 
         if debug:
             env = {
