@@ -119,8 +119,8 @@ class ReceptionThread(threading.Thread):
                     with self.db[param_name] as param:
                         reshaped = get_submatrix_from_axis_numbers(param, axis_numbers)
                         send_numeric_from_bytes(self.conn, reshaped)
-
                     continue
+
                 elif query_id == query_HEADER_push_full:
                     param_name =    data["name"]
                     alpha =         data["alpha"]
@@ -187,7 +187,7 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_create_if_doesnt_exist:
-                    """ So the main reasonning here is that we want this query to finish after
+                    """ So the main reasoning here is that we want this query to finish after
                         the param was initiated to simplify parallel work.
 
                         All threads block until the insertion is complete, then, all clients will

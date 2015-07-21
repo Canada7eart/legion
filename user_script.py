@@ -13,6 +13,7 @@ def main():
     soc["test"] = -np.ones((10, 10))
     soc.pull_full("test")
 
+
     print("Result:")
     print(soc.get("test"))
     print("user script - done")
