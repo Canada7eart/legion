@@ -148,6 +148,7 @@ echo "qsub like script done"
             stdout = process.communicate(complete_code)[0]
 
         else:
+            options = ""
             process = sp.Popen("jobdispatch {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(launch_template)[0]
 
