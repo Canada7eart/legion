@@ -8,7 +8,8 @@ import param_serv.server
 
 
 from param_serv.param_utils import *
-
+from dbi_utils import search_file
+from subprocess import *
 from traceback import format_exc
 
 class Server(object):
@@ -186,7 +187,7 @@ echo "qsub like script done"
             if dbi_param['launch_cmd'] is None:
                 dbi_param['launch_cmd'] = 'Local'
             options = ""
-            process = sp.Popen("jobdispatch {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen("{executable} {options}".format(executable=dbi_param['launch_cmd'], options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(launch_template)[0]
 
         print("benevolent_dictator - done")
