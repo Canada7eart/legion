@@ -102,14 +102,12 @@ class Server(object):
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
         launch_template = \
-"""
+            """
 #PBS -A {project_name}
 #PBS -l walltime={walltime}
 #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
 #PBS -r n
 #PBS -N {job_name}
-
-#PBS -v MOAB_JOBARRAYINDEX
 
 export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
@@ -122,16 +120,16 @@ wait
 echo "qsub like script done"
 """ \
             .format(
-                executable=       executable,
-                user_args=        user_args,
-                project_name=     project_name,
-                walltime=         walltime,
-                number_of_nodes=  number_of_nodes,
-                number_of_gpus=   number_of_gpus,
-                job_name=         job_name,
-                pydev=            pydev,
-                procs_per_job=    procs_per_job,
-                script_path=      script_path,
+            executable=       executable,
+            user_args=        user_args,
+            project_name=     project_name,
+            walltime=         walltime,
+            number_of_nodes=  number_of_nodes,
+            number_of_gpus=   number_of_gpus,
+            job_name=         job_name,
+            pydev=            pydev,
+            procs_per_job=    procs_per_job,
+            script_path=      script_path,
             )
 
         options = "-o '{here}/logs/out.log' -e '{here}/logs/err.log' -t {lower_bound}-{upper_bound}" \

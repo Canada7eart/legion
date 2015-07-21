@@ -6,7 +6,7 @@ from param_serv.param_utils import *
 
 if __name__ == "__main__":
 
-    debug = True
+    debug = False
     debug_pycharm = True
     soc = benevolant_dictator.Server()
     server = soc._launch_server()
