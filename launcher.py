@@ -14,7 +14,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         path = sys.argv[1]
     else:
-        path = os.path.join(os.path.dirname(__file__), 'user_script.py')
+        path = os.path.join(os.path.dirname(__file__), 'bash_go.sh')
 
     if debug:
         soc._launch_multiple(
