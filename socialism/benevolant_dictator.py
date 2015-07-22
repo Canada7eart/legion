@@ -160,7 +160,7 @@ echo "qsub like script done"
             stdout = process.communicate(launch_template)[0]
 
         if is_jobdispatch:
-            template = "jobdispatch --duree={walltime} --file={path}"\
+            template = "jobdispatch --gpu=2 --duree={walltime} --file={path}"\
                 .format(path=script_path,  walltime=walltime)
             proc = sp.Popen(template, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
         print("benevolent_dictator - done")
