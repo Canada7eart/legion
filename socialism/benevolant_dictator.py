@@ -161,6 +161,6 @@ echo "qsub like script done"
 
         if is_jobdispatch:
             template = "jobdispatch --file={path} --cpu={cpus} --gpu={gpus} --duree={walltime} --job_name={name}"\
-                .format(path=script_path, cpus=cpus_per_node, gpus=number_of_gpus, walltime=walltime, name=project_name)
-
+                .format(path=script_path, gpus=number_of_gpus, walltime=walltime, name=project_name)
+            proc = sp.Popen(template, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
         print("benevolent_dictator - done")
