@@ -45,9 +45,11 @@ class Server(object):
         procs_per_job,
         lower_bound,
         upper_bound,
-        user_args = "",
-        debug = False,
-        debug_pycharm = False
+        user_args="",
+        debug=False,
+        debug_pycharm=False,
+        is_qsub=False,
+        is_jobdispatch=True,
     ):
 
 ########################################################
@@ -134,7 +136,6 @@ echo "qsub like script done"
             )
 
 
-
         if debug:
             env = {
                 "PBS_NODENUM": "0",
@@ -148,46 +149,18 @@ echo "qsub like script done"
             process = sp.Popen("sh --debug", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(complete_code)[0]
 
-        else:
+        if is_qsub:
 
             PATH=os.getenv('PATH')
             dbi_param = {}
             dbi_param['launch_cmd'] = None
-            if search_file('condor_submit',PATH):
-                dbi_param['launch_cmd'] = 'Condor'
-            elif search_file('bqsubmit',PATH):
-                dbi_param['launch_cmd'] = 'Bqtools'
-            elif search_file('sqsub',PATH):
-                dbi_param['launch_cmd'] = 'Sharcnet'
-            elif search_file('msub',PATH):
-                dbi_param['launch_cmd'] = 'Moab'
-            elif search_file('qsub',PATH):
-                # qsub command is used by torque/pbs and Sun Grid Engine
-                # that take different input.
-                p = Popen('qsub --version',shell=True, stdout=PIPE, stderr=PIPE)
-                ret = p.wait()
-                stdout = p.stdout.readlines()
-                stderr = p.stderr.readlines()
-                #Maui have a different output then Torque, but it support the Torque interface
-                if ret==0 and len(stdout) == 1 and stdout[0] == "\n" and len(stderr) in [2, 3]:
-                    dbi_param['launch_cmd'] = 'Torque'
-                elif ret==0 and len(stdout)==0:
-                    dbi_param['launch_cmd'] = 'Torque'
-                else:
-                    # We suppose it is SGE.
-                    dbi_param['launch_cmd'] = 'Sge'
-            elif search_file('cluster',PATH):
-                # The command cluster is not always the program we want
-                # The want the cluster command used at DIRO.
-                p = Popen('cluster --liste',shell=True, stdout=PIPE, stderr=PIPE)
-                ret = p.wait()
-                stderr = p.stderr.readlines()
-                if len(stderr) == 0:
-                    dbi_param['launch_cmd'] = 'Cluster'
-            if dbi_param['launch_cmd'] is None:
-                dbi_param['launch_cmd'] = 'Local'
+
             options = ""
-            process = sp.Popen("{executable} {options}".format(executable=dbi_param['launch_cmd'], options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen("qsub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(launch_template)[0]
+
+        if is_jobdispatch:
+            template = "jobdispatch --file={path} --cpu={cpus} --gpu={gpus} --duree={walltime} --job_name={name}"\
+                .format(path=script_path, cpus=cpus_per_node, gpus=number_of_gpus, walltime=walltime, name=project_name)
 
         print("benevolent_dictator - done")
