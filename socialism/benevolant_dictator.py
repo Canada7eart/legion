@@ -69,17 +69,19 @@ class Server(object):
         # TODO: add jobdispatch integration
         ############
 
-        os.environ["SOCIALISM_project_name"] =     project_name
-        os.environ["SOCIALISM_walltime"] =         str(walltime)
-        os.environ["SOCIALISM_number_of_nodes"] =  str(number_of_nodes)
-        os.environ["SOCIALISM_number_of_gpus"] =   str(number_of_gpus)
-        os.environ["SOCIALISM_job_name"] =         job_name
-        os.environ["SOCIALISM_task_name"] =        task_name
-        os.environ["SOCIALISM_procs_per_job"] =    str(procs_per_job)
-        os.environ["SOCIALISM_script_path"] =      script_path
-        os.environ["SOCIALISM_server_ip"] =        our_ip()
-        os.environ["SOCIALISM_server_port"] =      str(self.port)
-        os.environ["SOCIALISM_debug"] =            str(debug).lower()
+        to_export = {}
+
+        to_export["SOCIALISM_project_name"] =     project_name
+        to_export["SOCIALISM_walltime"] =         str(walltime)
+        to_export["SOCIALISM_number_of_nodes"] =  str(number_of_nodes)
+        to_export["SOCIALISM_number_of_gpus"] =   str(number_of_gpus)
+        to_export["SOCIALISM_job_name"] =         job_name
+        to_export["SOCIALISM_task_name"] =        task_name
+        to_export["SOCIALISM_procs_per_job"] =    str(procs_per_job)
+        to_export["SOCIALISM_script_path"] =      script_path
+        to_export["SOCIALISM_server_ip"] =        our_ip()
+        to_export["SOCIALISM_server_port"] =      str(self.port)
+        to_export["SOCIALISM_debug"] =            str(debug).lower()
 
 
 ########################################################
@@ -103,25 +105,24 @@ class Server(object):
 
                 # change the executable
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
-
         launch_template = \
             """
-#PBS -A {project_name}
-#PBS -l walltime={walltime}
-#PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
-#PBS -r n
-#PBS -N {job_name}
+            #PBS -A {project_name}
+            #PBS -l walltime={walltime}
+            #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
+            #PBS -r n
+            #PBS -N {job_name}
 
-export PYTHONPATH="$PYTHONPATH":"{pydev}"
+            export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
-for i in $(seq 0 $(expr {procs_per_job} - 1))
-do
-    echo "starting job $i"
-    {executable} '{script_path}' '{user_args}' &
-done
-wait
-echo "qsub like script done"
-""" \
+            for i in $(seq 0 $(expr {procs_per_job} - 1))
+            do
+                echo "starting job $i"
+                {executable} '{script_path}' '{user_args}' &
+            done
+            wait
+            echo "qsub like script done"
+            """ \
             .format(
             executable=       executable,
             user_args=        user_args,
@@ -158,9 +159,13 @@ echo "qsub like script done"
             options = ""
             process = sp.Popen("qsub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(launch_template)[0]
-
         if is_jobdispatch:
-            template = "jobdispatch --gpu --duree={walltime} --file={path}"\
-                .format(path=script_path,  walltime=walltime)
+
+            line = ";".join([ "export {key}=\"{value}\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + "; python2 ./user_script.py"
+
+            template = "jobdispatch --gpu --duree={walltime} \'{line}\'"\
+                .format(path=script_path,  walltime=walltime, line=line)
+
             proc = sp.Popen(template, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+
         print("benevolent_dictator - done")
