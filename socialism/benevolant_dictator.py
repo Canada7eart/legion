@@ -160,7 +160,7 @@ class Server(object):
         if is_jobdispatch:
 
 
-            line = ";\n".join([ "export {key}=\\\"{value}\\\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";\npython2 \\\"/home/julesgm/task/user_script.py\\\";"
+            line = ";".join([ "export {key}=\\\"{value}\\\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";python2 \\\"/home/julesgm/task/user_script.py\\\";"
 
             template = "jobdispatch --gpu --duree={walltime} \"{line}\""\
                 .format(path=script_path,  walltime=walltime, line=line)
