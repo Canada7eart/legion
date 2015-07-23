@@ -169,12 +169,10 @@ class Server(object):
                 tmp.write("#! /usr/bin/env bash\n" + line)
 
             sp.Popen("chmod +x \"{path}\"".format(path=path_to_tmp), shell=True).wait()
-
+            os.environ["JOBDISPATCH_GPU_PARAM"] = "--gpu"
             template = "jobdispatch --gpu --duree={walltime} \"{cmd}\""\
                 .format(path=script_path,  walltime=walltime, cmd=path_to_tmp)
 
             sp.Popen(template, shell=True, stdin=sp.PIPE, stdout=sys.stdout).wait()
-
-            sp.Popen("rm {path}".format(path=path_to_tmp), shell=True).wait()
 
         print("benevolent_dictator - done")
