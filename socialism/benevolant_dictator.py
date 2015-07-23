@@ -160,10 +160,16 @@ class Server(object):
         if is_jobdispatch:
 
 
-            line = ";".join([ "export {key}=\\\"{value}\\\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";python2 \\\"/home/julesgm/task/user_script.py\\\";"
+            line = ";\n".join([ "export {key}=\"{value}\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";\npython2 \"/home/julesgm/task/user_script.py\";"
+            path_to_tmp = os.path.join(os.path.dirname(__file__), "tmp.sh")
+            with open(path_to_tmp, "w") as tmp:
+                tmp.write("#! /usr/bin/env bash\n" + line)
 
-            template = "jobdispatch --gpu --duree={walltime} \"{line}\""\
-                .format(path=script_path,  walltime=walltime, line=line)
+            with open(path_to_tmp, "r") as tmp:
+                print(tmp.read())
+
+            template = "jobdispatch --gpu --duree={walltime} \"{cmd}\""\
+                .format(path=script_path,  walltime=walltime, cmd=path_to_tmp)
 
             proc = sp.Popen(template, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
 
