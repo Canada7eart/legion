@@ -168,6 +168,9 @@ class Server(object):
             with open(path_to_tmp, "r") as tmp:
                 print(tmp.read())
 
+            sp.Popen("chmod +x \"{path}\"".format(path=path_to_tmp)).wait()
+
+            
             template = "jobdispatch --gpu --duree={walltime} \"{cmd}\""\
                 .format(path=script_path,  walltime=walltime, cmd=path_to_tmp)
 
