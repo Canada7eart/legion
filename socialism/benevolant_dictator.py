@@ -163,11 +163,10 @@ class Server(object):
             line = ";\n".join([ "export {key}=\"{value}\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";\npython2 \"/home/julesgm/task/user_script.py\";"
             path_to_tmp = os.path.join(os.path.dirname(__file__), "tmp.sh")
 
+            sp.Popen("rm {path}".format(path_to_tmp), shell=True).wait()
+
             with open(path_to_tmp, "w") as tmp:
                 tmp.write("#! /usr/bin/env bash\n" + line)
-
-            with open(path_to_tmp, "r") as tmp:
-                print(tmp.read())
 
             sp.Popen("chmod +x \"{path}\"".format(path=path_to_tmp), shell=True).wait()
 
