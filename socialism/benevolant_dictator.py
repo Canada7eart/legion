@@ -65,24 +65,22 @@ class Server(object):
         assert procs_per_job >= 1, "There needs to be at least one process per job."
 
         ############
-        # Create the shell script that is going to be used to launch the jobs.
-        # TODO: add jobdispatch integration
+        # These environment variables are going to be used by the clients
         ############
 
-        to_export = {}
-
-        to_export["SOCIALISM_project_name"] =     project_name
-        to_export["SOCIALISM_walltime"] =         str(walltime)
-        to_export["SOCIALISM_number_of_nodes"] =  str(number_of_nodes)
-        to_export["SOCIALISM_number_of_gpus"] =   str(number_of_gpus)
-        to_export["SOCIALISM_job_name"] =         job_name
-        to_export["SOCIALISM_task_name"] =        task_name
-        to_export["SOCIALISM_procs_per_job"] =    str(procs_per_job)
-        to_export["SOCIALISM_script_path"] =      script_path
-        to_export["SOCIALISM_server_ip"] =        our_ip()
-        to_export["SOCIALISM_server_port"] =      str(self.port)
-        to_export["SOCIALISM_debug"] =            str(debug).lower()
-
+        to_export = {
+            "SOCIALISM_project_name":     project_name,
+            "SOCIALISM_walltime":         str(walltime),
+            "SOCIALISM_number_of_nodes":  str(number_of_nodes),
+            "SOCIALISM_number_of_gpus":   str(number_of_gpus),
+            "SOCIALISM_job_name":         job_name,
+            "SOCIALISM_task_name":        task_name,
+            "SOCIALISM_procs_per_job":    str(procs_per_job),
+            "SOCIALISM_script_path":      script_path,
+            "SOCIALISM_server_ip":        our_ip(),
+            "SOCIALISM_server_port":      str(self.port),
+            "SOCIALISM_debug":            str(debug).lower()
+            }
 
 ########################################################
 # pycharm remote debugging
@@ -161,9 +159,9 @@ class Server(object):
             stdout = process.communicate(launch_template)[0]
         if is_jobdispatch:
 
-            line = ";\n".join([ "export {key}=\\\'{value}\\\'".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";\npython2 \\\'/home/julesgm/task/user_script.py\\\';"
+            line = ";\n".join([ "export {key}=\\\"{value}\\\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";\npython2 \\\"/home/julesgm/task/user_script.py\\\";"
 
-            template = "jobdispatch --gpu --duree={walltime} \'{line}\'"\
+            template = "jobdispatch --gpu --duree={walltime} \"{line}\""\
                 .format(path=script_path,  walltime=walltime, line=line)
 
             proc = sp.Popen(template, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
