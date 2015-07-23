@@ -175,6 +175,4 @@ class Server(object):
 
             sp.Popen(template, shell=True, stdin=sp.PIPE, stdout=sys.stdout).wait()
 
-            sp.Popen("rm {path}".format(path=path_to_tmp), shell=True).wait()
-
         print("benevolent_dictator - done")
