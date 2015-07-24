@@ -5,7 +5,7 @@ from __future__ import print_function, with_statement, division, generators
 import os, sys, re, threading, socket, time
 import subprocess as sp
 import param_serv.server
-
+import random
 
 from param_serv.param_utils import *
 from dbi_utils import search_file
@@ -48,13 +48,12 @@ class Server(object):
         user_args="",
         debug=False,
         debug_pycharm=False,
-        is_qsub=False,
-        is_jobdispatch=True,
+        force_jobdispatch=False,
     ):
 
-########################################################
-# grunt work
-########################################################
+###################################################################
+# Grunt Work
+###################################################################
         pydev = ""
         executable = "python2"
 
@@ -79,12 +78,12 @@ class Server(object):
             "SOCIALISM_script_path":      script_path,
             "SOCIALISM_server_ip":        our_ip(),
             "SOCIALISM_server_port":      str(self.port),
-            "SOCIALISM_debug":            str(debug).lower()
+            "SOCIALISM_debug":            str(debug).lower(),
             }
 
-########################################################
-# pycharm remote debugging
-########################################################
+###################################################################
+# Pycharm remote debugging
+###################################################################
         if debug_pycharm:
             # find the debugging process
             sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
@@ -135,6 +134,11 @@ class Server(object):
             )
 
 
+        dnsdomainname = os.popen("dnsdomainname").read()
+
+        qsub_set = {"guillimin.clumeq.ca"}
+        msub_set = {"helios"}
+
         if debug:
             env = {
                 "PBS_NODENUM": "0",
@@ -148,28 +152,54 @@ class Server(object):
             process = sp.Popen("sh --debug", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(complete_code)[0]
 
-        if is_qsub:
+        # allow further customization then just command name
+        elif not force_jobdispatch and  dnsdomainname in qsub_set:
+            print(">>> qsub")
+            process = sp.Popen("qsub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            # pass the code through stdin
+            process.communicate(launch_template)[0]
 
-            PATH=os.getenv('PATH')
-            dbi_param = {}
-            dbi_param['launch_cmd'] = None
+        # allow further customization then just command name
+        elif not force_jobdispatch and dnsdomainname in msub_set:
+            print(">>> msub")
+            process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            # pass the code through stdin
+            process.communicate(launch_template)[0]
 
-            options = ""
-            process = sp.Popen("qsub {options}".format(options=options), shell=True, stdin=sp.PIPE, stdout=sys.stdout)
-            stdout = process.communicate(launch_template)[0]
-        if is_jobdispatch:
+        # fall back on jobdispatch
+        else:
+            print(">>> jobdispatch")
 
+            ###################################################################
+            # Generation of the launch script
+            # as jobdispatch cannot read the script with stdin
+            ###################################################################
+            generic_shebang =    "#! /usr/bin/env bash\n"
+            key_value_exports =  ";\n".join(["export {key}=\"{value}\"".format(key=key, value=value) for key, value in to_export.iteritems()])
+            execution =          ";\npython2 \"/home/julesgm/task/user_script.py\";"
 
-            line = ";\n".join([ "export {key}=\"{value}\"".format(key=key, value=value) for key, value in to_export.iteritems()]) + ";\npython2 \"/home/julesgm/task/user_script.py\";"
-            path_to_tmp = os.path.join(os.path.dirname(__file__), "tmp.sh")
+            complete = generic_shebang + key_value_exports + execution
 
-            sp.Popen("rm {path}".format(path=path_to_tmp), shell=True).wait()
-
+            # we generate a random name so multiple servers on the same machine don't overlap
+            while True:
+                file_name = "tmp_{rand_id}.sh".format(rand_id=random.randint(0, 100000))
+                path_to_tmp = os.path.join(os.path.dirname(__file__), file_name)
+                if not os.path.exists(path_to_tmp):
+                    break
+            # save the script
             with open(path_to_tmp, "w") as tmp:
-                tmp.write("#! /usr/bin/env bash\n" + line)
+                tmp.write(complete)
 
+            # make it executable
             sp.Popen("chmod +x \"{path}\"".format(path=path_to_tmp), shell=True).wait()
-            #os.environ["JOBDISPATCH_GPU_PARAM"] = "--gpu"
+
+            # jobdispatch needs this with guillimin
+            if dnsdomainname == "guillimin.clumeq.ca":
+                os.environ["JOBDISPATCH_GPU_PARAM"] = "--gpu"
+
+            ###################################################################
+            # We make and run the jobdispatch shell line
+            ###################################################################
             template = "jobdispatch --gpu --duree={walltime} \"{cmd}\""\
                 .format(path=script_path,  walltime=walltime, cmd=path_to_tmp)
 
