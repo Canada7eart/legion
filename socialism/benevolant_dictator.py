@@ -116,7 +116,11 @@ class Server(object):
                 )
 
         # This is basic logic to detect if we are on either Helios or Guillimin
-        dnsdomainname = os.popen("dnsdomainname").read()
+        try:
+            dnsdomainname = os.popen("dnsdomainname").read()
+        except NameError:
+            dnsdomainname = None
+
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}
 
