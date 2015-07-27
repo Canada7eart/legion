@@ -3,12 +3,12 @@ __author__ = 'jules'
 from traceback import format_exc
 import os, sys
 import h5py
-import param_serv.param_utils
+import socialism.param_serv.param_utils
 
 
 def server_save_db_to_hdf5(path, db):
     if os.path.exists(path):
-        param_serv.param_utils.pwh("save_db_to_hdf5 - overwriting %s" % path)
+        socialism.param_serv.param_utils.pwh("save_db_to_hdf5 - overwriting %s" % path)
     h5 = h5py.File(path, "w")
 
     for key, value in db.iteritems():
@@ -25,7 +25,7 @@ def server_load_db_from_hdf5(path, creation_lock):
     db = {}
     with creation_lock:
         for key, value in h5.iterkeys():
-            db[key] = param_serv.param_utils.Entry(value)
+            db[key] = socialism.param_serv.param_utils.Entry(value)
 
     h5.close()
     return db
@@ -36,7 +36,7 @@ def client_load_db_from_hdf5(path):
 
     db = {}
     for key, value in h5.iterkeys():
-        db[key] = param_serv.param_utils.Entry(value)
+        db[key] = socialism.param_serv.param_utils.Entry(value)
 
     h5.close()
     return db
@@ -44,7 +44,7 @@ def client_load_db_from_hdf5(path):
 
 def client_save_db_to_hdf5(path, db):
     if os.path.exists(path):
-        param_serv.param_utils.pwh("save_db_to_hdf5 - overwriting %s" % path)
+        socialism.param_serv.param_utils.pwh("save_db_to_hdf5 - overwriting %s" % path)
 
     h5 = h5py.File(path, "w")
 

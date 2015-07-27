@@ -2,7 +2,7 @@
 from __future__ import print_function, with_statement, division, generators
 from socialism import benevolant_dictator
 import socket, os, sys, argparse
-from param_serv.param_utils import *
+from socialism.param_serv.param_utils import *
 
 if __name__ == "__main__":
 
