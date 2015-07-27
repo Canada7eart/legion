@@ -4,11 +4,11 @@ from __future__ import print_function, with_statement, division, generators
 """ Extremely simple launch script. Should be improved. """
 import os, sys, re, threading, socket, time
 import subprocess as sp
-import param_serv.server
+import socialism.param_serv.server
 import random
 
 from param_serv.param_utils import *
-from dbi_utils import search_file
+
 from subprocess import *
 from traceback import format_exc
 
@@ -22,7 +22,7 @@ class Server(object):
         meta = {}
         meta_rlock = threading.RLock()
 
-        acceptor = param_serv.server.AcceptorThread(
+        acceptor = socialism.param_serv.server.AcceptorThread(
             meta=meta,
             meta_rlock=meta_rlock,
             db=db,
@@ -131,7 +131,9 @@ class Server(object):
                 "PBS_NODENUM": "0",
                 }
 
-            env_code = "\n".join(["export {key}={value};".format(key=key, value=value) for key, value in to_export.items()]) + "\n"
+            env_code = "\n".join(["export {key}={value};".format(key=key, value=value)
+                for key, value in to_export.items()]) + "\n"
+
             complete_code = env_code + "sh" + qsub_msub_or_debug_launch_template
 
             # run the script
@@ -175,7 +177,8 @@ class Server(object):
                 "SOCIALISM_debug":            str(debug).lower(),
                 }
             standard_shebang =    "#! /usr/bin/env bash\n"
-            key_value_exports =   ";\n".join(["export {export_key}=\"{export_value}\"".format(export_key=key, export_value=value) for key, value in to_export.iteritems()])
+            key_value_exports =   ";\n".join(["export {export_key}=\"{export_value}\""
+                                      .format(export_key=key, export_value=value) for key, value in to_export.iteritems()])
             execution =           ";\npython2 \"/home/julesgm/task/user_script.py\";"
             complete = standard_shebang + key_value_exports + execution
 
@@ -190,7 +193,7 @@ class Server(object):
             with open(path_to_tmp, "w") as tmp:
                 tmp.write(complete)
 
-            # make it executable
+            # Make it executable
             chmod_x_cmd = "chmod +x \"{path}\"".format(path=path_to_tmp)
             sp.Popen(chmod_x_cmd, shell=True).wait()
 

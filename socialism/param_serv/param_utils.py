@@ -132,8 +132,6 @@ def brecv(conn, size):
     return buff
 
 
-
-
 def receive_json(conn):
     header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     assert header == HEADER_JSON, "expected {header_json}, got {header}".format(header_json=HEADER_JSON, header=header)
