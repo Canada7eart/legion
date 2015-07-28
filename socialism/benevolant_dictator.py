@@ -122,6 +122,7 @@ class Server(object):
 
         # This is basic logic to detect if we are on either Helios or Guillimin
         try:
+            import re
             dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname").read())
         except NameError:
             print("dnsdomainname: NameError")
