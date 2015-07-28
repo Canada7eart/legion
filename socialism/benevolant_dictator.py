@@ -124,13 +124,15 @@ class Server(object):
             dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname").read())
         except NameError:
             dnsdomainname = None
-        exit(0)
+
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}
 
         print("dnsdomainname: {dnsdomainname}".format(dnsdomainname=dnsdomainname))
         print("force_jobdispatch: {force_jobdispatch}".format(force_jobdispatch=force_jobdispatch))
 
+        exit(0)
+        
         if debug:
 
             print(">>> qsub")
