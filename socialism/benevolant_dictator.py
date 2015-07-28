@@ -45,7 +45,8 @@ class Server(object):
         procs_per_job,
         lower_bound,
         upper_bound,
-        user_args="",
+        theano_flags,
+        client_script_args="",
         debug=False,
         debug_pycharm=False,
         force_jobdispatch=False,
@@ -93,6 +94,7 @@ class Server(object):
             #PBS -N {job_name}
 
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
+            export THEANO_FLAGS="{theano_flags}"
 
             for i in $(seq 0 $(expr {procs_per_job} - 1))
             do
@@ -104,7 +106,7 @@ class Server(object):
             """ \
             .format(
                 executable=       executable,
-                user_args=        user_args,
+                user_args=        client_script_args,
                 project_name=     project_name,
                 walltime=         walltime,
                 number_of_nodes=  number_of_nodes,
@@ -113,6 +115,7 @@ class Server(object):
                 pydev=            pydev,
                 procs_per_job=    procs_per_job,
                 script_path=      script_path,
+                theano_flags=     theano_flags,
                 )
 
         # This is basic logic to detect if we are on either Helios or Guillimin
@@ -179,7 +182,7 @@ class Server(object):
             standard_shebang =    "#! /usr/bin/env bash\n"
             key_value_exports =   ";\n".join(["export {export_key}=\"{export_value}\""
                                       .format(export_key=key, export_value=value) for key, value in to_export.iteritems()])
-            execution =           ";\npython2 \"/home/julesgm/task/user_script.py\";"
+            execution =           ";\nTHEANO_FLAGS=\"{theano_flags}\" python2 \"/home/julesgm/task/user_script.py\" {user_args};".format(theano_flags=theano_flags, user_args=client_script_args)
             complete = standard_shebang + key_value_exports + execution
 
             # We generate a random name so multiple servers on the same machine don't overlap

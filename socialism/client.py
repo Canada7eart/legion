@@ -4,7 +4,7 @@ from __future__ import print_function, with_statement, division, generators
 """ Extremely simple launch script. Should be improved. """
 import sys
 
-from param_serv.param_utils import *
+from socialism.param_serv.param_utils import *
 
 from traceback import format_exc
 
@@ -87,7 +87,6 @@ class Client(object):
             self._db[name].tobytes())
 
     def pull_part(self, name, axis_numbers):
-        #TODO: far from functionnal
 
         send_json(self._conn, {
             "query_name":   "pull_part",
