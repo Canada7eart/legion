@@ -128,7 +128,10 @@ class Server(object):
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}
 
+        print("dnsdomainname: {dnsdomainname}".format(dnsdomainname=dnsdomainname))
+
         if debug:
+
             print(">>> qsub")
             # Add some fake qsub env variables to emulate those that would be present at the time of execution
             to_export = {
@@ -145,7 +148,7 @@ class Server(object):
             stdout = process.communicate(complete_code)[0]
 
         # allow further customization then just command name
-        elif not force_jobdispatch and  dnsdomainname in qsub_set:
+        elif not force_jobdispatch and dnsdomainname in qsub_set:
             print(">>> qsub")
             process = sp.Popen("qsub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
