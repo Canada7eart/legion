@@ -126,10 +126,13 @@ class Server(object):
             print("dnsdomainname: NameError")
             dnsdomainname = None
 
+
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}
 
+
         print("\ndnsdomainname: {dnsdomainname}".format(dnsdomainname=dnsdomainname))
+        print("debug_pycharm: {debug_pycharm}".format(debug_pycharm=debug_pycharm))
         print("force_jobdispatch: {force_jobdispatch}".format(force_jobdispatch=force_jobdispatch))
 
         exit(0)
