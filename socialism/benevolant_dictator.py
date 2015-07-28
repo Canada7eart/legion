@@ -125,7 +125,7 @@ class Server(object):
         except NameError:
             print("dnsdomainname: NameError")
             dnsdomainname = None
-            traceback.print_exc()
+            print(format_exc())
 
 
         qsub_set = {"guillimin.clumeq.ca"}
