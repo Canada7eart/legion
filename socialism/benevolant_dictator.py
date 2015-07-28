@@ -6,7 +6,6 @@ import os, sys, re, threading, socket, time
 import subprocess as sp
 import socialism.param_serv.server
 import random
-import re
 
 from param_serv.param_utils import *
 
@@ -137,7 +136,7 @@ class Server(object):
         print("debug_pycharm: {debug_pycharm}".format(debug_pycharm=debug_pycharm))
         print("force_jobdispatch: {force_jobdispatch}".format(force_jobdispatch=force_jobdispatch))
 
-        exit(0)
+        
 
         if debug:
 
