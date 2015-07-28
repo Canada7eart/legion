@@ -124,7 +124,7 @@ class Server(object):
             dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname").read())
         except NameError:
             dnsdomainname = None
-
+        exit(0)
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}
 
