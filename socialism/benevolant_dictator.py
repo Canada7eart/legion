@@ -125,11 +125,11 @@ class Server(object):
         except NameError:
             print("dnsdomainname: NameError")
             dnsdomainname = None
+            traceback.print_exc()
 
 
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}
-
 
         print("\ndnsdomainname: {dnsdomainname}".format(dnsdomainname=dnsdomainname))
         print("debug_pycharm: {debug_pycharm}".format(debug_pycharm=debug_pycharm))
