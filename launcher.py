@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     if debug:
         soc._launch_multiple(
-            script_path=path,
+            user_script_path=path,
             project_name="jvb-000-aa",
             walltime=10,
             number_of_nodes=1,
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     else:
         soc._launch_multiple(
-            script_path=path,
+            user_script_path=path,
             project_name="jvb-000-aa",
             walltime=10,
             number_of_nodes=1,
@@ -44,6 +44,8 @@ if __name__ == "__main__":
             procs_per_job=8,
             lower_bound=0,
             upper_bound=0,
+            user_script_args="--experiment_dir=/home/julesgm/NIPS/experiments/experiment_dir_1 --output_server_params_desc_path=server_params_desc.json",
+            theano_flags="device=gpu0,floatX=float32",
             )
 
 
