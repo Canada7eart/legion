@@ -46,7 +46,7 @@ class Server(object):
         lower_bound,
         upper_bound,
         theano_flags,
-        client_script_args="",
+        user_script_args="",
         debug=False,
         debug_pycharm=False,
         force_jobdispatch=False,
@@ -106,7 +106,7 @@ class Server(object):
             """ \
             .format(
                 executable=       executable,
-                user_args=        client_script_args,
+                user_args=        user_script_args,
                 project_name=     project_name,
                 walltime=         walltime,
                 number_of_nodes=  number_of_nodes,
@@ -114,7 +114,7 @@ class Server(object):
                 job_name=         job_name,
                 pydev=            pydev,
                 procs_per_job=    procs_per_job,
-                script_path=      script_path,
+                script_path=      user_script_path,
                 theano_flags=     theano_flags,
                 )
 
@@ -174,7 +174,7 @@ class Server(object):
                 "SOCIALISM_job_name":         job_name,
                 "SOCIALISM_task_name":        task_name,
                 "SOCIALISM_procs_per_job":    str(procs_per_job),
-                "SOCIALISM_script_path":      script_path,
+                "SOCIALISM_script_path":      user_script_path,
                 "SOCIALISM_server_ip":        our_ip(),
                 "SOCIALISM_server_port":      str(self.port),
                 "SOCIALISM_debug":            str(debug).lower(),
@@ -182,7 +182,7 @@ class Server(object):
             standard_shebang =    "#! /usr/bin/env bash\n"
             key_value_exports =   ";\n".join(["export {export_key}=\"{export_value}\""
                                       .format(export_key=key, export_value=value) for key, value in to_export.iteritems()])
-            execution =           ";\nTHEANO_FLAGS=\"{theano_flags}\" python2 \"/home/julesgm/task/user_script.py\" {user_args};".format(theano_flags=theano_flags, user_args=client_script_args)
+            execution =           ";\nTHEANO_FLAGS=\"{theano_flags}\" python2 \"/home/julesgm/task/user_script.py\" {user_args};".format(theano_flags=theano_flags, user_args=user_script_args)
             complete = standard_shebang + key_value_exports + execution
 
             # We generate a random name so multiple servers on the same machine don't overlap
@@ -209,7 +209,7 @@ class Server(object):
             ###################################################################
             jobdispatch_cmd = "jobdispatch --gpu --duree={walltime} \"{cmd}\"" \
                                  .format(
-                                     path=        script_path,
+                                     path=        user_script_path,
                                      walltime=    walltime,
                                      cmd=         path_to_tmp,
                                      )
