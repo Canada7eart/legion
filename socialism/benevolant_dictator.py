@@ -35,7 +35,7 @@ class Server(object):
 
     def _launch_multiple(
         self,
-        script_path,
+        user_script_path,
         project_name,
         walltime,
         number_of_nodes,
