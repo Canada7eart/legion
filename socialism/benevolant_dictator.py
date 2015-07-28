@@ -129,6 +129,7 @@ class Server(object):
         msub_set = {"helios"}
 
         print("dnsdomainname: {dnsdomainname}".format(dnsdomainname=dnsdomainname))
+        print("force_jobdispatch: {force_jobdispatch}".format(force_jobdispatch=force_jobdispatch))
 
         if debug:
 
