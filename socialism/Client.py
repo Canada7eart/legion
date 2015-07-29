@@ -176,6 +176,14 @@ class Client(object):
         if test["requesting_param"]:
             send_numeric_from_bytes(self._conn, arr)
 
+    def server_save_to_hdf5(self, path):
+        send_json(self._conn, {
+            "query_id": query_HEADER_save_all_to_hdf5,
+            "path": path,
+            })
+
+
+
     def __getitem__(self, item):
         return self._db[item]
 

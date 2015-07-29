@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-""" THIS IS AN EXAMPLE : this is the type of launch script that it is suggested that you use """
-
 
 from socialism import benevolant_dictator
 import socket, os, sys, argparse
@@ -12,15 +10,15 @@ if __name__ == "__main__":
     debug = False
     debug_pycharm = True
     soc = benevolant_dictator.Server()
-    server = soc._launch_server()
+    server = soc.launch_server()
 
     if len(sys.argv) > 1:
         path = sys.argv[1]
     else:
-        path = os.path.join(os.path.dirname(__file__), 'user_script.py')
+        path = os.path.join(os.path.dirname(__file__), 'exemple_user_script.py')
 
     if debug:
-        soc._launch_multiple(
+        soc.launch_clients(
             user_script_path=path,
             project_name="jvb-000-aa",
             walltime=10,
@@ -36,7 +34,7 @@ if __name__ == "__main__":
             )
 
     else:
-        soc._launch_multiple(
+        soc.launch_clients(
             user_script_path=path,
             project_name="jvb-000-aa",
             walltime=10,

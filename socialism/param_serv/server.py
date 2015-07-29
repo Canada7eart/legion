@@ -3,7 +3,7 @@ from __future__ import print_function, with_statement, division, generators
 from traceback import format_exc
 
 from param_utils import *
-
+from socialism.checkpoint_hdf5 import server_save_db_to_hdf5
 
 class AcceptorThread(threading.Thread):
     def __init__(self, meta, meta_rlock, db, db_rlock):
@@ -203,6 +203,11 @@ class ReceptionThread(threading.Thread):
                         else:
                             send_json(self.conn, {"requesting_param": False})
                     continue
+
+                elif query_id == query_HEADER_save_all_to_hdf5:
+                    server_save_db_to_hdf5(data["path"], self.db)
+                    continue
+                    
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     pwh(">>>> server - Exception: Unsupported query id #%d with "
