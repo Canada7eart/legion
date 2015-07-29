@@ -1,5 +1,8 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
+""" THIS IS AN EXAMPLE : this is the type of launch script that it is suggested that you use """
+
+
 from socialism import benevolant_dictator
 import socket, os, sys, argparse
 from socialism.param_serv.param_utils import *
@@ -14,7 +17,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         path = sys.argv[1]
     else:
-        path = os.path.join(os.path.dirname(__file__), 'bash_go.sh')
+        path = os.path.join(os.path.dirname(__file__), 'user_script.py')
 
     if debug:
         soc._launch_multiple(
