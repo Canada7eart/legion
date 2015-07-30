@@ -2,7 +2,7 @@
 from __future__ import print_function, with_statement, division, generators
 from traceback import format_exc
 
-from param_utils import *
+from socialism.param_utils import *
 from socialism.checkpoint_hdf5 import server_save_db_to_hdf5
 
 class AcceptorThread(threading.Thread):
