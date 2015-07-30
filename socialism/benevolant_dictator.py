@@ -53,6 +53,9 @@ class Server(object):
         force_jobdispatch=False,
 
     ):
+
+        assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
+
         """
         This makes the call to jobdispatch, msub or qsub
         """
@@ -194,10 +197,11 @@ class Server(object):
                 "SOCIALISM_server_port":      str(self.port),
                 "SOCIALISM_debug":            str(debug).lower(),
                 }
+
             standard_shebang =    "#! /usr/bin/env bash\n"
-            key_value_exports =   ";\n".join(["export {export_key}=\"{export_value}\""
+            key_value_exports =   " ".join(["export {export_key}=\"{export_value}\""
                                       .format(export_key=key, export_value=value) for key, value in to_export.iteritems()])
-            execution =           ";\nTHEANO_FLAGS=\"{theano_flags}\" python2 \"/home/julesgm/task/user_script.py\" {user_args};".format(theano_flags=theano_flags, user_args=user_script_args)
+            execution =           "THEANO_FLAGS=\"{theano_flags}\" python2 \"{user_script_path}\" {user_args};".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
             complete = standard_shebang + key_value_exports + execution
 
             # We generate a random name so multiple servers on the same machine don't overlap
@@ -229,8 +233,11 @@ class Server(object):
                                      cmd=         path_to_tmp,
                                      )
 
-            jobdispatch_proc = sp.Popen(jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
-            ret_val_jobdispatch_proc = jobdispatch_proc.wait()
+            experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}"\
+                .format(exports=key_value_exports, execution=execution)
 
+            print(experimental_jobdispatch_cmd)
+            jobdispatch_proc = sp.Popen(experimental_jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            ret_val_jobdispatch_proc = jobdispatch_proc.wait()
 
         print("benevolent_dictator - done")

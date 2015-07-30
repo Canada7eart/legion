@@ -12,10 +12,9 @@ if __name__ == "__main__":
     soc = benevolant_dictator.Server()
     server = soc.launch_server()
 
-    if len(sys.argv) > 1:
-        path = sys.argv[1]
-    else:
-        path = os.path.join(os.path.dirname(__file__), 'exemple_user_script.py')
+
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'exemple_user_script.py')
+
 
     if debug:
         soc.launch_clients(
@@ -27,8 +26,6 @@ if __name__ == "__main__":
             job_name="0",
             task_name="debug",
             procs_per_job=1,
-            lower_bound=0,
-            upper_bound=0,
             debug=True,
             debug_pycharm=debug_pycharm
             )
@@ -43,8 +40,6 @@ if __name__ == "__main__":
             job_name="0",
             task_name="debug",
             procs_per_job=8,
-            lower_bound=0,
-            upper_bound=0,
             user_script_args="--experiment_dir=/home/julesgm/NIPS/experiments/experiment_dir_1 --output_server_params_desc_path=server_params_desc.json",
             theano_flags="device=gpu0,floatX=float32",
             )

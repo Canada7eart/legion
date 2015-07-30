@@ -207,7 +207,7 @@ class ReceptionThread(threading.Thread):
                 elif query_id == query_HEADER_save_all_to_hdf5:
                     server_save_db_to_hdf5(data["path"], self.db)
                     continue
-                    
+
                 else:
                     pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                     pwh(">>>> server - Exception: Unsupported query id #%d with "
