@@ -16,7 +16,10 @@ class Server(object):
     def __init__(self):
         pass
 
-    def _launch_server(self):
+    def launch_server(self):
+        """
+        This launches the server acceptor thread.
+        """
         db = {}
         db_rlock = threading.RLock()
         meta = {}
@@ -33,7 +36,7 @@ class Server(object):
         acceptor.start()
         return acceptor
 
-    def _launch_multiple(
+    def launch_clients(
         self,
         user_script_path,
         project_name,
@@ -43,8 +46,6 @@ class Server(object):
         job_name,
         task_name,
         procs_per_job,
-        lower_bound,
-        upper_bound,
         theano_flags,
         user_script_args="",
         debug=False,
@@ -53,6 +54,11 @@ class Server(object):
 
     ):
 
+        assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
+
+        """
+        This makes the call to jobdispatch, msub or qsub
+        """
         # There variables will be changed if Pycharm remote debugging is enabled,
         # as the remote debugger needs to be the one running the script
         executable = "python2"
@@ -100,10 +106,10 @@ class Server(object):
             for i in $(seq 0 $(expr {procs_per_job} - 1))
             do
                 echo "starting job $i"
-                {executable} '{script_path}' '{user_args}' &
+                {executable} '{script_path}' {user_args} &
             done
             wait
-            echo "qsub like script done"
+            echo "qsub/msub script done"
             """ \
             .format(
                 executable=       executable,
@@ -130,7 +136,7 @@ class Server(object):
 
 
         qsub_set = {"guillimin.clumeq.ca"}
-        msub_set = {"helios"}
+        msub_set = {}  # used to be for msub
 
         print("\ndnsdomainname: {dnsdomainname}".format(dnsdomainname=dnsdomainname))
         print("debug_pycharm: {debug_pycharm}".format(debug_pycharm=debug_pycharm))
@@ -140,7 +146,7 @@ class Server(object):
 
         if debug:
 
-            print(">>> qsub")
+            print(">>> debu")
             # Add some fake qsub env variables to emulate those that would be present at the time of execution
             to_export = {
                 "PBS_NODENUM": "0",
@@ -152,7 +158,7 @@ class Server(object):
             complete_code = env_code + "sh" + qsub_msub_or_debug_launch_template
 
             # run the script
-            process = sp.Popen("sh --debug", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             stdout = process.communicate(complete_code)[0]
 
         # allow further customization then just command name
@@ -191,15 +197,19 @@ class Server(object):
                 "SOCIALISM_server_port":      str(self.port),
                 "SOCIALISM_debug":            str(debug).lower(),
                 }
+
             standard_shebang =    "#! /usr/bin/env bash\n"
-            key_value_exports =   ";\n".join(["export {export_key}=\"{export_value}\""
+            key_value_exports =   " ".join(["export {export_key}=\"{export_value}\""
                                       .format(export_key=key, export_value=value) for key, value in to_export.iteritems()])
-            execution =           ";\nTHEANO_FLAGS=\"{theano_flags}\" python2 \"/home/julesgm/task/user_script.py\" {user_args};".format(theano_flags=theano_flags, user_args=user_script_args)
+            execution =           "THEANO_FLAGS=\"{theano_flags}\" python2 \"{user_script_path}\" {user_args};".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
             complete = standard_shebang + key_value_exports + execution
 
             # We generate a random name so multiple servers on the same machine don't overlap
             while True:
-                file_name = "tmp_{rand_id}.sh".format(rand_id=random.randint(0, 10000000))
+                file_name = "{user_script_path}__tmp_{rand_id}.sh".format(
+                    user_script_path=user_script_path,
+                    rand_id=random.randint(0, 10000000)
+                    )
                 path_to_tmp = os.path.join(os.path.dirname(__file__), file_name)
                 if not os.path.exists(path_to_tmp):
                     break
@@ -210,11 +220,8 @@ class Server(object):
 
             # Make it executable
             chmod_x_cmd = "chmod +x \"{path}\"".format(path=path_to_tmp)
-            sp.Popen(chmod_x_cmd, shell=True).wait()
-
-            # jobdispatch needs this with guillimin
-            if dnsdomainname == "guillimin.clumeq.ca":
-                os.environ["JOBDISPATCH_GPU_PARAM"] = "--gpu"
+            chmod_x_proc = sp.Popen(chmod_x_cmd, shell=True)
+            ret_vav_chmod_x_proc = chmod_x_proc.wait()
 
             ###################################################################
             # We make and run the jobdispatch shell line
@@ -226,6 +233,11 @@ class Server(object):
                                      cmd=         path_to_tmp,
                                      )
 
-            sp.Popen(jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout).wait()
+            experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}"\
+                .format(exports=key_value_exports, execution=execution)
+
+            print(experimental_jobdispatch_cmd)
+            jobdispatch_proc = sp.Popen(experimental_jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            ret_val_jobdispatch_proc = jobdispatch_proc.wait()
 
         print("benevolent_dictator - done")
