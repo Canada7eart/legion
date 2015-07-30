@@ -7,7 +7,7 @@ import subprocess as sp
 import socialism.param_serv.server
 import random
 
-from param_serv.param_utils import *
+from socialism.param_serv.param_utils import *
 
 from subprocess import *
 from traceback import format_exc
