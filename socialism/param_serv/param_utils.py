@@ -21,7 +21,6 @@ def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
     indices = indices.reshape(tuple(new_shape))
 
     ranges_of_positions_in_indices_table = [range(len(x)) for x in axis_numbers]
-
     possible_positions_in_indices_table = list(product(*ranges_of_positions_in_indices_table))
 
     for position in possible_positions_in_indices_table:

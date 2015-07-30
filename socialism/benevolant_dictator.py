@@ -48,30 +48,35 @@ class Server(object):
         force_jobdispatch=False,
 
     ):
+        """ This makes the call to jobdispatch, msub or qsub """
 
+        ###################################################################
+        # Function argument/param consistency check
+        # TODO: This needs to be tight at "shipping"
+        ###################################################################
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
+        assert procs_per_job > 0
+        assert walltime >= 0
 
-        """
-        This makes the call to jobdispatch, msub or qsub
-        """
+        if debug_pycharm and debug:
+            try:
+                # Try to add the common OSX path for pydev
+                sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
+                import pydev
+            except ImportError:
+                pwh("You need to have the pydev library in your path in order to use remote debugging.")
+                pwh(format_exc())
+                debug_pycharm = False
+
         # There variables will be changed if Pycharm remote debugging is enabled,
         # as the remote debugger needs to be the one running the script
         executable = "python2"
         pydev = ""
 
         ###################################################################
-        # Function argument/param consistency check
-        # TODO: This needs to be tight at "shipping"
-        ###################################################################
-        assert procs_per_job >= 1, "There needs to be at least one process per job."
-
-        ###################################################################
         # Setup of the Pycharm remote debugging
         ###################################################################
         if debug_pycharm:
-            # find the debugging process
-            sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
-            import pydevd
             import re
             debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
             debugger_is_running = debug_procs[0] != ''
@@ -87,6 +92,9 @@ class Server(object):
                 # change the executable
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
+        ########################################################################
+        # This will eventually be useless, as we will be only using jobdispatch
+        ########################################################################
         qsub_msub_or_debug_launch_template = \
             """
             #PBS -A {project_name}
@@ -120,35 +128,26 @@ class Server(object):
                 theano_flags=     theano_flags,
                 )
 
-        # This is basic logic to detect if we are on either Helios or Guillimin
+        # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
         try:
             import re
             dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname").read())
         except NameError:
-            print("dnsdomainname: NameError")
+            pwh("dnsdomainname: NameError")
             dnsdomainname = None
-            print(format_exc())
-
+            pwh(format_exc())
 
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {}  # used to be for msub
 
-        print("\ndnsdomainname: {dnsdomainname}".format(dnsdomainname=dnsdomainname))
-        print("debug_pycharm: {debug_pycharm}".format(debug_pycharm=debug_pycharm))
-        print("force_jobdispatch: {force_jobdispatch}".format(force_jobdispatch=force_jobdispatch))
-
-        
-
         if debug:
 
-            print(">>> debu")
+            print(">>> debug")
             # Add some fake qsub env variables to emulate those that would be present at the time of execution
-            to_export = {
-                "PBS_NODENUM": "0",
-                }
+            to_export = {"PBS_NODENUM": "0"}
 
-            env_code = "\n".join(["export {key}={value};".format(key=key, value=value)
-                for key, value in to_export.items()]) + "\n"
+            env_code = "\n".join(("export {key}={value}".format(key=key, value=value)
+                                  for key, value in to_export.items())) + "\n"
 
             complete_code = env_code + "sh" + qsub_msub_or_debug_launch_template
 
@@ -181,54 +180,29 @@ class Server(object):
             # Add some exports that we need in the client
             to_export = {
                 "SOCIALISM_project_name":     project_name,
-                "SOCIALISM_walltime":         str(walltime),
-                "SOCIALISM_number_of_nodes":  str(number_of_nodes),
-                "SOCIALISM_number_of_gpus":   str(number_of_gpus),
+                "SOCIALISM_walltime":         walltime,
+                # "SOCIALISM_number_of_nodes":  number_of_nodes,
+                # "SOCIALISM_number_of_gpus":   number_of_gpus,
                 "SOCIALISM_job_name":         job_name,
                 "SOCIALISM_task_name":        task_name,
-                "SOCIALISM_procs_per_job":    str(procs_per_job),
+                "SOCIALISM_procs_per_job":    procs_per_job,
                 "SOCIALISM_script_path":      user_script_path,
                 "SOCIALISM_server_ip":        our_ip(),
-                "SOCIALISM_server_port":      str(self.port),
+                "SOCIALISM_server_port":      self.port,
                 "SOCIALISM_debug":            str(debug).lower(),
                 }
 
-            standard_shebang =    "#! /usr/bin/env bash\n"
-            key_value_exports =   " ".join(["export {export_key}=\"{export_value}\""
-                                      .format(export_key=key, export_value=value) for key, value in to_export.iteritems()])
-            execution =           "THEANO_FLAGS=\"{theano_flags}\" python2 \"{user_script_path}\" {user_args};".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
-            complete = standard_shebang + key_value_exports + execution
+            # This code was unreadable, so I split it up in smaller parts (like the unnecessary lambda)s
+            exports_substring_formatting = lambda key, value: "export {key}=\"{value}\"".format(key=key, value=value)
+            exports_substring_generator = (exports_substring_formatting for key, value in to_export.iteritems())
+            key_value_exports = " ".join(exports_substring_generator)
 
-            # We generate a random name so multiple servers on the same machine don't overlap
-            while True:
-                file_name = "{user_script_path}__tmp_{rand_id}.sh".format(
-                    user_script_path=user_script_path,
-                    rand_id=random.randint(0, 10000000)
-                    )
-                path_to_tmp = os.path.join(os.path.dirname(__file__), file_name)
-                if not os.path.exists(path_to_tmp):
-                    break
-
-            # Save the script
-            with open(path_to_tmp, "w") as tmp:
-                tmp.write(complete)
-
-            # Make it executable
-            chmod_x_cmd = "chmod +x \"{path}\"".format(path=path_to_tmp)
-            chmod_x_proc = sp.Popen(chmod_x_cmd, shell=True)
-            ret_vav_chmod_x_proc = chmod_x_proc.wait()
-
+            execution =         "THEANO_FLAGS=\"{theano_flags}\" python2 \"{user_script_path}\" {user_args};".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
             ###################################################################
             # We make and run the jobdispatch shell line
             ###################################################################
-            jobdispatch_cmd = "jobdispatch --gpu --duree={walltime} \"{cmd}\"" \
-                                 .format(
-                                     path=        user_script_path,
-                                     walltime=    walltime,
-                                     cmd=         path_to_tmp,
-                                     )
 
-            experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}"\
+            experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}" \
                 .format(exports=key_value_exports, execution=execution)
 
             print(experimental_jobdispatch_cmd)
