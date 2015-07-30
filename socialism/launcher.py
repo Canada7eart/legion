@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
 
-from socialism import benevolant_dictator
+import benevolant_dictator
 import socket, os, sys, argparse
 from param_serv.param_utils import *
 
