@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-from __future__ import print_function, with_statement, division, generators
+from __future__ import print_function, with_statement, division, generators, absolute_import
 """ THIS IS AN EXEMPLE """
 
 

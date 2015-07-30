@@ -1,25 +1,20 @@
 #!/usr/bin/env python2
-from __future__ import print_function, with_statement, division, generators
-
+from __future__ import print_function, with_statement, division, generators, absolute_import
 """ Extremely simple launch script. Should be improved. """
-import os, sys, re, threading, socket, time
+
+import os, sys, re, time, random, threading, socket
 import subprocess as sp
-import socialism.param_serv.server
-import random
+from traceback import format_exc
 
 from socialism.param_serv.param_utils import *
-
-from subprocess import *
-from traceback import format_exc
+import socialism.param_serv.server
 
 class Server(object):
     def __init__(self):
         pass
 
     def launch_server(self):
-        """
-        This launches the server acceptor thread.
-        """
+        """ This launches the server acceptor thread. """
         db = {}
         db_rlock = threading.RLock()
         meta = {}

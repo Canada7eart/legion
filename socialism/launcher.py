@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
-from __future__ import print_function, with_statement, division, generators
+from __future__ import print_function, with_statement, division, generators, absolute_import
 
-import benevolant_dictator
 import socket, os, sys, argparse
-from param_serv.param_utils import *
+from socialism.param_serv.param_utils import *
+from socialism import benevolant_dictator
 
 if __name__ == "__main__":
 

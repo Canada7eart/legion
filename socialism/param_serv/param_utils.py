@@ -1,19 +1,13 @@
-from __future__ import print_function, with_statement, division, generators
-import socket
-import json
-import struct
-import threading
-import os
-import time
-import datetime
+from __future__ import print_function, with_statement, division, generators, absolute_import
+""" In here you will find various utility functions mostly used by the param_serv, but not exclusively so.
+    Very helpful description, I know. """
+
+import socket, json, struct, threading, os, time, datetime
 from traceback import print_exc
 from itertools import product
-
-
-
 import numpy as np
 
-from headers import *
+from socialism.param_serv.headers import *
 
 
 def get_submatrix_from_axis_numbers(arr, axis_numbers):
