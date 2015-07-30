@@ -181,8 +181,6 @@ class Server(object):
             to_export = {
                 "SOCIALISM_project_name":     project_name,
                 "SOCIALISM_walltime":         walltime,
-                # "SOCIALISM_number_of_nodes":  number_of_nodes,
-                # "SOCIALISM_number_of_gpus":   number_of_gpus,
                 "SOCIALISM_job_name":         job_name,
                 "SOCIALISM_task_name":        task_name,
                 "SOCIALISM_procs_per_job":    procs_per_job,
