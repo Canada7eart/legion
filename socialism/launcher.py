@@ -11,10 +11,7 @@ if __name__ == "__main__":
     debug_pycharm = True
     soc = benevolant_dictator.Server()
     server = soc.launch_server()
-
-
     path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'exemple_user_script.py')
-
 
     if debug:
         soc.launch_clients(

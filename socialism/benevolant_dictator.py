@@ -94,7 +94,7 @@ class Server(object):
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
         # Add some exports that we need in the client
-        to_export = {   
+        to_export = {
             "SOCIALISM_walltime":         walltime,
             "SOCIALISM_job_name":         job_name,
             "SOCIALISM_task_name":        task_name,
@@ -103,6 +103,7 @@ class Server(object):
             "SOCIALISM_server_ip":        our_ip(),
             "SOCIALISM_server_port":      self.port,
             "SOCIALISM_debug":            str(debug).lower(),
+            "THEANO_FLAGS":               theano_flags,
             }
 
         # This code was unreadable, so I split it up in smaller parts (like the unnecessary lambda)s
@@ -121,7 +122,6 @@ class Server(object):
             #PBS -N {job_name}
 
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
-            export THEANO_FLAGS="{theano_flags}"
 
             for i in $(seq 0 $(expr {procs_per_job} - 1))
             do
@@ -141,7 +141,6 @@ class Server(object):
                 pydev=            pydev,
                 procs_per_job=    procs_per_job,
                 script_path=      user_script_path,
-                theano_flags=     theano_flags,
                 )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
@@ -193,7 +192,7 @@ class Server(object):
             # as jobdispatch cannot read the script with stdin
             ###################################################################
 
-            execution =         "THEANO_FLAGS=\"{theano_flags}\" python2 \"{user_script_path}\" {user_args};".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
+            execution =         "python2 \"{user_script_path}\" {user_args};".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
             ###################################################################
             # We make and run the jobdispatch shell line
             ###################################################################
