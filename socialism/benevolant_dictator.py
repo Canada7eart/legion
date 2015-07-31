@@ -34,15 +34,15 @@ class Server(object):
     def launch_clients(
         self,
         user_script_path,
-        project_name,
         walltime,
-        number_of_nodes,
-        number_of_gpus,
+
         job_name,
         task_name,
         procs_per_job,
         theano_flags,
         user_script_args="",
+        number_of_nodes=1,
+        number_of_gpus=1,
         debug=False,
         debug_pycharm=False,
         force_jobdispatch=False,
@@ -61,8 +61,9 @@ class Server(object):
         if debug_pycharm and debug:
             try:
                 # Try to add the common OSX path for pydev
-                sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/pydev/")
+                sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/")
                 import pydev
+
             except ImportError:
                 pwh("You need to have the pydev library in your path in order to use remote debugging.")
                 pwh(format_exc())
@@ -92,12 +93,29 @@ class Server(object):
                 # change the executable
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
+        # Add some exports that we need in the client
+        to_export = {
+            "SOCIALISM_project_name":     project_name,
+            "SOCIALISM_walltime":         walltime,
+            "SOCIALISM_job_name":         job_name,
+            "SOCIALISM_task_name":        task_name,
+            "SOCIALISM_procs_per_job":    procs_per_job,
+            "SOCIALISM_script_path":      user_script_path,
+            "SOCIALISM_server_ip":        our_ip(),
+            "SOCIALISM_server_port":      self.port,
+            "SOCIALISM_debug":            str(debug).lower(),
+            }
+
+        # This code was unreadable, so I split it up in smaller parts (like the unnecessary lambda)s
+        exports_substring_formatting = lambda key, value: "export {key}=\"{value}\"".format(key=key, value=value)
+        exports_substring_generator = (exports_substring_formatting(key, value) for key, value in to_export.iteritems())
+        key_value_exports = " ".join(exports_substring_generator)
+
         ########################################################################
         # This will eventually be useless, as we will be only using jobdispatch
         ########################################################################
         qsub_msub_or_debug_launch_template = \
             """
-            #PBS -A {project_name}
             #PBS -l walltime={walltime}
             #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
             #PBS -r n
@@ -117,7 +135,6 @@ class Server(object):
             .format(
                 executable=       executable,
                 user_args=        user_script_args,
-                project_name=     project_name,
                 walltime=         walltime,
                 number_of_nodes=  number_of_nodes,
                 number_of_gpus=   number_of_gpus,
@@ -149,7 +166,7 @@ class Server(object):
             env_code = "\n".join(("export {key}={value}".format(key=key, value=value)
                                   for key, value in to_export.items())) + "\n"
 
-            complete_code = env_code + "sh" + qsub_msub_or_debug_launch_template
+            complete_code = key_value_exports + env_code + "sh" + qsub_msub_or_debug_launch_template
 
             # run the script
             process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
@@ -176,24 +193,6 @@ class Server(object):
             # Generation of the launch script
             # as jobdispatch cannot read the script with stdin
             ###################################################################
-
-            # Add some exports that we need in the client
-            to_export = {
-                "SOCIALISM_project_name":     project_name,
-                "SOCIALISM_walltime":         walltime,
-                "SOCIALISM_job_name":         job_name,
-                "SOCIALISM_task_name":        task_name,
-                "SOCIALISM_procs_per_job":    procs_per_job,
-                "SOCIALISM_script_path":      user_script_path,
-                "SOCIALISM_server_ip":        our_ip(),
-                "SOCIALISM_server_port":      self.port,
-                "SOCIALISM_debug":            str(debug).lower(),
-                }
-
-            # This code was unreadable, so I split it up in smaller parts (like the unnecessary lambda)s
-            exports_substring_formatting = lambda key, value: "export {key}=\"{value}\"".format(key=key, value=value)
-            exports_substring_generator = (exports_substring_formatting for key, value in to_export.iteritems())
-            key_value_exports = " ".join(exports_substring_generator)
 
             execution =         "THEANO_FLAGS=\"{theano_flags}\" python2 \"{user_script_path}\" {user_args};".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
             ###################################################################
