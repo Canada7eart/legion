@@ -122,6 +122,7 @@ class Server(object):
             #PBS -r n
             #PBS -N {job_name}
 
+            {key_value_exports}
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
             for i in $(seq 0 $(expr {procs_per_job} - 1))
@@ -133,6 +134,7 @@ class Server(object):
             echo "qsub/msub script done"
             """ \
             .format(
+                key_value_exports=key_value_exports,
                 executable=       executable,
                 user_args=        user_script_args,
                 walltime=         walltime,
@@ -175,14 +177,14 @@ class Server(object):
             print(">>> qsub")
             process = sp.Popen("qsub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            process.communicate(key_value_exports + qsub_msub_or_debug_launch_template)[0]
+            process.communicate(qsub_msub_or_debug_launch_template)[0]
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in msub_set:
             print(">>> msub")
             process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            process.communicate(key_value_exports + qsub_msub_or_debug_launch_template)[0]
+            process.communicate(qsub_msub_or_debug_launch_template)[0]
 
         # fall back on jobdispatch
         else:
