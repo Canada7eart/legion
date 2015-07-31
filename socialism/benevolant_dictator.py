@@ -116,6 +116,7 @@ class Server(object):
         ########################################################################
         qsub_msub_or_debug_launch_template = \
             """
+            #PBS -A jvb-000-aa,
             #PBS -l walltime={walltime}
             #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
             #PBS -r n
