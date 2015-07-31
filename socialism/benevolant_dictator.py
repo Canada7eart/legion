@@ -94,8 +94,7 @@ class Server(object):
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
         # Add some exports that we need in the client
-        to_export = {
-            "SOCIALISM_project_name":     project_name,
+        to_export = {   
             "SOCIALISM_walltime":         walltime,
             "SOCIALISM_job_name":         job_name,
             "SOCIALISM_task_name":        task_name,
