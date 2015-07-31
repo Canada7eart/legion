@@ -153,10 +153,9 @@ class Server(object):
             pwh(format_exc())
 
         qsub_set = {"guillimin.clumeq.ca"}
-        msub_set = {}  # used to be for msub
+        msub_set = {"helios"}  # used to be for msub
 
         if debug:
-
             print(">>> debug")
             # Add some fake qsub env variables to emulate those that would be present at the time of execution
             to_export = {"PBS_NODENUM": "0"}
@@ -192,7 +191,7 @@ class Server(object):
             # as jobdispatch cannot read the script with stdin
             ###################################################################
 
-            execution =         "python2 \"{user_script_path}\" {user_args} '> /home/julesgm/voltmeleon/LOGS/log.txt'".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
+            execution =         "python2 \"{user_script_path}\" {user_args}".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
             ###################################################################
             # We make and run the jobdispatch shell line
             ###################################################################
