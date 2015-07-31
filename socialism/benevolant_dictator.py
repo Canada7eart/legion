@@ -192,12 +192,12 @@ class Server(object):
             # as jobdispatch cannot read the script with stdin
             ###################################################################
 
-            execution =         "python2 \"{user_script_path}\" {user_args}".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
+            execution =         "python2 \"{user_script_path}\" {user_args} '> /home/julesgm/voltmeleon/LOGS/log.txt'".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
             ###################################################################
             # We make and run the jobdispatch shell line
             ###################################################################
 
-            experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution} > /home/julesgm/voltmeleon/LOGS/log.txt" \
+            experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}" \
                 .format(exports=key_value_exports, execution=execution)
 
             print(experimental_jobdispatch_cmd)
