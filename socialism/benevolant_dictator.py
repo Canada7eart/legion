@@ -109,7 +109,7 @@ class Server(object):
         # This code was unreadable, so I split it up in smaller parts (like the unnecessary lambda)s
         exports_substring_formatting = lambda key, value: "export {key}=\"{value}\"".format(key=key, value=value)
         exports_substring_generator = (exports_substring_formatting(key, value) for key, value in to_export.iteritems())
-        key_value_exports = " ".join(exports_substring_generator)
+        key_value_exports = " ".join(exports_substring_generator) + " "
 
         ########################################################################
         # This will eventually be useless, as we will be only using jobdispatch
@@ -175,14 +175,14 @@ class Server(object):
             print(">>> qsub")
             process = sp.Popen("qsub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            process.communicate(qsub_msub_or_debug_launch_template)[0]
+            process.communicate(key_value_exports + qsub_msub_or_debug_launch_template)[0]
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in msub_set:
             print(">>> msub")
             process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            process.communicate(qsub_msub_or_debug_launch_template)[0]
+            process.communicate(key_value_exports + qsub_msub_or_debug_launch_template)[0]
 
         # fall back on jobdispatch
         else:
