@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     else:
         soc.launch_clients(
-            user_script_path=path,
+            user_script_path="/home/julesgm/voltmeleon/socialist_launcher.py",
             project_name="jvb-000-aa",
             walltime=10,
             number_of_nodes=1,
