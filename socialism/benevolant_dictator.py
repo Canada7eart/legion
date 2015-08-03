@@ -119,7 +119,6 @@ class Server(object):
             #PBS -A jvb-000-aa
             #PBS -l walltime={walltime}
             #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
-            #PBS -r n
             #PBS -N {job_name}
 
             {key_value_exports}
