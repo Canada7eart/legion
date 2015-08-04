@@ -9,6 +9,13 @@ import numpy as np
 
 from socialism.param_serv.headers import *
 
+import inspect
+
+def f_name():
+    return inspect.currentframe().f_back.f_code.co_name
+
+def caller_name():
+    return inspect.currentframe().f_back.f_back.f_code.co_name
 
 def get_submatrix_from_axis_numbers(arr, axis_numbers):
     temp = np.array([arr[x] for x in product(*axis_numbers)])
