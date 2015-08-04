@@ -63,12 +63,16 @@ class ReceptionThread(threading.Thread):
         self.meta_rlock         =   meta_rlock
         self.db_insertion_mutex =   threading.RLock()
 
-    def pwhs(self, state):
+    def pwhs(self, state, param_name = None):
         """
         Prints the date, the pid, the fact that this is the server, and the name of current state.
         :return: No return value.
         """
-        pwh("Server from client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state))
+        if param_name is None:
+            pwh("Server from client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state))
+        else :
+            pwh("Server from client hash '{client_pid}' - {state} - param_name : {param_name}".format(client_pid=self.conn.__hash__(), state=state, param_name=param_name))
+
 
 
     def run(self):
