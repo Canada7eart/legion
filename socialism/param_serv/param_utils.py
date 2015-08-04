@@ -18,6 +18,8 @@ def caller_name():
     return inspect.currentframe().f_back.f_back.f_code.co_name
 
 def get_submatrix_from_axis_numbers(arr, axis_numbers):
+    print("get_submatrix_from_axis_numbers:\n\tarr shape: {shape}\n\taxis_number: {axis_number}".format(axis_numbers=str(axis_numbers), shape=arr.shape))
+
     temp = np.array([arr[x] for x in product(*axis_numbers)])
     return temp.reshape([len(x) for x in axis_numbers])
 
