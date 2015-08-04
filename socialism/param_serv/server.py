@@ -105,9 +105,10 @@ class ReceptionThread(threading.Thread):
                     """
                     The client wants to pull the full param from the server.
                     """
-                    self.pwhs("pull_full")
-
                     param_name = data["name"]
+                    self.pwhs("pull_full", param_name)
+
+
                     answer = {
                         "query_id":    query_answer_HEADER_pull_full,
                         "query_name":  "answer_pull_full",
@@ -122,9 +123,10 @@ class ReceptionThread(threading.Thread):
                     """
                     The client wants to pull part of the param, from the axis numbers.
                     """
-                    self.pwhs("pull_part")
-
                     param_name = data["name"]
+                    self.pwhs("pull_part", param_name)
+
+
                     axis_numbers = data["axis_numbers"]
                     answer = {
                         "query_id":      query_answer_HEADER_pull_part,
@@ -142,12 +144,11 @@ class ReceptionThread(threading.Thread):
                     """
                     The client is trying to push his full param.
                     """
-                    self.pwhs("pull_full")
+                    param_name = data["name"]
+                    self.pwhs("pull_full", param_name )
 
-                    param_name =    data["name"]
                     alpha =         data["alpha"]
                     beta =          data["beta"]
-
                     numeric_data = receive_numeric(self.conn)
 
                     with self.db[param_name] as param:
@@ -158,9 +159,9 @@ class ReceptionThread(threading.Thread):
                     """
                     The client is trying to push part of a param, by axis numbers.
                     """
-                    self.pwhs("push_part")
-
                     param_name =    data["name"]
+                    self.pwhs("push_part", param_name)
+
                     axis_numbers =  data["axis_numbers"]
                     alpha =         data["alpha"]
                     beta =          data["beta"]
@@ -183,9 +184,9 @@ class ReceptionThread(threading.Thread):
                         then we iterate through the indices and assign the associated
                         values in the db
                     """
-                    self.pwhs("push_from_indices")
+                    param_name = data["name", param_name]
+                    self.pwhs("push_from_indices", param_name)
 
-                    name = data["name"]
                     alpha = data["alpha"]
                     beta = data["beta"]
 
@@ -193,7 +194,7 @@ class ReceptionThread(threading.Thread):
                     numeric_data = receive_numeric(self.conn)
                     formatted_indices = indices.T.tolist()
 
-                    with self.db[name] as param:
+                    with self.db[param_name] as param:
                         param[formatted_indices] = alpha * param[formatted_indices] + beta * numeric_data[:]
                     continue
 
@@ -204,12 +205,12 @@ class ReceptionThread(threading.Thread):
 
                         We then send the array.
                     """
-                    self.pwhs("pull_from_indices")
+                    param_name = data["name"]
+                    self.pwhs("pull_from_indices", param_name)
 
-                    name = data["name"]
                     indices = receive_numeric(self.conn)
 
-                    with self.db[name] as param:
+                    with self.db[param_name] as param:
                         send_numeric_from_bytes(self.conn, param[indices.tolist()])
 
                     continue
@@ -219,15 +220,14 @@ class ReceptionThread(threading.Thread):
                         All threads block until the insertion is complete, then, all clients except the first one
                         receive a copy of the array that got the lock the first, so they all have the same array
                     """
-                    self.pwhs("create_if_doesnt_exist")
-
-                    name = data["name"]
+                    param_name = data["name"]
+                    self.pwhs("create_if_doesnt_exist", param_name)
 
                     with self.db_insertion_mutex:
-                        if name not in self.db:
+                        if param_name not in self.db:
                             send_json(self.conn, {"requesting_param": True})
                             param = receive_numeric(self.conn)
-                            self.db[name] = Entry(param)
+                            self.db[param_name] = Entry(param)
                             not_requesting = False
 
                         # We don't need to keep this mutex to sent the arr back
@@ -237,12 +237,12 @@ class ReceptionThread(threading.Thread):
                     if not_requesting:
                         send_json(self.conn, {"requesting_param": False})
                         # This is an atomic operation; we are only reading.
-                        send_numeric_from_bytes(self.conn, self.db[name].inner)
+                        send_numeric_from_bytes(self.conn, self.db[param_name].inner)
 
                     continue
 
                 elif query_id == query_HEADER_save_all_to_hdf5:
-                    pwh("Server - save all to hdf5")
+                    self.pwhs("save_all_to_hdf5")
                     server_save_db_to_hdf5(data["path"], self.db)
                     continue
 
