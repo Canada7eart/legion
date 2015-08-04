@@ -52,22 +52,24 @@ class AcceptorThread(threading.Thread):
                 self.sock.close()
 
 
-def pwhs(state):
-    """
-    Prints the date, the pid, the fact that this is the server, and the name of current state.
-    :return: No return value.
-    """
-    pwh("Server - %s" % state)
 
 class ReceptionThread(threading.Thread):
-    def __init__(self, conn, meta, meta_rlock, db, db_rlock):
+    def __init__(self, conn, meta, meta_rlock, db, db_rlock, client_pid):
         super(self.__class__, self).__init__()
-        self.conn           =       conn
-        self.db             =       db
-        self.db_rlock       =       db_rlock
-        self.meta           =       meta
-        self.meta_rlock     =       meta_rlock
+        self.conn               =   conn
+        self.db                 =   db
+        self.db_rlock           =   db_rlock
+        self.meta               =   meta
+        self.meta_rlock         =   meta_rlock
         self.db_insertion_mutex =   threading.RLock()
+
+    def pwhs(self, state):
+        """
+        Prints the date, the pid, the fact that this is the server, and the name of current state.
+        :return: No return value.
+        """
+        pwh("Server from client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state))
+
 
     def run(self):
         try:
@@ -99,7 +101,7 @@ class ReceptionThread(threading.Thread):
                     """
                     The client wants to pull the full param from the server.
                     """
-                    pwhs("pull_full")
+                    self.pwhs("pull_full")
 
                     param_name = data["name"]
                     answer = {
@@ -116,7 +118,7 @@ class ReceptionThread(threading.Thread):
                     """
                     The client wants to pull part of the param, from the axis numbers.
                     """
-                    pwhs("pull_part")
+                    self.pwhs("pull_part")
 
                     param_name = data["name"]
                     axis_numbers = data["axis_numbers"]
@@ -136,7 +138,7 @@ class ReceptionThread(threading.Thread):
                     """
                     The client is trying to push his full param.
                     """
-                    pwhs("pull_full")
+                    self.pwhs("pull_full")
 
                     param_name =    data["name"]
                     alpha =         data["alpha"]
@@ -152,7 +154,7 @@ class ReceptionThread(threading.Thread):
                     """
                     The client is trying to push part of a param, by axis numbers.
                     """
-                    pwhs("push_part")
+                    self.pwhs("push_part")
 
                     param_name =    data["name"]
                     axis_numbers =  data["axis_numbers"]
@@ -177,7 +179,7 @@ class ReceptionThread(threading.Thread):
                         then we iterate through the indices and assign the associated
                         values in the db
                     """
-                    pwhs("push_from_indices")
+                    self.pwhs("push_from_indices")
 
                     name = data["name"]
                     alpha = data["alpha"]
@@ -198,7 +200,7 @@ class ReceptionThread(threading.Thread):
 
                         We then send the array.
                     """
-                    pwhs("pull_from_indices")
+                    self.pwhs("pull_from_indices")
 
                     name = data["name"]
                     indices = receive_numeric(self.conn)
@@ -213,7 +215,7 @@ class ReceptionThread(threading.Thread):
                         All threads block until the insertion is complete, then, all clients except the first one
                         receive a copy of the array that got the lock the first, so they all have the same array
                     """
-                    pwhs("create_if_doesnt_exist")
+                    self.pwhs("create_if_doesnt_exist")
 
                     name = data["name"]
 
