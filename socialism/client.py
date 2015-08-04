@@ -8,9 +8,12 @@ from socialism.param_serv.param_utils import *
 
 from traceback import format_exc
 
+def pwhcf():
+    pwh("Client - %s" % caller_name())
 
 class Client(object):
     def __init__(self):
+        pwhcf()
         # we minimise the number of hash map lookups by saving refs to values used more than once
         self._server_ip = os.environ["SOCIALISM_server_ip"]
         self._server_port = os.environ["SOCIALISM_server_port"]
@@ -36,7 +39,7 @@ class Client(object):
                     sys.exit(-1)
 
     def push_part(self, name, axis_numbers, alpha, beta):
-        print("worker.push_part")
+        pwhcf()
         try:
             tensor = self._db[name]
             # this action copies the data
@@ -56,7 +59,7 @@ class Client(object):
             "name":             name,
             "alpha":            alpha,
             "beta":             beta,
-            "axis_numbers":     axis_numbers
+            "axis_numbers":     str(axis_numbers)
             }
 
         try:
@@ -72,7 +75,7 @@ class Client(object):
             return
 
     def push_full(self, name, alpha, beta):
-        print("worker.pull_full")
+        pwhcf()
 
         send_json(self._conn, {
             "query_name":   "push_full",
@@ -87,12 +90,12 @@ class Client(object):
             self._db[name].tobytes())
 
     def pull_part(self, name, axis_numbers):
-
+        pwhcf()
         send_json(self._conn, {
             "query_name":   "pull_part",
             "query_id":     query_HEADER_pull_part,
             "name":         name,
-            "axis_numbers": axis_numbers,
+            "axis_numbers": str(axis_numbers),
             })
 
         meta = receive_json(self._conn)
@@ -102,7 +105,15 @@ class Client(object):
         set_submatrix_from_axis_numbers(self._db[name], numeric, 0, 1, axis_numbers)
 
     def pull_full(self, name):
-        """ Pull full parameter from server """
+        """
+        Pull full parameter from server
+
+        :param name: Name of the param
+        :return: No return value.
+        """
+        pwhcf()
+        assert isinstance(name, str), "Argument 'name' needs to be a string."
+
         send_json(self._conn, {
             "query_name":   "pull_full",
             "query_id":    query_HEADER_pull_full,
@@ -117,6 +128,21 @@ class Client(object):
         self._db[name] = reception_numeric
 
     def push_from_indices(self, name, indices, alpha, beta):
+        """
+        Push values to the server by specifying each of their indices.
+
+        :param name: Name of the parameter that we're trying to push
+        :param indices: List of tuples with the indices of the values that we're trying to push
+        :param alpha: Float for the calculation of the final value on the server
+        :param beta: Float for the calculation of the final value on the server
+        :return: No return value.
+        """
+        pwhcf()
+        assert isinstance(name, str), "Argument 'name' needs to be a string."
+        assert isinstance(indices, list) or isinstance(indices, tuple), "Argument 'indicies' needs to be a list of tuples or a tuple of tuples."
+        assert isinstance(alpha, float) or isinstance(alpha, np.float), "Argument 'alpha' needs to be a float"
+        assert isinstance(beta, float) or isinstance(beta, np.float), "Argument 'beta' needs to be a float"
+
         np_indices = np.array(indices)
         values = np.zeros(shape=np_indices.shape)
 
@@ -134,6 +160,18 @@ class Client(object):
         send_numeric_from_bytes(self._conn, values)
 
     def pull_from_indices(self, name, indices):
+        """
+        Pull values from the server, by specifying the index of each value
+
+        :param name: Name of the param
+        :param indices: Tuple of tuple or list of tuples with the indices of the values to be requested from the server
+        :return: No return value.
+        """
+        pwhcf()
+        assert not isinstance(name, str), "Argument 'name' needs to be a valid string."
+        assert not isinstance(indices, list) \
+               and not isinstance(indices, tuple), \
+            "Argument 'indices' needs to be a list or a tuple"
 
         # they need to be all the same shape
         first = len(indices[0])
@@ -159,12 +197,19 @@ class Client(object):
 
         param[np_indices.tolist()] = values[:]
 
-    def create_if_doesnt_exist(self, name, arr=None):
-        if arr is not None:
-            self._db[name] = arr
+    def create_if_doesnt_exist(self, name, arr):
+        """
+        Ask the server to create an entry in its db with this name if it doesn't already exist.
+        Assign the value in arr if it doesn't already exist.
 
-        else:
-            arr = self._db[name]
+        :param name: Name of the param
+        :param arr: value of the param
+        :return:
+        """
+        pwhcf()
+        assert name is not None, "Argument 'name' cannot be None."
+        assert arr is not None, "Argument 'arr' cannot be None."
+
 
         send_json(self._conn, {
             "query_id": query_HEADER_create_if_doesnt_exist,
@@ -175,8 +220,18 @@ class Client(object):
 
         if test["requesting_param"]:
             send_numeric_from_bytes(self._conn, arr)
+        else:
+            self._db[name] = receive_numeric(self._conn)
 
     def server_save_to_hdf5(self, path):
+        """
+        Ask the server to save his db in the hdf5 format to the specified path.
+
+        :param path: Path on the server where we want it to save its database
+        :return: Nothing
+        """
+        pwhcf()
+
         send_json(self._conn, {
             "query_id": query_HEADER_save_all_to_hdf5,
             "path": path,

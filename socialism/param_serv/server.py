@@ -52,6 +52,13 @@ class AcceptorThread(threading.Thread):
                 self.sock.close()
 
 
+def pwhs(state):
+    """
+    Prints the date, the pid, the fact that this is the server, and the name of current state.
+    :return: No return value.
+    """
+    pwh("Server - %s" % state)
+
 class ReceptionThread(threading.Thread):
     def __init__(self, conn, meta, meta_rlock, db, db_rlock):
         super(self.__class__, self).__init__()
@@ -89,40 +96,48 @@ class ReceptionThread(threading.Thread):
                 query_id = data["query_id"]
 
                 if query_id == query_HEADER_pull_full:
-                    pwh("server - pull full")
-                    param_name = data["name"]
+                    """
+                    The client wants to pull the full param from the server.
+                    """
+                    pwhs("pull_full")
 
+                    param_name = data["name"]
                     answer = {
                         "query_id":    query_answer_HEADER_pull_full,
                         "query_name":  "answer_pull_full",
                         "name":        param_name,
                     }
-
                     send_json(self.conn, answer)
-
                     with self.db[param_name] as param:
                         send_numeric_from_bytes(self.conn, param)
                     continue
 
                 elif query_id == query_HEADER_pull_part:
+                    """
+                    The client wants to pull part of the param, from the axis numbers.
+                    """
+                    pwhs("pull_part")
+
                     param_name = data["name"]
                     axis_numbers = data["axis_numbers"]
-
                     answer = {
                         "query_id":      query_answer_HEADER_pull_part,
                         "query_name":    "answer_pull_part",
                         "name":          param_name,
                         "axis_numbers":  axis_numbers
                     }
-
                     send_json(self.conn, answer)
-
                     with self.db[param_name] as param:
                         reshaped = get_submatrix_from_axis_numbers(param, axis_numbers)
                         send_numeric_from_bytes(self.conn, reshaped)
                     continue
 
                 elif query_id == query_HEADER_push_full:
+                    """
+                    The client is trying to push his full param.
+                    """
+                    pwhs("pull_full")
+
                     param_name =    data["name"]
                     alpha =         data["alpha"]
                     beta =          data["beta"]
@@ -134,6 +149,11 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_push_part:
+                    """
+                    The client is trying to push part of a param, by axis numbers.
+                    """
+                    pwhs("push_part")
+
                     param_name =    data["name"]
                     axis_numbers =  data["axis_numbers"]
                     alpha =         data["alpha"]
@@ -153,10 +173,11 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_push_from_indices:
-                    """ we receive the param data, then we receive the indices,
+                    """ We receive the param data, then we receive the indices,
                         then we iterate through the indices and assign the associated
                         values in the db
                     """
+                    pwhs("push_from_indices")
 
                     name = data["name"]
                     alpha = data["alpha"]
@@ -164,7 +185,6 @@ class ReceptionThread(threading.Thread):
 
                     indices = receive_numeric(self.conn)
                     numeric_data = receive_numeric(self.conn)
-
                     formatted_indices = indices.T.tolist()
 
                     with self.db[name] as param:
@@ -178,6 +198,7 @@ class ReceptionThread(threading.Thread):
 
                         We then send the array.
                     """
+                    pwhs("pull_from_indices")
 
                     name = data["name"]
                     indices = receive_numeric(self.conn)
@@ -188,12 +209,12 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_create_if_doesnt_exist:
-                    """ So the main reasoning here is that we want this query to finish after
-                        the param was initiated to simplify parallel work.
-
-                        All threads block until the insertion is complete, then, all clients will
-                        be released very quickly.
                     """
+                        All threads block until the insertion is complete, then, all clients except the first one
+                        receive a copy of the array that got the lock the first, so they all have the same array
+                    """
+                    pwhs("create_if_doesnt_exist")
+
                     name = data["name"]
 
                     with self.db_insertion_mutex:
@@ -201,11 +222,21 @@ class ReceptionThread(threading.Thread):
                             send_json(self.conn, {"requesting_param": True})
                             param = receive_numeric(self.conn)
                             self.db[name] = Entry(param)
+                            not_requesting = False
+
+                        # We don't need to keep this mutex to sent the arr back
                         else:
-                            send_json(self.conn, {"requesting_param": False})
+                            not_requesting = True
+
+                    if not_requesting:
+                        send_json(self.conn, {"requesting_param": False})
+                        # This is an atomic operation; we are only reading.
+                        send_numeric_from_bytes(self.conn, self.db[name].inner)
+
                     continue
 
                 elif query_id == query_HEADER_save_all_to_hdf5:
+                    pwh("Server - save all to hdf5")
                     server_save_db_to_hdf5(data["path"], self.db)
                     continue
 

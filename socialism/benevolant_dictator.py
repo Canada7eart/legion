@@ -127,22 +127,22 @@ class Server(object):
             for i in $(seq 0 $(expr {procs_per_job} - 1))
             do
                 echo "starting job $i"
-                {executable} '{script_path}' {user_args} &
+                {executable} '{script_path}' {user_args}
             done
             wait
             echo "qsub/msub script done"
             """ \
             .format(
-                key_value_exports=key_value_exports,
-                executable=       executable,
-                user_args=        user_script_args,
-                walltime=         walltime,
-                number_of_nodes=  number_of_nodes,
-                number_of_gpus=   number_of_gpus,
-                job_name=         job_name,
-                pydev=            pydev,
-                procs_per_job=    procs_per_job,
-                script_path=      user_script_path,
+                key_value_exports= key_value_exports,
+                executable=        executable,
+                user_args=         user_script_args,
+                walltime=          walltime,
+                number_of_nodes=   number_of_nodes,
+                number_of_gpus=    number_of_gpus,
+                job_name=          job_name,
+                pydev=             pydev,
+                procs_per_job=     procs_per_job,
+                script_path=       user_script_path,
                 )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
