@@ -111,7 +111,7 @@ class ReceptionThread(threading.Thread):
                     """
                     param_name = data["name"]
                     self.pwhs("pull_full", param_name)
-
+                    assert param_name in self.db, "Bad param name."
 
                     answer = {
                         "query_id":    query_answer_HEADER_pull_full,
@@ -129,7 +129,7 @@ class ReceptionThread(threading.Thread):
                     """
                     param_name = data["name"]
                     self.pwhs("pull_part", param_name)
-
+                    assert param_name in self.db, "Bad param name."
 
                     axis_numbers = data["axis_numbers"]
                     answer = {
@@ -150,6 +150,7 @@ class ReceptionThread(threading.Thread):
                     """
                     param_name = data["name"]
                     self.pwhs("pull_full", param_name )
+                    assert param_name in self.db, "Bad param name."
 
                     alpha =         data["alpha"]
                     beta =          data["beta"]
@@ -165,6 +166,7 @@ class ReceptionThread(threading.Thread):
                     """
                     param_name =    data["name"]
                     self.pwhs("push_part", param_name)
+                    assert param_name in self.db, "Bad param name."
 
                     axis_numbers =  data["axis_numbers"]
                     alpha =         data["alpha"]
@@ -190,6 +192,7 @@ class ReceptionThread(threading.Thread):
                     """
                     param_name = data["name", param_name]
                     self.pwhs("push_from_indices", param_name)
+                    assert param_name in self.db, "Bad param name."
 
                     alpha = data["alpha"]
                     beta = data["beta"]
@@ -211,6 +214,7 @@ class ReceptionThread(threading.Thread):
                     """
                     param_name = data["name"]
                     self.pwhs("pull_from_indices", param_name)
+                    assert param_name in self.db, "Bad param name."
 
                     indices = receive_numeric(self.conn)
 
