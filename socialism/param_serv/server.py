@@ -63,16 +63,20 @@ class ReceptionThread(threading.Thread):
         self.meta_rlock         =   meta_rlock
         self.db_insertion_mutex =   threading.RLock()
 
-    def pwhs(self, state, param_name = None):
+    def pwhs(self, state, param_name = None, extra = None):
         """
         Prints the date, the pid, the fact that this is the server, and the name of current state.
         :return: No return value.
         """
-        if param_name is None:
-            pwh("Server - client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state))
-        else :
-            pwh("Server - client hash '{client_pid}' - {state} - param_name : {param_name}".format(client_pid=self.conn.__hash__(), state=state, param_name=param_name))
 
+        text = "Server - client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state)
+        if param_name is not None:
+            text += " - " + param_name
+
+        if extra is not None:
+            text += " - " + extra
+
+        pwh(text)
 
 
     def run(self):
@@ -221,12 +225,14 @@ class ReceptionThread(threading.Thread):
                         receive a copy of the array that got the lock the first, so they all have the same array
                     """
                     param_name = data["name"]
-                    self.pwhs("create_if_doesnt_exist", param_name)
+                    self.pwhs("create_if_doesnt_exist", param_name, "Entry")
 
                     with self.db_insertion_mutex:
                         if param_name not in self.db:
+
                             send_json(self.conn, {"requesting_param": True})
                             param = receive_numeric(self.conn)
+                            self.pwhs("create_if_doesnt_exist", param_name, "Creating. Shape = {shape}".format(shape=param.shape))
                             self.db[param_name] = Entry(param)
                             not_requesting = False
 
@@ -236,6 +242,7 @@ class ReceptionThread(threading.Thread):
 
                     if not_requesting:
                         send_json(self.conn, {"requesting_param": False})
+                        self.pwhs("create_if_doesnt_exist", param_name, "Was already created.")
                         # This is an atomic operation; we are only reading.
                         send_numeric_from_bytes(self.conn, self.db[param_name].inner)
 
