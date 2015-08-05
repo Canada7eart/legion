@@ -7,6 +7,12 @@ import socialism.param_serv.param_utils
 
 
 def server_save_db_to_hdf5(path, db):
+    """
+    Save the server's db to hdf5.
+    :param path: Where to save.
+    :param db: db to save.
+    :return: Nothing.
+    """
     if os.path.exists(path):
         socialism.param_serv.param_utils.pwh("save_db_to_hdf5 - overwriting %s" % path)
     h5 = h5py.File(path, "w")
@@ -20,6 +26,12 @@ def server_save_db_to_hdf5(path, db):
 
 
 def server_load_db_from_hdf5(path, creation_lock):
+    """
+    Load the server's db from hdf5.
+    :param path: Path load the db from.
+    :return: The db object.
+    """
+
     h5 = h5py.File(path, "r")
 
     db = {}
@@ -32,6 +44,13 @@ def server_load_db_from_hdf5(path, creation_lock):
 
 
 def client_load_db_from_hdf5(path):
+    """
+    -> Not currently used.
+    Load the client's db from hdf5.
+    :param path: Path load the db from.
+    :return: The db object.
+    """
+
     h5 = h5py.File(path, "r")
 
     db = {}
@@ -43,6 +62,14 @@ def client_load_db_from_hdf5(path):
 
 
 def client_save_db_to_hdf5(path, db):
+    """
+    -> Not currently used.
+    Save the client's db to hdf5.
+    :param path: Where to save.
+    :param db: db to save.
+    :return: Nothing.
+    """
+
     if os.path.exists(path):
         socialism.param_serv.param_utils.pwh("save_db_to_hdf5 - overwriting %s" % path)
 

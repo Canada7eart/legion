@@ -8,8 +8,14 @@ from socialism.param_serv.param_utils import *
 
 from traceback import format_exc
 
-def pwhcf():
-    pwh("Client - %s" % caller_name())
+
+def pwhcf(param_name=None):
+    text = "Client - %s" % caller_name()
+
+    if param_name is not None:
+        text += " - {param_name}".format(param_name=param_name)
+
+    pwh(text)
 
 class Client(object):
     def __init__(self):
@@ -39,7 +45,7 @@ class Client(object):
                     sys.exit(-1)
 
     def push_part(self, name, axis_numbers, alpha, beta):
-        pwhcf()
+        pwhcf(name)
         try:
             tensor = self._db[name]
             # this action copies the data
@@ -75,7 +81,7 @@ class Client(object):
             return
 
     def push_full(self, name, alpha, beta):
-        pwhcf()
+        pwhcf(name)
 
         send_json(self._conn, {
             "query_name":   "push_full",
@@ -90,7 +96,8 @@ class Client(object):
             self._db[name].tobytes())
 
     def pull_part(self, name, axis_numbers):
-        pwhcf()
+        pwhcf(name)
+
         send_json(self._conn, {
             "query_name":   "pull_part",
             "query_id":     query_HEADER_pull_part,
@@ -111,7 +118,7 @@ class Client(object):
         :param name: Name of the param
         :return: No return value.
         """
-        pwhcf()
+        pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
 
         send_json(self._conn, {
@@ -137,7 +144,7 @@ class Client(object):
         :param beta: Float for the calculation of the final value on the server
         :return: No return value.
         """
-        pwhcf()
+        pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
         assert isinstance(indices, list) or isinstance(indices, tuple), "Argument 'indicies' needs to be a list of tuples or a tuple of tuples."
         assert isinstance(alpha, float) or isinstance(alpha, np.float), "Argument 'alpha' needs to be a float"
@@ -167,7 +174,7 @@ class Client(object):
         :param indices: Tuple of tuple or list of tuples with the indices of the values to be requested from the server
         :return: No return value.
         """
-        pwhcf()
+        pwhcf(name)
         assert not isinstance(name, str), "Argument 'name' needs to be a valid string."
         assert not isinstance(indices, list) \
                and not isinstance(indices, tuple), \
@@ -206,7 +213,7 @@ class Client(object):
         :param arr: value of the param
         :return:
         """
-        pwhcf()
+        pwhcf(name)
         assert name is not None, "Argument 'name' cannot be None."
         assert arr is not None, "Argument 'arr' cannot be None."
 
