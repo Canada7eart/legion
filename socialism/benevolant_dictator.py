@@ -192,6 +192,7 @@ class Server(object):
             print(">>> msub")
             process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
+            print(qsub_msub_or_debug_launch_template)
             process.communicate(qsub_msub_or_debug_launch_template)[0]
 
         # fall back on jobdispatch
