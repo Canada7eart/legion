@@ -38,6 +38,7 @@ if __name__ == "__main__":
             job_name=         "0",
             task_name=        "debug",
             procs_per_job=    1,
+            allocation_name=  "jvb-000-aa",
             user_script_args= "--experiment_dir=/home/julesgm/NIPS/experiments/experiment_dir_1 --output_server_params_desc_path=server_params_desc.json",
             theano_flags=     "device=gpu0,floatX=float32",
             )
