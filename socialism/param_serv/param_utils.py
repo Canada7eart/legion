@@ -39,15 +39,13 @@ def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
     Meant for the push part and the pull part functions.
     Assign to a matrix's submatrix that corresponds to the axis_numbers.
     """
-    # generate the individual indices
-    indices_server = np.array(list(product(*axis_numbers))).reshape([len(x) for x in axis_numbers])
-    print(indices_server)
+    # Generate the individual indices.
+    # This is extremely unefficient.
+    local_indices = np.asarray(list(product(*[range(len(x)) for x in axis_numbers])))
+    indices_server = np.asarray(list(product(*axis_numbers)))
     for i in range(indices_server.shape[0]):
-        print(indices_server[i, :])
-
-        print("===")
         a = alpha * param[tuple(indices_server[i, :])]
-        b = beta * addition[i, :]
+        b = beta * addition[tuple(local_indices[i, :])]
         param[tuple(indices_server[i, :])] = a + b
 
 def our_ip():
