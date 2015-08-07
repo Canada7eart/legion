@@ -35,7 +35,6 @@ class Server(object):
         self,
         user_script_path,
         walltime,
-
         job_name,
         task_name,
         procs_per_job,
@@ -52,7 +51,7 @@ class Server(object):
 
         ###################################################################
         # Function argument/param consistency check
-        # TODO: This needs to be tight at "shipping"
+        # TODO: This needs to be fairly tight at "shipping"
         ###################################################################
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
         assert procs_per_job > 0
@@ -60,12 +59,19 @@ class Server(object):
 
         if debug_pycharm and debug:
             try:
-                # Try to add the common OSX path for pydev
-                sys.path.append("/Applications/PyCharm CE.app/Contents/helpers/")
-                import pydev
+                # Add the standard OSX paths for pydevd
+                to_add = ["/Applications/PyCharm.app/Contents/helpers/pydev",
+                          "/Applications/PyCharm CE.app/Contents/helpers/pydev",
+                          ]
+
+                for path in to_add:
+                    if os.path.exists(path):
+                        sys.path.append(path)
+
+                import pydevd
 
             except ImportError:
-                pwh("You need to have the pydev library in your path in order to use remote debugging.")
+                pwh("You need to have the pydevd script in your path in order to use remote debugging.")
                 pwh(format_exc())
                 debug_pycharm = False
 
@@ -78,8 +84,9 @@ class Server(object):
         # Setup of the Pycharm remote debugging
         ###################################################################
         if debug_pycharm:
-            import re
+            # not tight. there could be more then one debugging server open
             debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
+            pwh(debug_procs)
             debugger_is_running = debug_procs[0] != ''
 
             if debugger_is_running:
@@ -146,13 +153,14 @@ class Server(object):
                 )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
+
+        import re
+        # if dnsdomainname fails, "" is assigned to dnsdomainname.
         try:
-            import re
-            dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname").read())
-        except NameError:
-            pwh("dnsdomainname: NameError")
+            dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname 2>/dev/null").read())
+        except:
+            # We don't really care why we failed.
             dnsdomainname = None
-            pwh(format_exc())
 
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}  # used to be for msub
@@ -193,7 +201,11 @@ class Server(object):
             # as jobdispatch cannot read the script with stdin
             ###################################################################
 
-            execution =         "python2 \"{user_script_path}\" {user_args}".format(theano_flags=theano_flags, user_script_path=user_script_path, user_args=user_script_args)
+            execution = "python2 \"{user_script_path}\" {user_args}"\
+                .format(theano_flags=theano_flags,
+                        user_script_path=user_script_path,
+                        user_args=user_script_args)
+
             ###################################################################
             # We make and run the jobdispatch shell line
             ###################################################################

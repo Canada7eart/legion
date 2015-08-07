@@ -12,42 +12,60 @@ from socialism.param_serv.headers import *
 import inspect
 
 def f_name():
+    """
+    Return the caller function's name. Only used for quick logging.
+    """
     return inspect.currentframe().f_back.f_code.co_name
 
 def caller_name():
+    """
+    Display the caller function's caller function's name. Only used for quick logging.
+    """
     return inspect.currentframe().f_back.f_back.f_code.co_name
 
 def get_submatrix_from_axis_numbers(arr, axis_numbers):
-    print("get_submatrix_from_axis_numbers:\n\tarr shape: {shape}\n\taxis_number: {axis_numbers}".format(axis_numbers=str(axis_numbers), shape=arr.shape))
-
+    """
+    Meant for the push part and the pull part functions.
+    Return the submatrix from the array indices.
+    ...
+    This needs further testing.
+    """
     temp = np.array([arr[x] for x in product(*axis_numbers)])
     return temp.reshape([len(x) for x in axis_numbers])
 
 
 def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
-    indices = np.array(list(product(* axis_numbers)))
-    new_shape = [len(x) for x in axis_numbers] + [2]
-    indices = indices.reshape(tuple(new_shape))
+    """
+    Meant for the push part and the pull part functions.
+    Assign to a matrix's submatrix that corresponds to the axis_numbers.
+    """
+    # generate the individual indices
+    indices_server = np.array(list(product(*axis_numbers)))
+    indices_received = np.array([range(x) for x in indices_server.shape])
 
-    ranges_of_positions_in_indices_table = [range(len(x)) for x in axis_numbers]
-    possible_positions_in_indices_table = list(product(*ranges_of_positions_in_indices_table))
-
-    for position in possible_positions_in_indices_table:
-        tind = tuple(indices[position])
-        a = alpha * param[tind]
-        b = beta * addition[position]
-        param[tind] = a + b
-
+    for i in range(indices_server.shape[0]):
+        a = alpha * param[tuple(indices_server[i, :])]
+        b = beta * addition[tuple(indices_received[i, :])]
+        param[tuple(indices_server[i, :])] = a + b
 
 def our_ip():
+    """
+    Fairly straightforward.
+    """
     return socket.gethostbyname(socket.gethostname())
 
-
 def insert_tabs(text):
+    """
+    Inserts tabs at the beginning of every line of the passed text.
+    Meant to help with the formatting of text meant for logging and exceptions.
+    """
     return "\t" + text.replace("\n", "\n\t")
 
 
 def get_tod():
+    """
+    Returns the time of day.
+    """
     return time.strftime("%H:%M:%S", time.gmtime())
 
 
@@ -57,12 +75,18 @@ def header():
 
 # print_with_header
 def pwh(text):
+    """
+    Print with header. Small custom print function with extra information.
+    """
     print("{header}: {text}".format(
         header=header(), 
         text=text))
 
 
 class Entry(object):
+    """
+    This is the main unit of the database.
+    """
     def __init__(self, val):
         self.inner = val
         self.rlock = threading.RLock()
@@ -74,26 +98,24 @@ class Entry(object):
     def __exit__(self, _type, value, traceback):
         self.rlock.release()
 
-"""
-def view_from_slice(tensor, _slice):
-    assert False, "Dead code."
-
-    assert False, "Needs rebuilding. don't use."
-
-    formatted_slice = []
-    for i in xrange(len(slice.shape)):
-        formatted_slice.append([j for j in xrange(_slice[i])])
-
-    return tensor.__getitem__(formatted_slice)
-"""
-
 
 def now_milliseconds():
+    """
+    :return: The number of milliseconds since the epoch
+    """
     now = datetime.datetime.now()
     return (now.days * 24. * 60. * 60. + now.seconds) * 1000. + now.microseconds / 1000.
 
 
 def send_numeric_from_bytes(conn, array):
+    """
+    Sends a numeric numpy array on the connection.
+    Uses json for the dtype and shape, and uses straight binary for the array itself.
+
+    :param conn: The connection object
+    :param array: A numeric array
+    :return: Nothing.
+    """
     send_json(conn, {
         "shape": array.shape,
         "dtype": str(array.dtype)
@@ -102,7 +124,15 @@ def send_numeric_from_bytes(conn, array):
     bytes = struct.pack("ii%ds" % len(array_bytes), HEADER_NUMERIC, len(array_bytes), array_bytes)
     conn.sendall(bytes)
 
+
 def receive_numeric(conn):
+    """
+    The other side of the 'send_numeric_from_bytes'. Receives the json metadata, then receives the bytes, then
+    reshapes the array and returns it.
+
+    :param conn: The connection object
+    :return: The resulting numpy array.
+    """
     meta = receive_json(conn)
     header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
     data_size = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
@@ -113,19 +143,55 @@ def receive_numeric(conn):
 
 
 def send_json(conn, dict_to_transform):
+    """
+    Takes a compatible python dictionary, converts it to json, and sends it over the connection.
+    :param conn: The connection object.
+    :param dict_to_transform: the dictionary to build json from.
+    :return: Nothing.
+    """
     data = json.dumps(dict_to_transform)
     bytes = struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data)
     conn.sendall(bytes)
 
-
+"""
 def server_compatibility_check(meta, meta_rlock, query):
     with meta["server-queries"] as server_queries:
         test = query in server_queries
 
-    return test    
+    return test
+"""
+
+def receive_json(conn):
+    """
+    Receive a json object from a connexion, and convert it to a python dict.
+    :param conn: The connection object.
+    :return: The python dict build from the received json.
+    """
+    header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    assert header == HEADER_JSON, "expected {header_json}, got {header}".format(header_json=HEADER_JSON, header=header)
+    number_of_bytes_to_receive = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
+    str_data = brecv(conn, number_of_bytes_to_receive)
+    raw = struct.unpack("%ds" % number_of_bytes_to_receive, str_data)[0]
+    try:
+        data = json.loads(raw)
+
+    except ValueError, err:
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print(">>>>> json conversion failed - Raw: %s" % raw)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        print_exc()
+        exit(-1)
+
+    return data
 
 
 def brecv(conn, size):
+    """
+    Blocking reception of given amount of bytes.
+    :param conn: the connection object.
+    :param size: The expected number of bytes.
+    :return: The received buffer.
+    """
     # socket.MSG_WAITALL doesnt work on all platforms
     buff = conn.recv(size, socket.MSG_WAITALL)
     while len(buff) < size:
@@ -136,20 +202,3 @@ def brecv(conn, size):
     return buff
 
 
-def receive_json(conn):
-    header = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
-    assert header == HEADER_JSON, "expected {header_json}, got {header}".format(header_json=HEADER_JSON, header=header)
-    number_of_bytes_to_receive = struct.unpack("i", brecv(conn, struct.calcsize("i")))[0]
-    str_data = brecv(conn, number_of_bytes_to_receive)
-    raw = struct.unpack("%ds" % number_of_bytes_to_receive, str_data)[0]
-    try:
-        data = json.loads(raw)
-        
-    except ValueError, err:
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        print(">>>>> json conversion failed - Raw: %s" % raw)
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        print_exc()
-        exit(-1)
-
-    return data

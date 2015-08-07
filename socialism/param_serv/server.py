@@ -7,6 +7,10 @@ from socialism.param_serv.param_utils import *
 from socialism.checkpoint_hdf5 import server_save_db_to_hdf5
 
 class AcceptorThread(threading.Thread):
+    """
+    This is the server's acceptor thread. The server has one of these.
+    Constantly loops to create "ReceptionThread"s when a connection to a client is accepted.
+    """
     def __init__(self, meta, meta_rlock, db, db_rlock):
         super(self.__class__, self).__init__()
         self.meta =                 meta
@@ -17,6 +21,13 @@ class AcceptorThread(threading.Thread):
 
 
     def bind(self):
+        """
+        This is where the port is bound.
+        We leave the decision of which port to bind to the OS, by binding on port 0,
+        which asks the OS to decide which port we bind to.
+
+        :return: The port that is bound to the server
+        """
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.bind(('', 0))
@@ -33,6 +44,12 @@ class AcceptorThread(threading.Thread):
         return self.sock.getsockname()[1]
 
     def run(self):
+        """
+        This is the server's acceptor thread. The server has one of these.
+        Constantly loops to create "ReceptionThread"s when a connection to a client is accepted.
+
+        :return: Nothing. Should never actually return.
+        """
         try:
             while True:
                 pwh("Waiting for a connection")
@@ -54,14 +71,21 @@ class AcceptorThread(threading.Thread):
 
 
 class ReceptionThread(threading.Thread):
+    """
+    This is the server's main client interaction loop thread object.
+    Each connection to a client has one of these.
+
+    :return: Nothing.
+    """
+
     def __init__(self, conn, meta, meta_rlock, db, db_rlock):
         super(self.__class__, self).__init__()
-        self.conn               =   conn
-        self.db                 =   db
-        self.db_rlock           =   db_rlock
-        self.meta               =   meta
-        self.meta_rlock         =   meta_rlock
-        self.db_insertion_mutex =   threading.RLock()
+        self.conn               = conn
+        self.db                 = db
+        self.db_rlock           = db_rlock
+        self.meta               = meta
+        self.meta_rlock         = meta_rlock
+        self.db_insertion_mutex = threading.RLock()
 
     def pwhs(self, state, param_name = None, extra = None):
         """
@@ -80,6 +104,10 @@ class ReceptionThread(threading.Thread):
 
 
     def run(self):
+        """
+        This is the server's main client interaction loop. Each connection to a client has one of these.
+        :return: Nothing.
+        """
         try:
             while True:
                 try:
@@ -132,13 +160,6 @@ class ReceptionThread(threading.Thread):
                     assert param_name in self.db, "Bad param name."
 
                     axis_numbers = data["axis_numbers"]
-                    answer = {
-                        "query_id":      query_answer_HEADER_pull_part,
-                        "query_name":    "answer_pull_part",
-                        "name":          param_name,
-                        "axis_numbers":  axis_numbers
-                    }
-                    send_json(self.conn, answer)
                     with self.db[param_name] as param:
                         reshaped = get_submatrix_from_axis_numbers(param, axis_numbers)
                         send_numeric_from_bytes(self.conn, reshaped)
@@ -149,7 +170,7 @@ class ReceptionThread(threading.Thread):
                     The client is trying to push his full param.
                     """
                     param_name = data["name"]
-                    self.pwhs("pull_full", param_name )
+                    self.pwhs("pull_full", param_name)
                     assert param_name in self.db, "Bad param name."
 
                     alpha =         data["alpha"]
@@ -186,11 +207,12 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_push_from_indices:
-                    """ We receive the param data, then we receive the indices,
-                        then we iterate through the indices and assign the associated
-                        values in the db
                     """
-                    param_name = data["name", param_name]
+                    We receive the param data, then we receive the indices,
+                    then we iterate through the indices and assign the associated
+                    values in the db
+                    """
+                    param_name = data["name"]
                     self.pwhs("push_from_indices", param_name)
                     assert param_name in self.db, "Bad param name."
 
@@ -206,11 +228,12 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_pull_from_indices:
-                    """ We receive an array with the indices, allocate the array
-                        for the values, iterate through the indices & assign
-                        them to the array.
+                    """
+                    We receive an array with the indices, allocate the array
+                    for the values, iterate through the indices & assign
+                    them to the array.
 
-                        We then send the array.
+                    We then send the array.
                     """
                     param_name = data["name"]
                     self.pwhs("pull_from_indices", param_name)
@@ -225,8 +248,8 @@ class ReceptionThread(threading.Thread):
 
                 elif query_id == query_HEADER_create_if_doesnt_exist:
                     """
-                        All threads block until the insertion is complete, then, all clients except the first one
-                        receive a copy of the array that got the lock the first, so they all have the same array
+                    All threads block until the insertion is complete, then, all clients except the first one
+                    receive a copy of the array that got the lock the first, so they all have the same array
                     """
                     param_name = data["name"]
                     self.pwhs("create_if_doesnt_exist", param_name, "Entry")
@@ -253,20 +276,27 @@ class ReceptionThread(threading.Thread):
                     continue
 
                 elif query_id == query_HEADER_save_all_to_hdf5:
+                    """
+                    Ask the server to save its database to hdf5.
+                    """
                     self.pwhs("save_all_to_hdf5")
                     server_save_db_to_hdf5(data["path"], self.db)
                     continue
 
                 else:
-                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    pwh(">>>> server - Exception: Unsupported query id #%d with "
-                        "name %s. closing the socket." % (data["query_id"], data.get("[query_name]",
-                        "[Query name not specified]")))
-                    pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                    from textwrap import dedent
+                    # Making multiline text not ugly in
+                    text = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" \
+                           "Server - Exception: Unsupported query id #{query_id} with name {query_name}.\n" \
+                           "Closing the socket.\n" \
+                           ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" \
+                           .format(query_id  =data["query_id"],
+                                   query_name=data.get("query_name", "[Query name not specified]")
+                                   )
 
-                    with self.meta["exceptions-log"] as exceptions_log:
-                        exceptions_log.write("Exception: Unsupported query id. closing the socket.")
-                    break
+                    pwh(text)
+                    raise RuntimeError(text)
+
         finally:
             self.conn.close()
             print("The server thread is exiting.")
