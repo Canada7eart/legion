@@ -39,6 +39,7 @@ class Server(object):
         task_name,
         procs_per_job,
         theano_flags,
+        allocation_name=None,
         user_script_args="",
         number_of_nodes=1,
         number_of_gpus=1,
@@ -56,6 +57,7 @@ class Server(object):
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
         assert procs_per_job > 0
         assert walltime >= 0
+        assert debug or allocation_name is not None, "If we aren't debugging, we need an allocation name"
 
         if debug_pycharm and debug:
             try:
@@ -123,7 +125,7 @@ class Server(object):
         ########################################################################
         qsub_msub_or_debug_launch_template = \
             """
-            #PBS -A jvb-000-aa
+            #PBS -A {allocation_name}
             #PBS -l walltime={walltime}
             #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
             #PBS -N {job_name}
@@ -141,6 +143,7 @@ class Server(object):
             echo "qsub/msub script done"
             """ \
             .format(
+                allocation_name=   allocation_name,
                 key_value_exports= key_value_exports,
                 executable=        executable,
                 user_args=         user_script_args,
