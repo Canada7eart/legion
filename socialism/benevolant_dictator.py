@@ -84,6 +84,7 @@ class Server(object):
         # Setup of the Pycharm remote debugging
         ###################################################################
         if debug_pycharm:
+            import re
             # not tight. there could be more then one debugging server open
             debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
             pwh(debug_procs)
