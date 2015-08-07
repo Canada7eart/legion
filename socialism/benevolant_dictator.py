@@ -111,7 +111,6 @@ class Server(object):
             "SOCIALISM_server_ip":        our_ip(),
             "SOCIALISM_server_port":      self.port,
             "SOCIALISM_debug":            str(debug).lower(),
-            "THEANO_FLAGS":               theano_flags,
             }
 
         # This code was unreadable, so I split it up in smaller parts (like the unnecessary lambda)s
@@ -135,6 +134,7 @@ class Server(object):
             for i in $(seq 0 $(expr {procs_per_job} - 1))
             do
                 echo "starting job $i"
+                export THEANO_FLAGS="device=gpu$i,{theano_flags}"
                 {executable} '{script_path}' {user_args}
             done
             wait
@@ -151,6 +151,7 @@ class Server(object):
                 pydev=             pydev,
                 procs_per_job=     procs_per_job,
                 script_path=       user_script_path,
+                theano_flags=theano_flags
                 )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
