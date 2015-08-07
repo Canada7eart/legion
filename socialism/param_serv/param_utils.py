@@ -40,12 +40,14 @@ def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
     Assign to a matrix's submatrix that corresponds to the axis_numbers.
     """
     # generate the individual indices
-    indices_server = np.array(list(product(*axis_numbers)))
-    indices_received = np.array([range(x) for x in indices_server.shape])
-
+    indices_server = np.array(list(product(*axis_numbers))).reshape([len(x) for x in axis_numbers])
+    print(indices_server)
     for i in range(indices_server.shape[0]):
+        print(indices_server[i, :])
+
+        print("===")
         a = alpha * param[tuple(indices_server[i, :])]
-        b = beta * addition[tuple(indices_received[i, :])]
+        b = beta * addition[i, :]
         param[tuple(indices_server[i, :])] = a + b
 
 def our_ip():
