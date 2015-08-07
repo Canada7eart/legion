@@ -44,12 +44,20 @@ class Client(object):
                     pwh(format_exc())
                     sys.exit(-1)
 
-    def push_part(self, name, axis_numbers, alpha, beta):
+    def push_as_part(self, name, axis_numbers, alpha, beta):
+        """
+        Push matrix to be assigned to a submatrix of the server's parameter.
+        This is used with dropout.
+
+        :param name: Name of the param of which to pull a submatrix from
+        :param axis_numbers: The axis numbers that compose the submatrix we are pulling
+        :param alpha: The linear importance of the server's previous value in the new assignment
+        :param beta: The linear importance of the value being sent by the client in the new assignment
+        :return: No return value/Always None.
+        """
         pwhcf(name)
         try:
             tensor = self._db[name]
-            # this action copies the data
-            transformed_view = get_submatrix_from_axis_numbers(tensor, axis_numbers)
 
         except KeyError, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -65,12 +73,12 @@ class Client(object):
             "name":             name,
             "alpha":            alpha,
             "beta":             beta,
-            "axis_numbers":     str(axis_numbers)
+            "axis_numbers":     axis_numbers
             }
 
         try:
             send_json(self._conn, query_metadata)
-            send_numeric_from_bytes(self._conn, transformed_view)
+            send_numeric_from_bytes(self._conn, tensor)
 
         except Exception, err:
             pwh(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -81,6 +89,16 @@ class Client(object):
             return
 
     def push_full(self, name, alpha, beta):
+        """
+        Push matrix to be assigned to a submatrix of the server's parameter.
+        This is used with dropout.
+
+        :param name: Name of the param of which to pull a submatrix from
+        :param axis_numbers: The axis numbers that compose the submatrix we are pulling
+        :param alpha: The linear importance of the server's previous value in the new assignment
+        :param beta: The linear importance of the value being sent by the client in the new assignment
+        :return: No return value/Always None.
+        """
         pwhcf(name)
 
         send_json(self._conn, {
@@ -96,27 +114,31 @@ class Client(object):
             self._db[name].tobytes())
 
     def pull_part(self, name, axis_numbers):
+        """
+        Pull part of the full param & assign the value to the contained param.
+        This is used with dropout.
+        :param name: Name of the param of which to pull a submatrix from
+        :param axis_numbers: The axis numbers that compose the submatrix we are pulling
+        :return: Nothing; the submatrix that we pull is assigned to an inner parameter.
+        """
         pwhcf(name)
 
         send_json(self._conn, {
             "query_name":   "pull_part",
             "query_id":     query_HEADER_pull_part,
             "name":         name,
-            "axis_numbers": str(axis_numbers),
+            "axis_numbers": axis_numbers,
             })
 
-        meta = receive_json(self._conn)
-        # shape = [len(x) for x in axis_numbers] # len(x): number of axises in a dimension
         numeric = receive_numeric(self._conn)
-
-        set_submatrix_from_axis_numbers(self._db[name], numeric, 0, 1, axis_numbers)
+        self._db[name] = numeric
 
     def pull_full(self, name):
         """
         Pull full parameter from server
 
         :param name: Name of the param
-        :return: No return value.
+        :return: No return value/Always None.
         """
         pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
@@ -142,20 +164,18 @@ class Client(object):
         :param indices: List of tuples with the indices of the values that we're trying to push
         :param alpha: Float for the calculation of the final value on the server
         :param beta: Float for the calculation of the final value on the server
-        :return: No return value.
+        :return: No return value/Always None.
         """
         pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
         assert isinstance(indices, list) or isinstance(indices, tuple), "Argument 'indicies' needs to be a list of tuples or a tuple of tuples."
-        assert isinstance(alpha, float) or isinstance(alpha, np.float), "Argument 'alpha' needs to be a float"
-        assert isinstance(beta, float) or isinstance(beta, np.float), "Argument 'beta' needs to be a float"
+
+        # Here we try to force the alpha and beta arguments to floats
+        alpha = float(alpha)
+        beta = float(beta)
 
         np_indices = np.array(indices)
-        values = np.zeros(shape=np_indices.shape)
-
-        param = self._db[name]
-        values = param[np_indices.T.tolist()]
-
+        values = self._db[name][np_indices.T.tolist()]
         send_json(self._conn, {
             "query_id":         query_HEADER_push_from_indices,
             "name":             name,
@@ -169,16 +189,21 @@ class Client(object):
     def pull_from_indices(self, name, indices):
         """
         Pull values from the server, by specifying the index of each value
+        This function probably shouldn't exist.
+        The other possibility is to have this verify if it makes squares or something.
 
         :param name: Name of the param
         :param indices: Tuple of tuple or list of tuples with the indices of the values to be requested from the server
-        :return: No return value.
+        :return: No return value/Always None.
         """
         pwhcf(name)
+        assert False, "TODO."
+
         assert not isinstance(name, str), "Argument 'name' needs to be a valid string."
         assert not isinstance(indices, list) \
                and not isinstance(indices, tuple), \
             "Argument 'indices' needs to be a list or a tuple"
+
 
         # they need to be all the same shape
         first = len(indices[0])
@@ -204,14 +229,14 @@ class Client(object):
 
         param[np_indices.tolist()] = values[:]
 
-    def create_if_doesnt_exist(self, name, arr):
+    def create_once(self, name, arr):
         """
         Ask the server to create an entry in its db with this name if it doesn't already exist.
         Assign the value in arr if it doesn't already exist.
 
         :param name: Name of the param
         :param arr: value of the param
-        :return:
+        :return: Nothing/Always None.
         """
         pwhcf(name)
         assert name is not None, "Argument 'name' cannot be None."
@@ -227,6 +252,7 @@ class Client(object):
 
         if test["requesting_param"]:
             send_numeric_from_bytes(self._conn, arr)
+            self._db[name] = arr
         else:
             self._db[name] = receive_numeric(self._conn)
 
@@ -235,7 +261,7 @@ class Client(object):
         Ask the server to save his db in the hdf5 format to the specified path.
 
         :param path: Path on the server where we want it to save its database
-        :return: Nothing
+        :return: No return value/Always None.
         """
         pwhcf()
 
@@ -244,13 +270,16 @@ class Client(object):
             "path": path,
             })
 
-
-
     def __getitem__(self, item):
         return self._db[item]
 
-    def __setitem__(self, *vargs,  **kwargs):
-        self._db.__setitem__(*vargs, **kwargs)
+    def __setitem__(self, name, item):
+        # not sure about this yet
+        if name not in self._db:
+            self.create_once(name, item)
+            return
+
+        self._db.__setitem__(name, item)
 
     def get(self, name):
         return self._db[name]
