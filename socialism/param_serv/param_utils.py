@@ -153,13 +153,6 @@ def send_json(conn, dict_to_transform):
     bytes = struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data)
     conn.sendall(bytes)
 
-"""
-def server_compatibility_check(meta, meta_rlock, query):
-    with meta["server-queries"] as server_queries:
-        test = query in server_queries
-
-    return test
-"""
 
 def receive_json(conn):
     """
@@ -197,11 +190,13 @@ def brecv(conn, size):
 
     while len(buff) < size:
         temp = conn.recv(size - len(buff), socket.MSG_WAITALL)
+
+        # If len(temp) == 0, then the connection has closed.
         if len(temp) == 0:
+            # This closes the thread.
             exit(0)
+
         buff += temp
 
     assert len(buff) == size
     return buff
-
-
