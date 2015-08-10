@@ -194,8 +194,11 @@ def brecv(conn, size):
     """
     # socket.MSG_WAITALL doesnt work on all platforms
     buff = conn.recv(size, socket.MSG_WAITALL)
+
     while len(buff) < size:
         temp = conn.recv(size - len(buff), socket.MSG_WAITALL)
+        if len(temp) == 0:
+            exit(0)
         buff += temp
 
     assert len(buff) == size
