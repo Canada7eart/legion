@@ -213,8 +213,8 @@ class _Server(object):
 
         print("benevolent_dictator - done")
 
-try:
+#try:
     Server = cython.inline("_Server")["_Server"]
-except:
-    print(">>>>>>>> Server not cythonized")
-    Server = _Server
+#except:
+#    print(">>>>>>>> Server not cythonized")
+#    Server = _Server
