@@ -2,7 +2,7 @@
 from __future__ import print_function, with_statement, division, generators, absolute_import
 """ Extremely simple launch script. Should be improved. """
 
-import os, sys, re, time, random, threading, socket
+import os, sys, time, random, threading, socket
 import subprocess as sp
 from traceback import format_exc
 
@@ -37,18 +37,16 @@ class Server(object):
         self,
         user_script_path,
         job_name,
+        instances,
         walltime="12:00:00",
         allocation_name="",
         user_script_args="",
-        number_of_nodes=1,
-        number_of_gpus=1,
         debug=False,
         debug_pycharm=False,
         force_jobdispatch=False,
-        non_device_theano_flags="floatX=float32"
+        non_device_theano_flags="floatX=float32",
+        theano_device_type="gpu"
     ):
-
-
         """ This makes the call to jobdispatch, msub or qsub """
 
         ###################################################################
@@ -58,66 +56,59 @@ class Server(object):
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
         assert debug or allocation_name is not None, "If we aren't debugging, we need an allocation name"
 
-        if debug_pycharm and debug:
-            try:
-                # Add the standard OSX paths for pydevd
-                to_add = ["/Applications/PyCharm.app/Contents/helpers/pydev",
-                          "/Applications/PyCharm CE.app/Contents/helpers/pydev",
-                          ]
-
-                for path in to_add:
-                    if os.path.exists(path):
-                        sys.path.append(path)
-
-                import pydevd
-
-            except ImportError:
-                pwh("You need to have the pydevd script in your path in order to use remote debugging.")
-                pwh(format_exc())
-                debug_pycharm = False
-
-        # There variables will be changed if Pycharm remote debugging is enabled,
-        # as the remote debugger needs to be the one running the script
         executable = "python2"
         pydev = ""
 
         ###################################################################
         # Setup of the Pycharm remote debugging
         ###################################################################
-        if debug_pycharm:
-            import re
-            # not tight. there could be more then one debugging server open
-            debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
-            pwh(debug_procs)
-            debugger_is_running = debug_procs[0] != ''
+        if debug_pycharm and debug:
+            try:
+                # Add the standard OSX paths for pydevd
+                to_add = ["/Applications/PyCharm.app/Contents/helpers/pydev",
+                          "/Applications/PyCharm CE.app/Contents/helpers/pydev"]
 
-            if debugger_is_running:
-                # extract the port of the debug server
-                print("< app found a debugger >")
-                res = debug_procs[0] # there could be more than one. eventually, we could use this if we need to
-                port = re.findall("--port \w+", res)[0].split()[1]
-                print("trying port {port}".format(port=port))
-                pydev = '/Applications/PyCharm CE.app/Contents/helpers/pydev/'
+                for path in to_add:
+                    if os.path.exists(path):
+                        sys.path.append(path)
 
-                # change the executable
-                executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
+                import pydevd
+                import re
+                # not tight. there could be more then one debugging server open
+                debug_procs = os.popen("ps -A | grep pydevd | grep -v grep").read().split("\n")
+                pwh(debug_procs)
+                debugger_is_running = debug_procs[0] != ''
 
-        procs_per_node = number_of_gpus // number_of_nodes
+                if debugger_is_running:
+                    # extract the port of the debug server
+                    print("< app found a debugger >")
+                    res = debug_procs[0] # there could be more than one. eventually, we could use this if we need to
+                    port = re.findall("--port \w+", res)[0].split()[1]
+                    print("trying port {port}".format(port=port))
+                    pydev = '/Applications/PyCharm CE.app/Contents/helpers/pydev/'
+
+                    # change the executable
+                    executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file "\
+                                 .format(port=port)
+
+            except ImportError:
+                pwh("You need to have the pydevd script in your path in order to use remote debugging.")
+                pwh(format_exc())
 
         # Add some exports that we need in the client
         to_export = {
             "SOCIALISM_walltime":         walltime,
             "SOCIALISM_job_name":         job_name,
-            "SOCIALISM_procs_per_job":    procs_per_node,
+            "SOCIALISM_instances":        instances,
             "SOCIALISM_script_path":      user_script_path,
             "SOCIALISM_server_ip":        our_ip(),
             "SOCIALISM_server_port":      self.port,
             "SOCIALISM_debug":            str(debug).lower(),
             }
 
-        # This code was unreadable, so I split it up in smaller parts (like the unnecessary lambda)s
-        exports_substring_formatting = lambda key, value: "export {key}=\"{value}\"".format(key=key, value=value)
-        exports_substring_generator = (exports_substring_formatting(key, value) for key, value in to_export.iteritems())
+        exports_substring_generator = ("export {key}=\"{val}\"".format(key=key, val=val)
+                                       for key, val in to_export.iteritems())
+
         key_value_exports = " ".join(exports_substring_generator) + " "
 
         ########################################################################
@@ -127,34 +118,30 @@ class Server(object):
             """
             #PBS -A {allocation_name}
             #PBS -l walltime={walltime}
-            #PBS -l nodes={number_of_nodes}:gpus={number_of_gpus}
+            #PBS -l nodes=1:gpus=1
             #PBS -N {job_name}
+            #PBS -t 1-{instances}
 
             {key_value_exports}
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
-            for i in $(seq 0 $(expr {procs_per_node} - 1))
-            do
-                echo "starting job $i"
-                export THEANO_FLAGS="device=gpu$i,{theano_flags}"
-                {executable} '{script_path}' {user_args}
-            done
+            export THEANO_FLAGS="device={theano_device_type},floatX=float32"
+            {executable} '{script_path}' {user_args}
+
             wait
             echo "qsub/msub script done"
             """ \
             .format(
-                allocation_name=   allocation_name,
-                key_value_exports= key_value_exports,
-                executable=        executable,
-                user_args=         user_script_args,
-                walltime=          walltime,
-                number_of_nodes=   number_of_nodes,
-                number_of_gpus=    number_of_gpus,
-                job_name=          job_name,
-                pydev=             pydev,
-                procs_per_job=     procs_per_node,
-                script_path=       user_script_path,
-                theano_flags=non_device_theano_flags
+                allocation_name=       allocation_name,
+                key_value_exports=     key_value_exports,
+                executable=            executable,
+                user_args=             user_script_args,
+                walltime=              walltime,
+                job_name=              job_name,
+                pydev=                 pydev,
+                instances=             instances,
+                script_path=           user_script_path,
+                theano_device_type=    theano_device_type,
                 )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
@@ -180,15 +167,8 @@ class Server(object):
 
             complete_code = key_value_exports + env_code + "sh" + qsub_msub_or_debug_launch_template
 
-            procs = []
-            # start the processes
-            for i in xrange(procs_per_node):
-                process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
-                process.communicate(complete_code)[0]
-                procs.append(procs)
-
-            for process in procs:
-                process.wait()
+            process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process.communicate(complete_code)[0]
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in qsub_set:
@@ -207,7 +187,7 @@ class Server(object):
 
         # fall back on jobdispatch
         else:
-            assert False
+            assert False, "support for jobdispatch is not yet available"
             print(">>> jobdispatch")
             ###################################################################
             # Generation of the launch script

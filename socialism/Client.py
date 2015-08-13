@@ -1,11 +1,9 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
 
-""" Extremely simple launch script. Should be improved. """
+
 import sys
-
 from socialism.param_serv.param_utils import *
-
 from traceback import format_exc
 
 
@@ -93,7 +91,7 @@ class Client(object):
         """
         pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
-        assert name in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
+        assert name not in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
         assert isinstance(arr, np.ndarray)
 
 
@@ -119,7 +117,7 @@ class Client(object):
         """
         pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
-        assert name in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
+        assert name not in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
 
         send_json(self._conn, {
             "query_name":    "pull_part",
@@ -140,7 +138,7 @@ class Client(object):
         """
         pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
-        assert name in self._names, \
+        assert name not in self._names, \
             "The array to be pulled needs to have been initialized with create_once first. '{name}' was not."\
                 .format(name=name)
 
@@ -154,10 +152,9 @@ class Client(object):
         receive_json(self._conn)
         reception_numeric = receive_numeric(self._conn)
         reception_numeric.flags.writeable = True
-
         return reception_numeric
 
-   def create_if_not_already_created(self, name, arr):
+    def create_if_not_already_created(self, name, arr):
         """
         Ask the server to create an entry in its db with this name if it doesn't already exist.
         Assign the value in arr if it doesn't already exist.
@@ -169,12 +166,12 @@ class Client(object):
         pwhcf(name)
         assert name is not None, "Argument 'name' cannot be None."
         assert arr is not None, "Argument 'arr' cannot be None."
-        assert isinstance(name, np.str), "Expected argument 'name' to be of type 'str'. Got an object of type '{type}' instead.".format(type=type(item))
-        assert isinstance(arr, np.ndarray), "Expected argument 'arr' to be of type 'numpy.ndarray'. Got an object of type '{type}' instead.".format(type=type(item))
+        assert isinstance(name, np.str), "Expected argument 'name' to be of type 'str'. Got an object of type '{type}' instead.".format(type=type(arr))
+        assert isinstance(arr, np.ndarray), "Expected argument 'arr' to be of type 'numpy.ndarray'. Got an object of type '{type}' instead.".format(type=type(arr))
 
         send_json(self._conn, {
             "query_id": query_HEADER_create_if_doesnt_exist,
-            "name":     name,
+            "name":     name
         })
 
         test = receive_json(self._conn)
@@ -182,6 +179,7 @@ class Client(object):
         if test["requesting_param"]:
             send_numeric_from_bytes(self._conn, arr)
             return arr
+
         else:
             return receive_numeric(self._conn)
 
