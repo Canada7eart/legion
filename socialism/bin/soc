@@ -38,7 +38,6 @@ if __name__ == "__main__":
     assert not args.debug_pycharm or (args.debug and args.debug_pycharm), "The --debug flag must be activated to use the --debug_pycharm flag"
 
     soc = benevolant_dictator.Server()
-
     soc.launch_clients(
         user_script_path= args.path,
         walltime=         args.walltime,
