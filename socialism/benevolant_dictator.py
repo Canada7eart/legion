@@ -36,20 +36,18 @@ class Server(object):
     def launch_clients(
         self,
         user_script_path,
-        walltime,
         job_name,
-        task_name,
-        procs_per_job,
-        theano_flags,
-        allocation_name=None,
+        walltime="12:00:00",
+        allocation_name="",
         user_script_args="",
         number_of_nodes=1,
         number_of_gpus=1,
         debug=False,
         debug_pycharm=False,
         force_jobdispatch=False,
-
+        non_device_theano_flags="floatX=float32"
     ):
+
 
         """ This makes the call to jobdispatch, msub or qsub """
 
@@ -58,8 +56,6 @@ class Server(object):
         # TODO: This needs to be fairly tight at "shipping"
         ###################################################################
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
-        assert procs_per_job > 0
-        assert walltime >= 0
         assert debug or allocation_name is not None, "If we aren't debugging, we need an allocation name"
 
         if debug_pycharm and debug:
@@ -106,11 +102,13 @@ class Server(object):
                 # change the executable
                 executable = "python2 -m pydevd --multiproc --client 127.0.0.1 --port {port} --file ".format(port=port)
 
+        procs_per_node = number_of_gpus // number_of_nodes
+
         # Add some exports that we need in the client
         to_export = {
             "SOCIALISM_walltime":         walltime,
             "SOCIALISM_job_name":         job_name,
-            "SOCIALISM_procs_per_job":    procs_per_job,
+            "SOCIALISM_procs_per_job":    procs_per_node,
             "SOCIALISM_script_path":      user_script_path,
             "SOCIALISM_server_ip":        our_ip(),
             "SOCIALISM_server_port":      self.port,
@@ -135,7 +133,7 @@ class Server(object):
             {key_value_exports}
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
-            for i in $(seq 0 $(expr {procs_per_job} - 1))
+            for i in $(seq 0 $(expr {procs_per_node} - 1))
             do
                 echo "starting job $i"
                 export THEANO_FLAGS="device=gpu$i,{theano_flags}"
@@ -154,9 +152,9 @@ class Server(object):
                 number_of_gpus=    number_of_gpus,
                 job_name=          job_name,
                 pydev=             pydev,
-                procs_per_job=     procs_per_job,
+                procs_per_job=     procs_per_node,
                 script_path=       user_script_path,
-                theano_flags=theano_flags
+                theano_flags=non_device_theano_flags
                 )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
@@ -182,9 +180,15 @@ class Server(object):
 
             complete_code = key_value_exports + env_code + "sh" + qsub_msub_or_debug_launch_template
 
-            # run the script
-            process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
-            stdout = process.communicate(complete_code)[0]
+            procs = []
+            # start the processes
+            for i in xrange(procs_per_node):
+                process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+                process.communicate(complete_code)[0]
+                procs.append(procs)
+
+            for process in procs:
+                process.wait()
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in qsub_set:
@@ -203,6 +207,7 @@ class Server(object):
 
         # fall back on jobdispatch
         else:
+            assert False
             print(">>> jobdispatch")
             ###################################################################
             # Generation of the launch script

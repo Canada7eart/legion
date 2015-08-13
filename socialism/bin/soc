@@ -18,10 +18,8 @@ from socialism import benevolant_dictator
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--path',             type=str)
-    parser.add_argument('--number_of_nodes',  type=int)
-    parser.add_argument('--number_of_gpus',   type=int)
-
-    parser.add_argument('--procs_per_job',    type=int)
+    parser.add_argument('--nodes',  type=int)
+    parser.add_argument('--gpus',   type=int)
 
     # Optional
     parser.add_argument('--walltime',         type=str, default="12:00:00")
@@ -44,10 +42,8 @@ if __name__ == "__main__":
         job_name=         args.job_name,
         number_of_nodes=  args.number_of_nodes,
         number_of_gpus=   args.number_of_gpus,
-        procs_per_job=    args.procs_per_job,
         allocation_name=  args.allocation_name,
         user_script_args= args.user_script_args,
-        theano_flags=     "floatX=float32",
         debug=            args.debug,
         debug_pycharm=    args.debug_pycharm
         )

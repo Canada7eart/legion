@@ -11,17 +11,20 @@ from socialism.param_serv.headers import *
 
 import inspect
 
+
 def f_name():
     """
     Return the caller function's name. Only used for quick logging.
     """
     return inspect.currentframe().f_back.f_code.co_name
 
+
 def caller_name():
     """
     Display the caller function's caller function's name. Only used for quick logging.
     """
     return inspect.currentframe().f_back.f_back.f_code.co_name
+
 
 def get_submatrix_from_axis_numbers(arr, axis_numbers):
     """
@@ -34,19 +37,23 @@ def get_submatrix_from_axis_numbers(arr, axis_numbers):
     return temp.reshape([len(x) for x in axis_numbers])
 
 
-def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
+def _set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
     """
     Meant for the push part and the pull part functions.
     Assign to a matrix's submatrix that corresponds to the axis_numbers.
     """
-    # Generate the individual indices.
+
     # This is extremely unefficient.
+    # Generate the individual indices.
+
     local_indices = np.asarray(list(product(*[range(len(x)) for x in axis_numbers])))
     indices_server = np.asarray(list(product(*axis_numbers)))
+
     for i in range(indices_server.shape[0]):
         a = alpha * param[tuple(indices_server[i, :])]
         b = beta * addition[tuple(local_indices[i, :])]
         param[tuple(indices_server[i, :])] = a + b
+
 
 def our_ip():
     """
@@ -203,3 +210,11 @@ def brecv(conn, size):
 
     assert len(buff) == size
     return buff
+
+
+try:
+    import cython
+    set_submatrix_from_axis_numbers = cython.inline("_set_submatrix_from_axis_numbers")["_set_submatrix_from_axis_numbers"]
+
+except:
+    set_submatrix_from_axis_numbers = _set_submatrix_from_axis_numbers
