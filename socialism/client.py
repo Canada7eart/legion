@@ -15,7 +15,7 @@ def pwhcf(param_name=None):
     if param_name is not None:
         text += " - {param_name}".format(param_name=param_name)
 
-    pwh(text)
+    #pwh(text)
 
 class Client(object):
     def __init__(self):

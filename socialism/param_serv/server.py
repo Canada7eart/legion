@@ -100,7 +100,7 @@ class ReceptionThread(threading.Thread):
         if extra is not None:
             text += " - " + extra
 
-        pwh(text)
+        #pwh(text)
 
 
     def run(self):
