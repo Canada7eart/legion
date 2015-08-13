@@ -44,8 +44,7 @@ class Server(object):
         debug=False,
         debug_pycharm=False,
         force_jobdispatch=False,
-        non_device_theano_flags="floatX=float32",
-        theano_device_type="gpu"
+        debug_specify_device="gpu0",
     ):
         """ This makes the call to jobdispatch, msub or qsub """
 
@@ -141,7 +140,7 @@ class Server(object):
                 pydev=                 pydev,
                 instances=             instances,
                 script_path=           user_script_path,
-                theano_device_type=    theano_device_type,
+                theano_device_type=    "gpu0" if not debug else debug_specify_device,
                 )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
