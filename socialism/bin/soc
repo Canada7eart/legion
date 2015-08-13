@@ -17,21 +17,21 @@ from socialism import benevolant_dictator
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--path',             type="str")
-    parser.add_argument('--number_of_nodes',  type="int")
-    parser.add_argument('--number_of_gpus',   type="int")
+    parser.add_argument('--path',             type=str)
+    parser.add_argument('--number_of_nodes',  type=int)
+    parser.add_argument('--number_of_gpus',   type=int)
 
-    parser.add_argument('--procs_per_job',    type="int")
+    parser.add_argument('--procs_per_job',    type=int)
 
     # Optional
-    parser.add_argument('--walltime',         type="str", default="12:00:00")
+    parser.add_argument('--walltime',         type=str, default="12:00:00")
 
     parser.add_argument('--debug',                        default=False, action="store_true")
     parser.add_argument('--debug_pycharm',                default=False, action="store_true")
 
-    parser.add_argument('--allocation_name',  type="str", default="jvb-000-aa")
-    parser.add_argument('--job_name',         type="str", default="[Unspecified]")
-    parser.add_argument('--user_script_args', type="str", default="")
+    parser.add_argument('--allocation_name',  type=str, default="jvb-000-aa")
+    parser.add_argument('--job_name',         type=str, default="[Unspecified]")
+    parser.add_argument('--user_script_args', type=str, default="")
 
     args = parser.parse_args()
 
