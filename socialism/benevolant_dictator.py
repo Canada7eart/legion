@@ -214,7 +214,7 @@ class _Server(object):
         print("benevolent_dictator - done")
 
 #try:
-    Server = cython.inline("_Server")["_Server"]
+Server = cython.inline("_Server")["_Server"]
 #except:
 #    print(">>>>>>>> Server not cythonized")
 #    Server = _Server
