@@ -125,7 +125,7 @@ class Server(object):
             {key_value_exports}
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
-            export THEANO_FLAGS="device={theano_device_type},floatX=float32"
+            export THEANO_FLAGS="device={theano_device_type}0,floatX=float32"
             {executable} '{script_path}' {user_args}
 
             wait
