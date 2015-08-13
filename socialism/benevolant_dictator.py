@@ -216,4 +216,5 @@ class _Server(object):
 try:
     Server = cython.inline("_Server")["_Server"]
 except:
+    print(">>>>>>>> Server not cythonized")
     Server = _Server
