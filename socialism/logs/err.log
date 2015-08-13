@@ -1,0 +1,110 @@
+
+Due to MODULEPATH changes the following have been reloaded:
+  1) mpi/openmpi/1.8.4
+
+The following have been reloaded with a version change:
+  1) cuda/6.0.37 => cuda/6.5.14
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:45:33 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:88:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:45:33 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:87:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:45:33 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:05:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:45:33 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:04:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
+
+Due to MODULEPATH changes the following have been reloaded:
+  1) mpi/openmpi/1.8.4
+
+The following have been reloaded with a version change:
+  1) cuda/6.0.37 => cuda/6.5.14
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:59:59 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:88:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:59:59 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:87:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:59:59 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:05:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
+
+==============NVSMI LOG==============
+
+Timestamp                           : Mon Jun 29 15:59:59 2015
+Driver Version                      : 340.58
+
+Attached GPUs                       : 8
+GPU 0000:04:00.0
+    Accounting Mode                 : Enabled
+    Accounting Mode Buffer Size     : 128
+    Accounted Processes             : None
+
