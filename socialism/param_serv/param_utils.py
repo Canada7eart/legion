@@ -78,10 +78,12 @@ def pwh(text):
     """
     Print with header. Small custom print function with extra information.
     """
+    """
     print("{header}: {text}".format(
         header=header(), 
         text=text))
-
+    """
+    pass
 
 class Entry(object):
     """
