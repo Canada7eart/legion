@@ -21,7 +21,6 @@ def server_save_db_to_hdf5(path, db):
         with value:
             h5.create_dataset(key, shape=value.inner.shape, dtype=value.inner.dtype, data=value.inner)
 
-    h5.save()
     h5.close()
 
 

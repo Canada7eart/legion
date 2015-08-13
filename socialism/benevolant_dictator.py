@@ -11,7 +11,7 @@ import socialism.param_serv.server
 
 class Server(object):
     def __init__(self):
-        pass
+        self.launch_server()
 
     def launch_server(self):
         """ This launches the server acceptor thread. """
@@ -21,15 +21,17 @@ class Server(object):
         meta_rlock = threading.RLock()
 
         acceptor = socialism.param_serv.server.AcceptorThread(
-            meta=meta,
-            meta_rlock=meta_rlock,
-            db=db,
-            db_rlock=db_rlock,
-            )
+                        meta=        meta,
+                        meta_rlock=  meta_rlock,
+                        db=          db,
+                        db_rlock=    db_rlock,
+                        )
 
         self.port = acceptor.bind()
         acceptor.start()
+
         return acceptor
+
 
     def launch_clients(
         self,
@@ -48,6 +50,7 @@ class Server(object):
         force_jobdispatch=False,
 
     ):
+
         """ This makes the call to jobdispatch, msub or qsub """
 
         ###################################################################
@@ -107,7 +110,6 @@ class Server(object):
         to_export = {
             "SOCIALISM_walltime":         walltime,
             "SOCIALISM_job_name":         job_name,
-            "SOCIALISM_task_name":        task_name,
             "SOCIALISM_procs_per_job":    procs_per_job,
             "SOCIALISM_script_path":      user_script_path,
             "SOCIALISM_server_ip":        our_ip(),

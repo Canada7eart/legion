@@ -56,6 +56,10 @@ class Client(object):
         :return: No return value/Always None.
         """
         pwhcf(name)
+        assert isinstance(name, str), "Argument 'name' needs to be a string."
+        assert name in self._db, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
+
+
         try:
             tensor = self._db[name]
 
@@ -100,6 +104,10 @@ class Client(object):
         :return: No return value/Always None.
         """
         pwhcf(name)
+        assert isinstance(name, str), "Argument 'name' needs to be a string."
+        assert name in self._db, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
+        assert isinstance(self._db[name], np.ndarray)
+
 
         send_json(self._conn, {
             "query_name":   "push_full",
@@ -111,7 +119,7 @@ class Client(object):
 
         send_numeric_from_bytes(
             self._conn,
-            self._db[name].tobytes())
+            self._db[name])
 
     def pull_part(self, name, axis_numbers):
         """
@@ -122,6 +130,8 @@ class Client(object):
         :return: Nothing; the submatrix that we pull is assigned to an inner parameter.
         """
         pwhcf(name)
+        assert isinstance(name, str), "Argument 'name' needs to be a string."
+        assert name in self._db, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
 
         send_json(self._conn, {
             "query_name":   "pull_part",
@@ -142,6 +152,7 @@ class Client(object):
         """
         pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
+        assert name in self._db, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
 
         send_json(self._conn, {
             "query_name":   "pull_full",
@@ -199,9 +210,9 @@ class Client(object):
         pwhcf(name)
         assert False, "TODO."
 
-        assert not isinstance(name, str), "Argument 'name' needs to be a valid string."
-        assert not isinstance(indices, list) \
-               and not isinstance(indices, tuple), \
+        assert isinstance(name, str), "Expected argument 'name' to be of type 'str'. Got an object of type '{type}' instead.".format(type=type(item))
+        assert isinstance(indices, list) \
+               or isinstance(indices, tuple), \
             "Argument 'indices' needs to be a list or a tuple"
 
 
@@ -241,7 +252,8 @@ class Client(object):
         pwhcf(name)
         assert name is not None, "Argument 'name' cannot be None."
         assert arr is not None, "Argument 'arr' cannot be None."
-
+        assert isinstance(name, np.str), "Expected argument 'name' to be of type 'str'. Got an object of type '{type}' instead.".format(type=type(item))
+        assert isinstance(arr, np.ndarray), "Expected argument 'arr' to be of type 'numpy.ndarray'. Got an object of type '{type}' instead.".format(type=type(item))
 
         send_json(self._conn, {
             "query_id": query_HEADER_create_if_doesnt_exist,
@@ -274,6 +286,7 @@ class Client(object):
         return self._db[item]
 
     def __setitem__(self, name, item):
+        assert isinstance(item, np.ndarray), "Expected argument 'item' to be of type 'numpy.ndarray'. Got an object of type '{type}' instead.".format(type=type(item))
         # not sure about this yet
         if name not in self._db:
             self.create_once(name, item)
