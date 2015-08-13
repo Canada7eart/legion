@@ -116,6 +116,7 @@ def send_numeric_from_bytes(conn, array):
     :param array: A numeric array
     :return: Nothing.
     """
+    assert isinstance(array, np.ndarray), "Expected an array of type 'ndarray'. Got an object of type '{type}' instead.".format(type=type(array))
     send_json(conn, {
         "shape": array.shape,
         "dtype": str(array.dtype)
