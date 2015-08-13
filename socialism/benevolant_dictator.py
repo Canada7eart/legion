@@ -9,9 +9,8 @@ from traceback import format_exc
 from socialism.param_serv.param_utils import *
 import socialism.param_serv.server
 
-import cython
 
-class _Server(object):
+class Server(object):
     def __init__(self):
         self.launch_server()
 
@@ -212,9 +211,3 @@ class _Server(object):
             ret_val_jobdispatch_proc = jobdispatch_proc.wait()
 
         print("benevolent_dictator - done")
-
-#try:
-Server = cython.inline("_Server")["_Server"]
-#except:
-#    print(">>>>>>>> Server not cythonized")
-#    Server = _Server
