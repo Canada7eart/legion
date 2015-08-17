@@ -8,7 +8,8 @@ import numpy as np
 
 setup(
       cmdclass = {'build_ext': build_ext},
-      ext_modules = [ 
+      ext_modules = [
+                     Extension("socialism", ["__init__.py"]),
                      Extension("socialism.benevolant_dictator",            [
                                                         #'__init__.py', 
                                                         'benevolant_dictator.py', 
