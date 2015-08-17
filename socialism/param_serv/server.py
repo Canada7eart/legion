@@ -18,7 +18,7 @@ class AcceptorThread(threading.Thread):
         self.db =                   db
         self.db_rlock =             db_rlock
         self.sock =                 None
-
+        self.threads = []
 
     def bind(self):
         """
@@ -43,6 +43,15 @@ class AcceptorThread(threading.Thread):
 
         return self.sock.getsockname()[1]
 
+    def stop(self):
+        for th in self.threads:
+            th.exit()
+            th.join()
+
+    def join_threads(self):
+        for th in self.threads:
+            th.join()
+
     def run(self):
         """
         This is the server's acceptor thread. The server has one of these.
@@ -63,6 +72,7 @@ class AcceptorThread(threading.Thread):
                     self.db_rlock)
 
                 new_thread.start()
+                self.threads.append(new_thread)
 
         finally:
             if self.sock:
