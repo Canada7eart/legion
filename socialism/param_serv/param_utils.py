@@ -211,10 +211,10 @@ def brecv(conn, size):
     assert len(buff) == size
     return buff
 
-
+"""
 try:
     import cython
     set_submatrix_from_axis_numbers = cython.inline("_set_submatrix_from_axis_numbers")["_set_submatrix_from_axis_numbers"]
 
-except:
-    set_submatrix_from_axis_numbers = _set_submatrix_from_axis_numbers
+except:"""
+set_submatrix_from_axis_numbers = _set_submatrix_from_axis_numbers

@@ -12,7 +12,18 @@ import socialism.param_serv.server
 
 class Server(object):
     def __init__(self):
-        self.launch_server()
+        self.acceptor = self.launch_server()
+
+    def stop(self):
+        if self.acceptor is not None:
+            self.acceptor.stop()
+            self.acceptor.exit()
+            self.acceptor.join()
+
+    def join_threads(self):
+        if self.acceptor is not None:
+            self.acceptor.join_threads()
+            self.acceptor.join()
 
     def launch_server(self):
         """ This launches the server acceptor thread. """
@@ -32,7 +43,6 @@ class Server(object):
         acceptor.start()
 
         return acceptor
-
 
     def launch_clients(
         self,

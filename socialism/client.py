@@ -16,6 +16,7 @@ def pwhcf(param_name=None):
     pwh(text)
 
 class Client(object):
+
     def __init__(self):
         pwhcf()
         # we minimise the number of hash map lookups by saving refs to values used more than once
