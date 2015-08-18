@@ -4,7 +4,7 @@ import socket, sys, os, threading
 from traceback import format_exc
 
 from socialism.param_serv.param_utils import *
-from socialism.param_serv import ReceptionThread
+from socialism.param_serv.ReceptionThread import ReceptionThread
 
 class AcceptorThread(threading.Thread):
     """

@@ -7,7 +7,7 @@ import subprocess as sp
 from traceback import format_exc
 
 from socialism.param_serv.param_utils import *
-import socialism.param_serv.AcceptorThread
+from socialism.param_serv.AcceptorThread import AcceptorThread
 
 class Server(object):
     def __init__(self):
@@ -31,7 +31,7 @@ class Server(object):
         meta = {}
         meta_rlock = threading.RLock()
 
-        acceptor = socialism.param_serv.AcceptorThread.AcceptorThread(
+        acceptor = AcceptorThread(
                         meta=        meta,
                         meta_rlock=  meta_rlock,
                         db=          db,

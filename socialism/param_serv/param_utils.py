@@ -92,7 +92,6 @@ def pwh(text):
         header=header(), 
         text=text))
 
-    pass
 
 class Entry(object):
     """
