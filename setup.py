@@ -7,7 +7,7 @@ from Cython.Distutils import build_ext
 cmdclass = { }
 
 extensions = ["socialism/*.py", 
-	      "socialism/param_serv/*.py"]
+	          "socialism/param_serv/*.py"]
 		
 
 setup(name = 'socialism', 

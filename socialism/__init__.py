@@ -13,7 +13,7 @@ which are really by far the most important usecases. The client one, most import
 
 """
 import socialism.param_serv.Server
-import socialism.Client
+import Client
 
 Server = socialism.param_serv.Server.Server
-Client = socialism.Client.Client
+Client = Client.Client
