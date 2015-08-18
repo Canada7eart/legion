@@ -17,6 +17,5 @@ which are really by far the most important usecases. The client one, most import
 import socialism.param_serv.Server
 Server = socialism.param_serv.Server.Server
 
-import socialism.Client
+from .Client import Client
 
-Client = Client.Client
