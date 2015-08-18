@@ -1,0 +1,40 @@
+#! /usr/bin/env python2
+from __future__ import print_function, with_statement, division, generators
+
+import os, sys, argparse, re
+
+from legion import Server
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path',        nargs=1, type=str)
+    parser.add_argument('--instances',          type=int)
+
+    # Optional
+    parser.add_argument('--walltime',           type=str, default="12:00:00")
+
+    parser.add_argument('--debug',                        default=False, action="store_true")
+    parser.add_argument('--debug_pycharm',                default=False, action="store_true")
+
+    parser.add_argument('--allocation_name',    type=str, default="jvb-000-aa") # jvb-000-ag
+    parser.add_argument('--job_name',           type=str, default="[Unspecified]")
+    parser.add_argument('--user_script_args',   type=str, default="")
+
+    args = parser.parse_args()
+    assert os.path.exists(args.path[0])
+    assert not args.debug_pycharm or (args.debug and args.debug_pycharm), "The --debug flag must be activated to use the --debug_pycharm flag"
+
+    soc = Server()
+    soc.launch_clients(
+        user_script_path= args.path[0],
+        walltime=         args.walltime,
+        job_name=         args.job_name,
+        instances=        args.instances,
+        allocation_name=  args.allocation_name,
+        user_script_args= args.user_script_args,
+        debug=            args.debug,
+        debug_pycharm=    args.debug_pycharm
+        )
+
+
+    print("launcher - done")
