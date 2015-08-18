@@ -30,7 +30,7 @@ class AcceptorThread(threading.Thread):
         """
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             self.sock.bind(('', 0))
             self.sock.getsockname()[1]
