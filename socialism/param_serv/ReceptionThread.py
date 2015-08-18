@@ -106,7 +106,7 @@ class ReceptionThread(threading.Thread):
                     The client is trying to push his full param.
                     """
                     param_name = data["name"]
-                    self.pwhs("pull_full", param_name)
+                    self.pwhs("push_full", param_name)
                     assert param_name in self.db, "Bad param name."
 
                     alpha =         data["alpha"]
