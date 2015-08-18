@@ -1,7 +1,0 @@
-pyflakes:
-      disable:
-          - F401
-pylint:
-    disable:
-        - unused-import
-        - unused-wildcard-import
