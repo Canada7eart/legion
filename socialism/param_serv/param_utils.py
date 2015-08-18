@@ -2,7 +2,8 @@ from __future__ import print_function, with_statement, division, generators, abs
 """ In here you will find various utility functions mostly used by the param_serv, but not exclusively so.
     Very helpful description, I know. """
 
-import socket, json, struct, threading, os, time, datetime
+import socket, struct, threading, os, time, datetime
+import ujson
 from traceback import print_exc
 from itertools import product
 import numpy as np
@@ -38,7 +39,7 @@ def get_submatrix_from_axis_numbers(arr, axis_numbers):
     return temp.reshape([len(x) for x in axis_numbers])
 
 
-def _set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
+def set_submatrix_from_axis_numbers(param, addition, alpha, beta, axis_numbers):
     """
     Meant for the push part and the pull part functions.
     Assign to a matrix's submatrix that corresponds to the axis_numbers.
@@ -160,7 +161,7 @@ def send_json(conn, dict_to_transform):
     :param dict_to_transform: the dictionary to build json from.
     :return: Nothing.
     """
-    data = json.dumps(dict_to_transform)
+    data = ujson.dumps(dict_to_transform)
     bytes = struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data)
     conn.sendall(bytes)
 
@@ -177,7 +178,7 @@ def receive_json(conn):
     str_data = brecv(conn, number_of_bytes_to_receive)
     raw = struct.unpack("%ds" % number_of_bytes_to_receive, str_data)[0]
     try:
-        data = json.loads(raw)
+        data = ujson.loads(raw)
 
     except ValueError, err:
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -211,11 +212,3 @@ def brecv(conn, size):
 
     assert len(buff) == size
     return buff
-
-"""
-try:
-    import cython
-    set_submatrix_from_axis_numbers = cython.inline("_set_submatrix_from_axis_numbers")["_set_submatrix_from_axis_numbers"]
-
-except:"""
-set_submatrix_from_axis_numbers = _set_submatrix_from_axis_numbers
