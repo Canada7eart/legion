@@ -49,11 +49,6 @@ def main():
     cost = cost + 0.005 * (W1 ** 2).sum() + 0.005 * (W2 ** 2).sum()
     cost.name = 'cost_with_regularization'
 
-    """
-    from blocks.bricks import MLP
-    mlp = MLP(activations=[Rectifier(), Softmax()], dims=[784, 100, 10]).apply(x)
-    """
-
     input_to_hidden.weights_init = hidden_to_output.weights_init = IsotropicGaussian(0.01)
     input_to_hidden.biases_init = hidden_to_output.biases_init = Constant(0)
     input_to_hidden.initialize()
@@ -72,6 +67,7 @@ def main():
     )
 
     mnist_test = MNIST(("test",))
+    
     data_stream_test = Flatten(DataStream.default_stream(
         mnist_test,
         iteration_scheme=SequentialScheme(mnist_test.num_examples,
@@ -82,7 +78,7 @@ def main():
                                    prefix="test")
 
     b1, b2 = VariableFilter(roles=[BIAS])(cg.variables)
-
+    
     main_loop = MainLoop(data_stream=data_stream,
                          algorithm=algorithm,
                          extensions=[monitor,
@@ -92,11 +88,11 @@ def main():
                                          params={"W1": W1,
                                                  "W2": W2,
                                                  "b1": b1,
-                                                 "b2": b2},
+                                                 "b2": b2
+                                                 },
                                          alpha=.5,
                                          beta=.5,
                                          every_n_batches=1)])
-
     main_loop.run()
 
 if __name__ == "__main__":

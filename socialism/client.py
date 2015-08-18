@@ -95,7 +95,7 @@ class Client(object):
         """
         pwhcf(name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
-        assert name not in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
+        assert name in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
         assert isinstance(arr, np.ndarray)
 
 
