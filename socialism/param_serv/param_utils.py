@@ -11,6 +11,7 @@ from socialism.param_serv.headers import *
 
 import inspect
 
+cython_init = "don't remove this."
 
 def f_name():
     """

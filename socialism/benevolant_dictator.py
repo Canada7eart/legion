@@ -9,6 +9,7 @@ from traceback import format_exc
 from socialism.param_serv.param_utils import *
 import socialism.param_serv.server
 
+cython_init = "don't remove this."
 
 class Server(object):
     def __init__(self):
