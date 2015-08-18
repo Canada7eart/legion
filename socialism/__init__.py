@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 """
 This is to allow the users to do something like
 
@@ -13,7 +14,7 @@ which are really by far the most important usecases. The client one, most import
 
 """
 import socialism.param_serv.Server
-import Client
+import socialism.Client
 
 Server = socialism.param_serv.Server.Server
 Client = Client.Client
