@@ -173,6 +173,8 @@ class Client(object):
         assert isinstance(name, np.str), "Expected argument 'name' to be of type 'str'. Got an object of type '{type}' instead.".format(type=type(arr))
         assert isinstance(arr, np.ndarray), "Expected argument 'arr' to be of type 'numpy.ndarray'. Got an object of type '{type}' instead.".format(type=type(arr))
 
+        self._names.add(name)
+
         send_json(self._conn, {
             "query_id": query_HEADER_create_if_doesnt_exist,
             "name":     name
