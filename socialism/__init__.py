@@ -18,4 +18,4 @@ import socialism.param_serv.Server
 import socialism
 
 Server = socialism.param_serv.Server.Server
-Client = socialism.Client.Client
+Client = socialism.Client
