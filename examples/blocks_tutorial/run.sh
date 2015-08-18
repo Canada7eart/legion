@@ -19,8 +19,8 @@
 #    parser.add_argument('--user_script_args', type="str", default="")
 
 <<<<<<< HEAD
-soc --path=./tuto0.py  --number_of_nodes=2 --number_of_gpus=8 --procs_per_job=8 --walltime="24:00:00" --allocation_name="jvb-000-ag"
+leg --path=./tuto0.py  --number_of_nodes=2 --number_of_gpus=8 --procs_per_job=8 --walltime="24:00:00" --allocation_name="jvb-000-ag"
 =======
 
-soc --path=./tuto0.py  --instances=32 --allocation_name="jvb-000-ag"
+leg --path=./tuto0.py  --instances=32 --allocation_name="jvb-000-ag"
 >>>>>>> 16781cc2bf04170a6609a926be9cd4c64377c1d4

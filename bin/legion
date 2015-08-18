@@ -24,8 +24,8 @@ if __name__ == "__main__":
     assert os.path.exists(args.path[0])
     assert not args.debug_pycharm or (args.debug and args.debug_pycharm), "The --debug flag must be activated to use the --debug_pycharm flag"
 
-    soc = Server()
-    soc.launch_clients(
+    leg = Server()
+    leg.launch_clients(
         user_script_path= args.path[0],
         walltime=         args.walltime,
         job_name=         args.job_name,

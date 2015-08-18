@@ -18,14 +18,14 @@ def profile():
     debug = False
     debug_pycharm = True
 
-    soc = Server()
+    leg = Server()
     path = os.path.join(os.path.dirname(__file__), 'tuto0.py')
 
     try:
         yappi.start()
 	
         if debug:
-            soc.launch_clients(user_script_path=  path,
+            leg.launch_clients(user_script_path=  path,
                                job_name=          "0",
                                debug=             True,
                                debug_pycharm=     True,
@@ -33,14 +33,14 @@ def profile():
 
         else:
             print("starting.")
-            soc.launch_clients(user_script_path=  path,
+            leg.launch_clients(user_script_path=  path,
                                job_name=          "soc_blocks_tuto0",
                                instances=         5,
                                walltime=          "6:00:00",
                                allocation_name=   "jvb-000-ag",
                                )
     	
-        soc.join_threads()
+        leg.join_threads()
    
     finally:
 	print("printing profiling information")
@@ -60,19 +60,19 @@ def main():
     debug = False
     debug_pycharm = True
 
-    soc = benevolant_dictator.Server()
+    leg = benevolant_dictator.Server()
 
     path = os.path.join(os.path.dirname(__file__), 'tuto0.py')
 
     if debug:
-        soc.launch_clients(user_script_path=  path,
+        leg.launch_clients(user_script_path=  path,
                            job_name=          "0",
                            debug=             True,
                            debug_pycharm=     True,
                            )
 
     else:
-        soc.launch_clients(user_script_path=  path,
+        leg.launch_clients(user_script_path=  path,
                            job_name=          "soc_blocks_tuto0",
                            instances=         5,
                            walltime=          "6:00:00",
