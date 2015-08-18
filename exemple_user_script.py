@@ -1,13 +1,11 @@
 #!/usr/bin/env python2
-from __future__ import print_function, with_statement, division, generators, absolute_import
 """ THIS IS AN EXEMPLE """
 
-
-from socialism.param_serv.param_utils import *
-from socialism import client
+import numpy as np
+from socialism import Client
 
 def main():
-    soc = client.Client()
+    soc = Client()
     soc["test"] = -np.ones((10, 20, 30))
     soc["test"][2:5, 2:5, 2:5] = np.zeros((3, 3, 3))
     soc.pull_full("test")

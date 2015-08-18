@@ -3,17 +3,7 @@ from __future__ import print_function, with_statement, division, generators
 
 import os, sys, argparse, re
 
-# path business
-if os.path.exists("/Users/jules"):
-    sys.path.append("/Users/jules/Documents/LISA/task")
-    sys.path.append("/Users/jules/Documents/LISA/DistributedDropout/")
-else:
-    dom_name = re.sub("\s", "", os.popen("dnsdomainname").read())
-    if dom_name in {"helios", "guillimin.clumeq.ca"} and os.path.exists("/home/julesgm/"):
-        sys.path.append("/home/julesgm/task/")
-        sys.path.append("/home/julesgm/DistributedDropout")
-
-from socialism import benevolant_dictator
+from socialism import Server
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -34,7 +24,7 @@ if __name__ == "__main__":
 
     assert not args.debug_pycharm or (args.debug and args.debug_pycharm), "The --debug flag must be activated to use the --debug_pycharm flag"
 
-    soc = benevolant_dictator.Server()
+    soc = Server()
     soc.launch_clients(
         user_script_path= args.path,
         walltime=         args.walltime,

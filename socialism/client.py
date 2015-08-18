@@ -8,12 +8,15 @@ from traceback import format_exc
 
 
 def pwhcf(param_name=None):
+    """
     text = "Client - %s" % caller_name()
 
     if param_name is not None:
         text += " - {param_name}".format(param_name=param_name)
 
     pwh(text)
+    """
+    pass
 
 class Client(object):
 
