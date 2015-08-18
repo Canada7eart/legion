@@ -15,7 +15,4 @@ which are really by far the most important usecases. The client one, most import
 
 """
 import socialism.param_serv.Server
-from .Client import Client as cl
-
 Server = socialism.param_serv.Server.Server
-Client = cl
