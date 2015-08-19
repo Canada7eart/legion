@@ -15,6 +15,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--debug',                        default=False, action="store_true")
     parser.add_argument('--debug_pycharm',                default=False, action="store_true")
+    parser.add_argument('--debug_devices',      type=str, default=None)
 
     parser.add_argument('--allocation_name',    type=str, default="jvb-000-aa") # jvb-000-ag
     parser.add_argument('--job_name',           type=str, default="[Unspecified]")
@@ -25,15 +26,20 @@ if __name__ == "__main__":
     assert not args.debug_pycharm or (args.debug and args.debug_pycharm), "The --debug flag must be activated to use the --debug_pycharm flag"
 
     leg = Server()
+
+    if args.debug_devices is not None:
+        debug_specify_devices = args.debug_devices.replace(";", ",").replace(" ", "").split(",")
+
     leg.launch_clients(
-        user_script_path= args.path[0],
-        walltime=         args.walltime,
-        job_name=         args.job_name,
-        instances=        args.instances,
-        allocation_name=  args.allocation_name,
-        user_script_args= args.user_script_args,
-        debug=            args.debug,
-        debug_pycharm=    args.debug_pycharm
+        user_script_path=      args.path[0],
+        walltime=              args.walltime,
+        job_name=              args.job_name,
+        instances=             args.instances,
+        allocation_name=       args.allocation_name,
+        user_script_args=      args.user_script_args,
+        debug=                 args.debug,
+        debug_pycharm=         args.debug_pycharm,
+        debug_specify_devices= debug_specify_devices
         )
 
 

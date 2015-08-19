@@ -9,6 +9,7 @@ from traceback import format_exc
 from legion.param_serv.param_utils import *
 from legion.param_serv.AcceptorThread import AcceptorThread
 
+
 class Server(object):
     def __init__(self):
         self.acceptor = self.launch_server()
@@ -44,18 +45,18 @@ class Server(object):
         return acceptor
 
     def launch_clients(
-        self,
-        user_script_path,
-        job_name,
-        instances,
-        walltime="12:00:00",
-        allocation_name="",
-        user_script_args="",
-        debug=False,
-        debug_pycharm=False,
-        force_jobdispatch=False,
-        debug_specify_device="gpu0",
-    ):
+                       self,
+                       user_script_path,
+                       job_name,
+                       instances,
+                       walltime="12:00:00",
+                       allocation_name="",
+                       user_script_args="",
+                       debug=False,
+                       debug_pycharm=False,
+                       force_jobdispatch=False,
+                       debug_specify_devices=None,
+                       ):
         """ This makes the call to jobdispatch, msub or qsub """
 
         ###################################################################
@@ -74,8 +75,10 @@ class Server(object):
         if debug_pycharm and debug:
             try:
                 # Add the standard OSX paths for pydevd
-                to_add = ["/Applications/PyCharm.app/Contents/helpers/pydev",
-                          "/Applications/PyCharm CE.app/Contents/helpers/pydev"]
+                to_add = [
+                          "/Applications/PyCharm.app/Contents/helpers/pydev",
+                          "/Applications/PyCharm CE.app/Contents/helpers/pydev",
+                          ]
 
                 for path in to_add:
                     if os.path.exists(path):
@@ -106,14 +109,14 @@ class Server(object):
 
         # Add some exports that we need in the client
         to_export = {
-            "legion_walltime":         walltime,
-            "legion_job_name":         job_name,
-            "legion_instances":        instances,
-            "legion_script_path":      user_script_path,
-            "legion_server_ip":        our_ip(),
-            "legion_server_port":      self.port,
-            "legion_debug":            str(debug).lower(),
-            }
+                     "legion_walltime":    walltime,
+                     "legion_job_name":    job_name,
+                     "legion_instances":   instances,
+                     "legion_script_path": user_script_path,
+                     "legion_server_ip":   our_ip(),
+                     "legion_server_port": self.port,
+                     "legion_debug":       str(debug).lower(),
+                     }
 
         exports_substring_generator = ("export {key}=\"{val}\"".format(key=key, val=val)
                                        for key, val in to_export.iteritems())
@@ -123,7 +126,7 @@ class Server(object):
         ########################################################################
         # This will eventually be useless, as we will be only using jobdispatch
         ########################################################################
-        qsub_msub_or_debug_launch_template = \
+        qsub_msub_launch_template = \
             """
             #PBS -A {allocation_name}
             #PBS -l walltime={walltime}
@@ -134,24 +137,24 @@ class Server(object):
             {key_value_exports}
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
 
-            export THEANO_FLAGS="device={theano_device_type}0,floatX=float32"
+            export THEANO_FLAGS="device={theano_device_type},floatX=float32"
             {executable} '{script_path}' {user_args}
 
             wait
             echo "qsub/msub script done"
             """ \
             .format(
-                allocation_name=       allocation_name,
-                key_value_exports=     key_value_exports,
-                executable=            executable,
-                user_args=             user_script_args,
-                walltime=              walltime,
-                job_name=              job_name,
-                pydev=                 pydev,
-                instances=             instances,
-                script_path=           user_script_path,
-                theano_device_type=    "gpu0" if not debug else debug_specify_device,
-                )
+                    allocation_name=    allocation_name,
+                    key_value_exports=  key_value_exports,
+                    executable=         executable,
+                    user_args=          user_script_args,
+                    walltime=           walltime,
+                    job_name=           job_name,
+                    pydev=              pydev,
+                    instances=          instances,
+                    script_path=        user_script_path,
+                    theano_device_type= "gpu0"
+                    )
 
         # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
 
@@ -168,31 +171,44 @@ class Server(object):
 
         if debug:
             print(">>> debug")
+            assert debug_specify_devices is None or len(debug_specify_devices) == instances, "if debug_specify_devices is specified, its size needs to be equal to the instances param"
             # Add some fake qsub env variables to emulate those that would be present at the time of execution
             to_export = {"PBS_NODENUM": "0"}
 
             env_code = "\n".join(("export {key}={value}".format(key=key, value=value)
                                   for key, value in to_export.items())) + "\n"
 
-            complete_code = key_value_exports + env_code + "sh" + qsub_msub_or_debug_launch_template
+            for i in xrange(instances):
 
-            process = sp.Popen("sh", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
-            process.communicate(complete_code)[0]
+                device = "cpu" if debug_specify_devices is None else debug_specify_devices[i]
+
+                launch_code = """export THEANO_FLAGS="device={theano_device_type},floatX=float32"
+                      {executable} '{script_path}' {user_args} &""".format(
+                                                                   theano_device_type=  device,
+                                                                   executable=          executable,
+                                                                   script_path=         user_script_path,
+                                                                   user_args=           user_script_args
+                                                                   )
+
+                complete_code = key_value_exports + env_code + launch_code
+                print(complete_code)
+                process = sp.Popen("sh", stdin=sp.PIPE, stdout=sys.stdout)
+                process.communicate(complete_code)[0]
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in qsub_set:
             print(">>> qsub")
-            process = sp.Popen("qsub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen("qsub", stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            process.communicate(qsub_msub_or_debug_launch_template)[0]
+            process.communicate(qsub_msub_launch_template)[0]
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in msub_set:
             print(">>> msub")
-            process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen("msub", stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            print(qsub_msub_or_debug_launch_template)
-            process.communicate(qsub_msub_or_debug_launch_template)[0]
+            print(qsub_msub_launch_template)
+            process.communicate(qsub_msub_launch_template)[0]
 
         # fall back on jobdispatch
         else:
