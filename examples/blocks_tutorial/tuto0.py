@@ -29,7 +29,7 @@ from blocks.graph import ComputationGraph
 from blocks.filter import VariableFilter
 from blocks.initialization import IsotropicGaussian, Constant
 
-from soc_sync import SocialistSync
+from legion_sync_extension import LegionSync
 
 def main():
     x = tensor.matrix('features')
@@ -46,6 +46,8 @@ def main():
     cg = ComputationGraph(cost)
 
     W1, W2 = VariableFilter(roles=[WEIGHT])(cg.variables)
+    print("W1 name:%s" % W1.name())
+    print("W2 name:%s" % W2.name())
     cost = cost + 0.005 * (W1 ** 2).sum() + 0.005 * (W2 ** 2).sum()
     cost.name = 'cost_with_regularization'
 
@@ -84,7 +86,7 @@ def main():
                          extensions=[monitor,
                                      FinishAfter(after_n_epochs=500),
                                      Printing(),
-                                     SocialistSync(
+                                     LegionSync(
                                          params={"W1": W1,
                                                  "W2": W2,
                                                  "b1": b1,

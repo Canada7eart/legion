@@ -5,7 +5,7 @@ from blocks.extensions import SimpleExtension
 from legion import Client
 import time, os
 
-class SocialistSync(SimpleExtension):
+class LegionSync(SimpleExtension):
     # make sure to specify the argument "every_n_batches=T" when you instantiate this extension,
     # or something to that effect to determine how often we want to call it
 
@@ -17,7 +17,7 @@ class SocialistSync(SimpleExtension):
                  verbose=False,
                  **kwargs):
 
-        super(SocialistSync, self).__init__(**kwargs)
+        super(LegionSync, self).__init__(**kwargs)
         self.client = Client()
         self.debug = debug
         self.params = params
