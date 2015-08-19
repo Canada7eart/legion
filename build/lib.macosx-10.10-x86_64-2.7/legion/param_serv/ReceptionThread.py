@@ -237,4 +237,3 @@ class ReceptionThread(threading.Thread):
 
         finally:
             self.conn.close()
-            print("The server thread is exiting.")

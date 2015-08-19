@@ -11,8 +11,8 @@ from legion.param_serv.AcceptorThread import AcceptorThread
 
 
 class Server(object):
-    def __init__(self):
-        self.acceptor = self.launch_server()
+    def __init__(self, instances):
+        self.acceptor = self.launch_server(instances)
 
     def stop(self):
         if self.acceptor is not None:
@@ -25,7 +25,7 @@ class Server(object):
             self.acceptor.join_threads()
             self.acceptor.join()
 
-    def launch_server(self):
+    def launch_server(self, instances):
         """ This launches the server acceptor thread. """
         db = {}
         db_rlock = threading.RLock()
@@ -33,12 +33,13 @@ class Server(object):
         meta_rlock = threading.RLock()
 
         acceptor = AcceptorThread(
+                        instances=   instances,
                         meta=        meta,
                         meta_rlock=  meta_rlock,
                         db=          db,
                         db_rlock=    db_rlock,
                         )
-
+        acceptor.setDaemon(True)
         self.port = acceptor.bind()
         acceptor.start()
 
@@ -55,9 +56,10 @@ class Server(object):
                        debug=False,
                        debug_pycharm=False,
                        force_jobdispatch=False,
-                       debug_specify_devices=None,
+                       debug_specify_devices=None
                        ):
-        """ This makes the call to jobdispatch, msub or qsub """
+        """ This makes the call to jobdispatch, msub or qsub.
+         This function never ruturns! """
 
         ###################################################################
         # Function argument/param consistency check
@@ -65,6 +67,12 @@ class Server(object):
         ###################################################################
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
         assert debug or allocation_name is not None, "If we aren't debugging, we need an allocation name"
+
+        if instances is None and debug:
+            instances = 1
+
+        assert instances is not None, "The parameter 'instances' needs to be specified."
+        assert isinstance(instances, int), "The parameter 'instances' needs to be an int."
 
         executable = "python2"
         pydev = ""
@@ -198,14 +206,14 @@ class Server(object):
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in qsub_set:
             print(">>> qsub")
-            process = sp.Popen("qsub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen("qsub", stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
             process.communicate(qsub_msub_launch_template)[0]
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in msub_set:
             print(">>> msub")
-            process = sp.Popen("msub", shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen("msub", stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
             print(qsub_msub_launch_template)
             process.communicate(qsub_msub_launch_template)[0]
@@ -235,4 +243,14 @@ class Server(object):
             jobdispatch_proc = sp.Popen(experimental_jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
             ret_val_jobdispatch_proc = jobdispatch_proc.wait()
 
-        print("benevolent_dictator - done")
+
+
+        # Join the threads. The acceptor stops by itself when all the expected instances have connected.
+        # The reception threads stop by themselves when their client gets disconnected.
+
+        sys.stdout.flush()
+        self.acceptor.join()
+        self.acceptor.join_reception_threads()
+
+        print("All done! The server is exiting.")
+

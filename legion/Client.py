@@ -108,8 +108,9 @@ class Client(object):
             })
 
         send_numeric_from_bytes(
-            self._conn,
-            arr)
+                                self._conn,
+                                arr
+                                )
 
     def pull_part(self, name, axis_numbers):
         """
