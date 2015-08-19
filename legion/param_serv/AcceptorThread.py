@@ -11,14 +11,20 @@ class AcceptorThread(threading.Thread):
     This is the server's acceptor thread. The server has one of these.
     Constantly loops to create "ReceptionThread"s when a connection to a client is accepted.
     """
-    def __init__(self, meta, meta_rlock, db, db_rlock):
+    def __init__(self, instances, meta, meta_rlock, db, db_rlock):
         super(self.__class__, self).__init__()
         self.meta =                 meta
         self.meta_rlock =           meta_rlock
         self.db =                   db
         self.db_rlock =             db_rlock
         self.sock =                 None
-        self.threads = []
+        self.instances =            instances
+        self.instances_counter =    0
+        self.reception_threads =    []
+
+    def join_reception_threads(self):
+        for reception_thread in self.reception_threads:
+            reception_thread.join()
 
     def bind(self):
         """
@@ -33,7 +39,7 @@ class AcceptorThread(threading.Thread):
             self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             self.sock.bind(('', 0))
-            self.sock.getsockname()[1]
+            #self.sock.getsockname()[1]
             self.sock.listen(100)
 
         except socket.error, s_err:
@@ -44,15 +50,6 @@ class AcceptorThread(threading.Thread):
                 raise s_err
 
         return self.sock.getsockname()[1]
-
-    def stop(self):
-        for th in self.threads:
-            th.exit()
-            th.join()
-
-    def join_threads(self):
-        for th in self.threads:
-            th.join()
 
     def run(self):
         """
@@ -73,8 +70,14 @@ class AcceptorThread(threading.Thread):
                     self.db,
                     self.db_rlock)
 
+                new_thread.setDaemon(True)
                 new_thread.start()
-                self.threads.append(new_thread)
+                self.instances_counter += 1
+
+                if self.instances_counter >= self.instances:
+                    print("The acceptor has received all the threads it expected.")
+                    break
+
 
         finally:
             if self.sock:

@@ -14,8 +14,8 @@ and
 which are really by far the most important usecases. The client one, most importantly.
 
 """
-import legion.param_serv.Dispatcher
-Server = legion.param_serv.Dispatcher.Dispatcher
+import legion.param_serv.Server
+Server = legion.param_serv.Server.Server
 
 from .Client import Client
 

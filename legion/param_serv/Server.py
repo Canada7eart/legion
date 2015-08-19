@@ -11,8 +11,8 @@ from legion.param_serv.AcceptorThread import AcceptorThread
 
 
 class Server(object):
-    def __init__(self):
-        self.acceptor = self.launch_server()
+    def __init__(self, instances):
+        self.acceptor = self.launch_server(instances)
 
     def stop(self):
         if self.acceptor is not None:
@@ -25,7 +25,7 @@ class Server(object):
             self.acceptor.join_threads()
             self.acceptor.join()
 
-    def launch_server(self):
+    def launch_server(self, instances):
         """ This launches the server acceptor thread. """
         db = {}
         db_rlock = threading.RLock()
@@ -33,12 +33,13 @@ class Server(object):
         meta_rlock = threading.RLock()
 
         acceptor = AcceptorThread(
+                        instances=   instances,
                         meta=        meta,
                         meta_rlock=  meta_rlock,
                         db=          db,
                         db_rlock=    db_rlock,
                         )
-
+        acceptor.setDaemon(True)
         self.port = acceptor.bind()
         acceptor.start()
 
@@ -55,9 +56,10 @@ class Server(object):
                        debug=False,
                        debug_pycharm=False,
                        force_jobdispatch=False,
-                       debug_specify_devices=None,
+                       debug_specify_devices=None
                        ):
-        """ This makes the call to jobdispatch, msub or qsub """
+        """ This makes the call to jobdispatch, msub or qsub.
+         This function never ruturns! """
 
         ###################################################################
         # Function argument/param consistency check
@@ -175,6 +177,9 @@ class Server(object):
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}  # used to be for msub
 
+
+        processes = []
+
         if debug:
             print(">>> debug")
             assert debug_specify_devices is None or len(debug_specify_devices) == instances, "if debug_specify_devices is specified, its size needs to be equal to the instances param"
@@ -184,12 +189,13 @@ class Server(object):
             env_code = "\n".join(("export {key}={value}".format(key=key, value=value)
                                   for key, value in to_export.items())) + "\n"
 
+
             for i in xrange(instances):
 
                 device = "cpu" if debug_specify_devices is None else debug_specify_devices[i]
 
                 launch_code = """export THEANO_FLAGS="device={theano_device_type},floatX=float32"
-                      {executable} '{script_path}' {user_args} &""".format(
+                      {executable} '{script_path}' {user_args}""".format(
                                                                    theano_device_type=  device,
                                                                    executable=          executable,
                                                                    script_path=         user_script_path,
@@ -200,6 +206,7 @@ class Server(object):
                 print(complete_code)
                 process = sp.Popen("sh", stdin=sp.PIPE, stdout=sys.stdout)
                 process.communicate(complete_code)[0]
+                processes.append(process)
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in qsub_set:
@@ -207,6 +214,7 @@ class Server(object):
             process = sp.Popen("qsub", stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
             process.communicate(qsub_msub_launch_template)[0]
+            processes.append(process)
 
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in msub_set:
@@ -215,7 +223,7 @@ class Server(object):
             # pass the code through stdin
             print(qsub_msub_launch_template)
             process.communicate(qsub_msub_launch_template)[0]
-
+            processes.append(process)
         # fall back on jobdispatch
         else:
             assert False, "support for jobdispatch is not yet available"
@@ -238,7 +246,20 @@ class Server(object):
                 .format(exports=key_value_exports, execution=execution)
 
             print(experimental_jobdispatch_cmd)
-            jobdispatch_proc = sp.Popen(experimental_jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
-            ret_val_jobdispatch_proc = jobdispatch_proc.wait()
+            process = sp.Popen(experimental_jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            processes.append(process)
 
-        print("benevolent_dictator - done")
+        # Join the threads. The acceptor stops by itself when all the expected instances have connected.
+        # The reception threads stop by themselves when their client gets disconnected.
+
+
+        for process in processes:
+            process.wait()
+
+        sys.stdout.flush()
+        sys.stderr.flush()
+        self.acceptor.join()
+        self.acceptor.join_reception_threads()
+
+        print("All done! The server is exiting.")
+
