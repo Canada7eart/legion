@@ -66,6 +66,12 @@ class Server(object):
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
         assert debug or allocation_name is not None, "If we aren't debugging, we need an allocation name"
 
+        if instances is None and debug:
+            instances = 1
+
+        assert instances is not None, "The parameter 'instances' needs to be specified."
+        assert isinstance(instances, int), "The parameter 'instances' needs to be an int."
+
         executable = "python2"
         pydev = ""
 
