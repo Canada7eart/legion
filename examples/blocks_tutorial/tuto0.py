@@ -46,8 +46,8 @@ def main():
     cg = ComputationGraph(cost)
 
     W1, W2 = VariableFilter(roles=[WEIGHT])(cg.variables)
-    print("W1 name:%s" % W1.name())
-    print("W2 name:%s" % W2.name())
+    print("W1 name:%s" % W1.name)
+    print("W2 name:%s" % W2.name)
     cost = cost + 0.005 * (W1 ** 2).sum() + 0.005 * (W2 ** 2).sum()
     cost.name = 'cost_with_regularization'
 
