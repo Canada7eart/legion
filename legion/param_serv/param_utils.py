@@ -131,7 +131,7 @@ def send_numeric_from_bytes(conn, array):
         "shape": array.shape,
         "dtype": str(array.dtype)
     })
-    array_bytes = array.tobytes()
+    array_bytes = array.tostring()
     bytes = struct.pack("ii%ds" % len(array_bytes), HEADER_NUMERIC, len(array_bytes), array_bytes)
     conn.sendall(bytes)
 
