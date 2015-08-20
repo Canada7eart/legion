@@ -232,6 +232,23 @@ class Server(object):
             # as jobdispatch cannot read the script with stdin
             ###################################################################
 
+            to_export = {
+                     "legion_walltime":    walltime,
+                     "legion_job_name":    job_name,
+                     "legion_instances":   instances,
+                     "legion_script_path": user_script_path,
+                     "legion_server_ip":   our_ip(),
+                     "legion_server_port": self.port,
+                     "legion_debug":       str(debug).lower(),
+                     "THEANO_FLAGS":       "device=gpu0,floatX=float32",
+                     }
+
+            exports_substring_generator = ("--env={key}=\"{val}\"".format(key=key, val=val)
+                                           for key, val in to_export.iteritems())
+
+            key_value_exports = " ".join(exports_substring_generator) + " "
+
+
             execution = "python2 \"{user_script_path}\" {user_args}"\
                 .format(
                         user_script_path=user_script_path,
@@ -241,9 +258,8 @@ class Server(object):
             # We make and run the jobdispatch shell line
             ###################################################################
 
-            key_value_exports += ' export THEANO_FLAGS="device=gpu0,floatX=float32" '
 
-            experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}" \
+            experimental_jobdispatch_cmd = "jobdispatch --gpu {exports} {execution}" \
                 .format(exports=key_value_exports, execution=execution)
 
             print(experimental_jobdispatch_cmd)
