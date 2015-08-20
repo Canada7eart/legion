@@ -232,7 +232,7 @@ class Server(object):
             # as jobdispatch cannot read the script with stdin
             ###################################################################
 
-            execution = "python2 \"{user_script_path}\" {user_args}"\
+            execution = "python2 \"{user_script_path}\" {user_args} > \'./output.log\'"\
                 .format(
                         user_script_path=user_script_path,
                         user_args=user_script_args)
