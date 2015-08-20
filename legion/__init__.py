@@ -15,6 +15,6 @@ which are really by far the most important usecases. The client one, most import
 
 """
 
-from legion.core.param_serv import Server
+from legion.core.param_serv.Server import Server
 from legion.core.Client import Client
 

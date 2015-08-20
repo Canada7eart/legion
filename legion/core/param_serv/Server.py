@@ -6,8 +6,8 @@ import os, sys, time, random, threading, socket
 import subprocess as sp
 from traceback import format_exc
 
-from legion.param_serv.param_utils import *
-from legion.param_serv.AcceptorThread import AcceptorThread
+from legion.core.param_serv.param_utils import *
+from legion.core.param_serv.AcceptorThread import AcceptorThread
 
 
 class Server(object):

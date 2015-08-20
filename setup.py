@@ -6,12 +6,11 @@ from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 cmdclass = { }
 
-extensions = ["legion/*.py", 
-	          "legion/param_serv/*.py"]
-		
+extensions = ["legion/core/*.py",
+	          "legion/core/param_serv/*.py"]
 
-setup(name = 'legion', 
-      packages = ["legion", "legion.param_serv"],
+setup(name = "legion",
+      packages = ["legion", "legion.core", "legion.core.param_serv"],
       ext_modules = cythonize(extensions),
       include_dirs = [np.get_include()],
      )

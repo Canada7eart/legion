@@ -3,7 +3,7 @@ __author__ = 'jules'
 from traceback import format_exc
 import os, sys
 import h5py
-import legion.param_serv.param_utils
+import legion.core.param_serv.param_utils
 
 
 def server_save_db_to_hdf5(path, db):

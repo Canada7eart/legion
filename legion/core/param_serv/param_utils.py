@@ -8,7 +8,7 @@ from traceback import print_exc
 from itertools import product
 import numpy as np
 
-from legion.param_serv.headers import *
+from legion.core.param_serv.headers import *
 
 import inspect
 

@@ -3,7 +3,7 @@ from __future__ import print_function, with_statement, division, generators
 
 
 import sys
-from legion.param_serv.param_utils import *
+from legion.core.param_serv.param_utils import *
 from traceback import format_exc
 
 
