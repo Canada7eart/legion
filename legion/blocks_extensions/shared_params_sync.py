@@ -20,13 +20,13 @@ class SharedParamsAutoSync(SimpleExtension):
                  params,
                  alpha,
                  beta,
-                 client=None
+                 client=None,
                  debug=False,
                  verbose=False,
                  **kwargs):
 
         super(SharedParamsAutoSync, self).__init__(**kwargs)
-        assert type(params) == list
+        assert type(params) == dict
         if client is None:
             self.client = Client()
         self.debug = debug
@@ -114,6 +114,9 @@ class SharedParamsRateLimited(SharedParamsAutoSync):
         #self.rolling_estimate_work_cost = self.decay_factor * time_diff + (1.0-self.decay_factor) * self.rolling_estimate_work_cost
 
         if self.rolling_estimate_sync_cost < self.maximum_rate * work_cost_since_last_sync:
+            if self.debug:
+                print("Going to perform update with server because %f < %f * %f." % (self.rolling_estimate_sync_cost, self.maximum_rate, work_cost_since_last_sync))
+
             return True
         else:
             return False

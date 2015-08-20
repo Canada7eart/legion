@@ -29,7 +29,8 @@ from blocks.graph import ComputationGraph
 from blocks.filter import VariableFilter
 from blocks.initialization import IsotropicGaussian, Constant
 
-from legion_sync_extension import LegionSync
+from legion.blocks_extensions import SharedParamsAutoSync, SharedParamsRateLimited
+
 
 def main():
     x = tensor.matrix('features')
@@ -85,7 +86,8 @@ def main():
                          extensions=[monitor,
                                      FinishAfter(after_n_epochs=500),
                                      Printing(),
-                                     LegionSync(
+                                     #SharedParamsAutoSync(
+                                     SharedParamsRateLimited(
                                          params={"W1": W1,
                                                  "W2": W2,
                                                  "b1": b1,
@@ -93,7 +95,8 @@ def main():
                                                  },
                                          alpha=.5,
                                          beta=.5,
-                                         every_n_batches=1)])
+                                         every_n_batches=1,
+                                         maximum_rate=0.1)])
     main_loop.run()
 
 if __name__ == "__main__":
