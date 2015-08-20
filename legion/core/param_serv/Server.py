@@ -175,7 +175,7 @@ class Server(object):
             dnsdomainname = None
 
         qsub_set = {"guillimin.clumeq.ca"}
-        msub_set = {} #"helios"}  # used to be for msub
+        msub_set = {"helios"}  # used to be for msub
 
 
         processes = []
