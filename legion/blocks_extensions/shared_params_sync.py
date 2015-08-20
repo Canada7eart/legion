@@ -56,16 +56,64 @@ class SharedParamsAutoSync(SimpleExtension):
     # These next functions are to support a bit of polymorphism
     # for other subclasses that will instrument this class a bit more.
 
-    def presync_callback():
+    def presync_callback(self):
         pass
 
-    def postsync_callback():
+    def postsync_callback(self):
         pass
 
-    def should_we_sync_now():
+    def should_we_sync_now(self):
         return True
 
 
 
 
 
+class SharedParamsRateLimited(SharedParamsAutoSync):
+
+    # Make sure to specify the argument "every_n_batches=T" when you instantiate this extension,
+    # or something to that effect to determine how often we want to call it.
+    #
+    # This extension does the same as SharedParamsAutoSync,
+    # but it overrides the `should_we_sync_now` functionality
+    # to be able to skip certain updates.
+
+    def __init__(self,
+                 maximum_rate=1.0,
+                 **kwargs):
+
+        super(SharedParamsRateLimited, self).__init__(**kwargs)
+
+        self.maximum_rate = maximum_rate
+
+        self.sync_start_timestamp = time.time()
+        self.sync_end_timestamp = time.time()
+
+        self.rolling_estimate_sync_cost = 0.0
+        #self.rolling_estimate_work_cost = 1.0
+
+        # Just a way to add some smoothing to our estimates
+        # about the costs to sync, or process stuff outside.
+        # Smaller factor -> more smoothing.
+        # Has to be in (0.0, 1.0) interval.
+        self.decay_factor = 0.2
+
+
+    def presync_callback(self):
+        self.sync_start_timestamp = time.time()
+
+    def postsync_callback(self):
+        self.sync_end_timestamp = time.time()
+        time_diff = self.sync_end_timestamp - self.sync_start_timestamp
+        self.rolling_estimate_sync_cost = self.decay_factor * time_diff + (1.0-self.decay_factor) * self.rolling_estimate_sync_cost
+
+    def should_we_sync_now(self):
+        work_cost_since_last_sync = time.time() - self.sync_end_timestamp
+
+        #time_diff = time.time() - self.sync_end_timestamp
+        #self.rolling_estimate_work_cost = self.decay_factor * time_diff + (1.0-self.decay_factor) * self.rolling_estimate_work_cost
+
+        if self.rolling_estimate_sync_cost < self.maximum_rate * work_cost_since_last_sync:
+            return True
+        else:
+            return False
