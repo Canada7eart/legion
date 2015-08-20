@@ -226,20 +226,22 @@ class Server(object):
             processes.append(process)
         # fall back on jobdispatch
         else:
-            
+
             ###################################################################
             # Generation of the launch script
             # as jobdispatch cannot read the script with stdin
             ###################################################################
 
             execution = "python2 \"{user_script_path}\" {user_args}"\
-                .format(theano_flags=theano_flags,
+                .format(
                         user_script_path=user_script_path,
                         user_args=user_script_args)
 
             ###################################################################
             # We make and run the jobdispatch shell line
             ###################################################################
+
+            exports["THEANO_FLAGS"] = "device=gpu0,floatX=float32"
 
             experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}" \
                 .format(exports=key_value_exports, execution=execution)
