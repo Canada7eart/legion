@@ -226,8 +226,7 @@ class Server(object):
             processes.append(process)
         # fall back on jobdispatch
         else:
-            assert False, "support for jobdispatch is not yet available"
-            print(">>> jobdispatch")
+            
             ###################################################################
             # Generation of the launch script
             # as jobdispatch cannot read the script with stdin
