@@ -241,7 +241,7 @@ class Server(object):
             # We make and run the jobdispatch shell line
             ###################################################################
 
-            key_value_exports["THEANO_FLAGS"] = "device=gpu0,floatX=float32"
+            key_value_exports += " THEANO_FLAGS='device=gpu0,floatX=float32' "
 
             experimental_jobdispatch_cmd = "jobdispatch --gpu --raw='{exports}' {execution}" \
                 .format(exports=key_value_exports, execution=execution)
