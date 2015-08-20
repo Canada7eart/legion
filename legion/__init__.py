@@ -14,8 +14,7 @@ and
 which are really by far the most important usecases. The client one, most importantly.
 
 """
-import legion.param_serv.Server
-Server = legion.param_serv.Server.Server
 
-from .Client import Client
+from legion.core.param_serv import Server
+from legion.core.Client import Client
 
