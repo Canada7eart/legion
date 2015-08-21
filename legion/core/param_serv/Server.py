@@ -174,8 +174,10 @@ class Server(object):
             # We don't really care why we failed.
             dnsdomainname = None
 
+
+
         qsub_set = {"guillimin.clumeq.ca"}
-        msub_set = {}  # used to be for msub
+        msub_set = {"helios"}  # add "helios" in this field to use msub on helios
 
 
         processes = []
