@@ -194,7 +194,7 @@ class ReceptionThread(threading.Thread):
                     with self.db_insertion_mutex:
                         self.pwhs("create_if_doesnt_exist", param_name, "Inside")
                         if param_name not in self.db:
-
+                            self.pwhs("create_if_doesnt_exist", param_name, "requesting")
                             send_json(self.conn, {"requesting_param": True})
                             param = receive_numeric(self.conn)
                             self.pwhs("create_if_doesnt_exist", param_name, "Creating. Shape = {shape}".format(shape=param.shape))
@@ -203,14 +203,17 @@ class ReceptionThread(threading.Thread):
 
                         # We don't need to keep this mutex to sent the arr back
                         else:
+                            self.pwhs("create_if_doesnt_exist", param_name, "not_requesting")
                             not_requesting = True
 
                     if not_requesting:
-                        send_json(self.conn, {"requesting_param": False})
                         self.pwhs("create_if_doesnt_exist", param_name, "Was already created.")
+                        send_json(self.conn, {"requesting_param": False})
+
                         # This is an atomic operation; we are only reading.
                         send_numeric_from_bytes(self.conn, self.db[param_name].inner)
 
+                    self.pwhs("create_if_doesnt_exist", param_name, "Done.")
                     continue
 
                 elif query_id == query_HEADER_save_all_to_hdf5:
