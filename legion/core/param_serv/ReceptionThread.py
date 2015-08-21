@@ -196,9 +196,12 @@ class ReceptionThread(threading.Thread):
                         if param_name not in self.db:
                             self.pwhs("create_if_doesnt_exist", param_name, "requesting")
                             send_json(self.conn, {"requesting_param": True})
+                            self.pwhs("create_if_doesnt_exist", param_name, "milieu requesting.")
                             param = receive_numeric(self.conn)
+                            self.pwhs("create_if_doesnt_exist", param_name, "apres receive_numeric.")
                             self.pwhs("create_if_doesnt_exist", param_name, "Creating. Shape = {shape}".format(shape=param.shape))
                             self.db[param_name] = Entry(param)
+                            self.pwhs("create_if_doesnt_exist", param_name, "fin requesting.")
                             not_requesting = False
 
                         # We don't need to keep this mutex to sent the arr back
