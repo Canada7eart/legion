@@ -190,7 +190,9 @@ class ReceptionThread(threading.Thread):
                     param_name = data["name"]
                     self.pwhs("create_if_doesnt_exist", param_name, "Entry")
 
+
                     with self.db_insertion_mutex:
+                        self.pwhs("create_if_doesnt_exist", param_name, "Inside")
                         if param_name not in self.db:
 
                             send_json(self.conn, {"requesting_param": True})
