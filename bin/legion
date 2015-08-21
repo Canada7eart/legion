@@ -25,6 +25,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     assert os.path.exists(args.path[0])
     assert not args.debug_pycharm or (args.debug and args.debug_pycharm), "The --debug flag must be activated to use the --debug_pycharm flag"
+    assert args.debug or args.instances is not None and args.instances > 0
 
     leg = Server(args.instances)
 
