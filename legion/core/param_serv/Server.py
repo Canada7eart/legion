@@ -263,7 +263,7 @@ class Server(object):
                 .format(exports=key_value_exports, execution=execution)
 
             print(experimental_jobdispatch_cmd)
-            process = sp.Popen(experimental_jobdispatch_cmd, shell=True, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen(experimental_jobdispatch_cmd, shell=True, stderr=sys.stdout, stdout=sys.stdout)
             processes.append(process)
 
         # Join the threads. The acceptor stops by itself when all the expected instances have connected.
