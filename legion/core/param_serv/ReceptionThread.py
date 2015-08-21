@@ -29,8 +29,6 @@ class ReceptionThread(threading.Thread):
         Prints the date, the pid, the fact that this is the server, and the name of current state.
         :return: No return value.
         """
-        return
-
         text = "Server - client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state)
         if param_name is not None:
             text += " - " + param_name
