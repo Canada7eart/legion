@@ -266,6 +266,10 @@ class Server(object):
             process = sp.Popen(experimental_jobdispatch_cmd, shell=True, stderr=sys.stdout, stdout=sys.stdout)
             processes.append(process)
 
+            # job dispatch doesn't support quitting by joining and waiting.
+            while True:
+                time.sleep(1000000)
+
         # Join the threads. The acceptor stops by itself when all the expected instances have connected.
         # The reception threads stop by themselves when their client gets disconnected.
 
