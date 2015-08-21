@@ -65,7 +65,7 @@ class ReceptionThread(threading.Thread):
                     print(">>>> server - Server received a query without a query id. "
                           "Killing connection and thread.")
                     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                    break
+                    raise
 
                 # explicitly cash query_id (hash map lookups are still expensive;
                 # we have an interpreter, not a static, aot or jit compiler)
