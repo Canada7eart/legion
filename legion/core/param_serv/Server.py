@@ -277,6 +277,6 @@ class Server(object):
         sys.stderr.flush()
         self.acceptor.join()
         self.acceptor.join_reception_threads()
-
+        time.sleep(10000000)
         print("All done! The server is exiting.")
 
