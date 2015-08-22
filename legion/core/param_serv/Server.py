@@ -269,11 +269,13 @@ class Server(object):
             processes.append(process)
 
             # job dispatch doesn't support quitting by joining and waiting.
-            while True:
-                time.sleep(1000000)
+
 
         # Join the threads. The acceptor stops by itself when all the expected instances have connected.
         # The reception threads stop by themselves when their client gets disconnected.
+
+        # while True:
+        #        time.sleep(1000000)
 
 
         for process in processes:
@@ -283,6 +285,7 @@ class Server(object):
         sys.stderr.flush()
         self.acceptor.join()
         self.acceptor.join_reception_threads()
-
         print("All done! The server is exiting.")
+
+
 

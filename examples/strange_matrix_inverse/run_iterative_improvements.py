@@ -47,7 +47,7 @@ def run_alone():
         print "update %s, current_error %0.12f" % (status, current_error)
 
 
-def run_legion():
+def run_legion(N):
 
     from legion import Client
 
@@ -55,7 +55,7 @@ def run_legion():
     alpha = 0.5
     beta = 0.5
 
-    N = 100
+
     big_matrix = generate_big_matrix(N)
 
     current_inv_approx = np.eye(N)
@@ -99,7 +99,14 @@ def run_legion():
 
 if __name__ == "__main__":
     #run_alone()
-    run_legion()
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("N", nargs=1, type=int, default=[100])
+    N = parser.parse_args().N[0]
+    print(">>>>>> Client received N = %d" % N)
+    run_legion(N)
 
 
 
