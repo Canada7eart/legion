@@ -270,8 +270,10 @@ class Server(object):
 
             # job dispatch doesn't support quitting by joining and waiting.
 
-        while True:
-                time.sleep(1000000)
-
+        try:
+            while True:
+                    time.sleep(1000000)
+        except KeyboardInterrupt:
+            print("Received KeyboardInterrupt. Exiting.")
 
 
