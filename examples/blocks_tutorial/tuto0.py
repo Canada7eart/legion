@@ -8,13 +8,6 @@ from blocks.algorithms import GradientDescent, Scale
 import numpy as np
 from fuel.datasets import MNIST
 
-if os.path.exists("/Users/jules"):
-    sys.path.append("/Users/jules/Documents/LISA/task")
-else:
-    dom_name = re.sub("\s", "", os.popen("dnsdomainname").read())
-    if dom_name in {"helios", "guillimin.clumeq.ca"} and os.path.exists("/home/julesgm/"):
-        sys.path.append("/home/julesgm/task/")
-
 from fuel.datasets import MNIST
 from fuel.streams import DataStream
 from fuel.schemes import SequentialScheme
