@@ -274,10 +274,10 @@ class Server(object):
         # Join the threads. The acceptor stops by itself when all the expected instances have connected.
         # The reception threads stop by themselves when their client gets disconnected.
 
-        # while True:
-        #        time.sleep(1000000)
+        while True:
+                time.sleep(1000000)
 
-
+        """
         for process in processes:
             process.wait()
 
@@ -286,6 +286,6 @@ class Server(object):
         self.acceptor.join()
         self.acceptor.join_reception_threads()
         print("All done! The server is exiting.")
-
+        """
 
 
