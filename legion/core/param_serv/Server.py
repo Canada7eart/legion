@@ -177,7 +177,7 @@ class Server(object):
 
 
         qsub_set = {"guillimin.clumeq.ca"}
-        msub_set = {"helios"}  # add "helios" in this field to use msub on helios
+        msub_set = {}  # add "helios" in this field to use msub on helios
 
 
         processes = []
@@ -270,22 +270,8 @@ class Server(object):
 
             # job dispatch doesn't support quitting by joining and waiting.
 
-
-        # Join the threads. The acceptor stops by itself when all the expected instances have connected.
-        # The reception threads stop by themselves when their client gets disconnected.
-
         while True:
                 time.sleep(1000000)
 
-        """
-        for process in processes:
-            process.wait()
-
-        sys.stdout.flush()
-        sys.stderr.flush()
-        self.acceptor.join()
-        self.acceptor.join_reception_threads()
-        print("All done! The server is exiting.")
-        """
 
 
