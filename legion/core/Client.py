@@ -17,6 +17,7 @@ def pwhcf(verbose=False, param_name=None):
 
 class Client(object):
 
+
     def __init__(self):
         pwhcf()
         # we minimise the number of hash map lookups by saving refs to values used more than once
@@ -201,6 +202,19 @@ class Client(object):
             "query_id": query_HEADER_save_all_to_hdf5,
             "path": path,
             })
+
+
+    # For the time being, we are not interested in having
+    # the client be pickled in any way.
+
+    # Also, we could use this to write down the timestamps at
+    # which we synchronized with the server.
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self):
+        return None
 
 
 #    def push_from_indices(self, name, arr, indices, alpha, beta):
