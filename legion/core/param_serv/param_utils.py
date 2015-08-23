@@ -108,7 +108,7 @@ class Entry(object):
     """
     def __init__(self, val):
         self.inner = val
-        self.rlock = threading.RLock()
+        self.rlock = threading.Lock()
     
     def __enter__(self):
         self.rlock.acquire()

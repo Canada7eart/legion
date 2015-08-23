@@ -192,8 +192,8 @@ few hours for them to get executed.
 \t  number that you can see in showq.
 \t- If you queue more than one job at once, the job number will have this format:
 \t\tXXX[YY]
-\tThis means that the job XXX has YY sub jobs. You can cancel them all at once by
-\tentering the command
+\t  This means that the job XXX has YY sub jobs. You can cancel them all at once by
+\t  entering the command
 \t\tcanceljob XXX
 """)
 
