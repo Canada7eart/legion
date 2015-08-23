@@ -1,22 +1,20 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
-
+__author__ = "Jules Gagnon-Marchand, jgagnonmarchand@gmail.com"
 
 import sys
 from legion.core.param_serv.param_utils import *
 from traceback import format_exc
 
 
-def pwhcf(param_name=None):
-    """
-    text = "Client - %s" % caller_name()
+def pwhcf(verbose=False, param_name=None):
+    if verbose:
+        text = "Client - %s" % caller_name()
 
-    if param_name is not None:
-        text += " - {param_name}".format(param_name=param_name)
+        if param_name is not None:
+            text += " - {param_name}".format(param_name=param_name)
 
-    pwh(text)
-    """
-    pass
+        pwh(text)
 
 class Client(object):
 

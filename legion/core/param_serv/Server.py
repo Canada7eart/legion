@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators, absolute_import
-""" Extremely simple launch script. Should be improved. """
 
 import os, sys, time, random, threading, socket, re
 import textwrap
@@ -291,6 +290,10 @@ class Server(object):
                     time.sleep(1000000)
         except KeyboardInterrupt:
             print("\nReceived KeyboardInterrupt. Exiting.")
+            print("If you are on the cluster and the jobs have not run yet, remember to cancel them")
+            print("By getting your jobid with " + bcolors.OKGREEN + "showq -u $USER" + bcolors.ENDC + " and ending them with")
+            print("\t" + bcolors.OKGREEN + "canceljob" + bcolors.UNDERLINE + "jobid" + bcolors.ENDC)
+            print("where 'jobid' is the jobid.")
             exit(0)
 
         print("Exiting.")

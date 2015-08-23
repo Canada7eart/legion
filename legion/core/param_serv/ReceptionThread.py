@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 from __future__ import print_function, with_statement, division, generators
+
 import socket, sys, os, threading
 from traceback import format_exc
-
 
 from legion.core.param_serv.param_utils import *
 from legion.core.checkpoint_hdf5 import server_save_db_to_hdf5
