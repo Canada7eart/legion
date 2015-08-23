@@ -170,9 +170,7 @@ class Server(object):
 
         import re
         dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname 2>/dev/null").read())
-
         # We don't really care why we failed.
-        dnsdomainname = None
 
         ################################################################################
         # This part is very important.
