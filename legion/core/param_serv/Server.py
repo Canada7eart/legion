@@ -2,7 +2,7 @@
 from __future__ import print_function, with_statement, division, generators, absolute_import
 """ Extremely simple launch script. Should be improved. """
 
-import os, sys, time, random, threading, socket
+import os, sys, time, random, threading, socket, re
 import textwrap
 import subprocess as sp
 from traceback import format_exc
@@ -10,6 +10,41 @@ from traceback import format_exc
 from legion.core.param_serv.param_utils import *
 from legion.core.param_serv.AcceptorThread import AcceptorThread
 
+
+def format_script(text):
+    return bcolors.OKGREEN + insert_tabs("\n".join(textwrap.wrap(text, 60))) + bcolors.ENDC
+
+def generate_qsub_msub_launch_script(allocation_name, key_value_exports, executable, user_script_args,
+                                     walltime, job_name, pydev, instances, user_script_path):
+    return textwrap.dedent(
+            """
+            #PBS -A {allocation_name}
+            #PBS -l walltime={walltime}
+            #PBS -l nodes=1:gpus=1
+            #PBS -N {job_name}
+            #PBS -t 1-{instances}
+
+            {key_value_exports}
+            export PYTHONPATH="$PYTHONPATH":"{pydev}"
+
+            export THEANO_FLAGS="device={theano_device_type},floatX=float32"
+            {executable} '{script_path}' {user_args}
+
+            wait
+            echo "qsub/msub script done"
+            """) \
+            .format(
+                    allocation_name=    allocation_name,
+                    key_value_exports=  key_value_exports,
+                    executable=         executable,
+                    user_args=          user_script_args,
+                    walltime=           walltime,
+                    job_name=           job_name,
+                    pydev=              pydev,
+                    instances=          instances,
+                    script_path=        user_script_path,
+                    theano_device_type= "gpu0"
+                    )
 
 class Server(object):
     def __init__(self, instances):
@@ -61,7 +96,6 @@ class Server(object):
                        ):
         """ This makes the call to jobdispatch, msub or qsub.
          This function never ruturns! """
-
         ###################################################################
         # Function argument/param consistency check
         # TODO: This needs to be fairly tight at "shipping"
@@ -116,7 +150,9 @@ class Server(object):
                 pwh("You need to have the pydevd script in your path in order to use remote debugging.")
                 pwh(format_exc())
 
-        # Add some exports that we need in the client
+        ######################################################################
+        # Add some exports for the information that the legion client needs
+        ######################################################################
         to_export = {
                      "legion_walltime":    walltime,
                      "legion_job_name":    job_name,
@@ -129,45 +165,8 @@ class Server(object):
 
         exports_substring_generator = ("export {key}=\"{val}\"".format(key=key, val=val)
                                        for key, val in to_export.iteritems())
-
         key_value_exports = " ".join(exports_substring_generator) + " "
 
-        ########################################################################
-        # This will eventually be useless, as we will be only using jobdispatch
-        ########################################################################
-        qsub_msub_launch_template = \
-            """
-            #PBS -A {allocation_name}
-            #PBS -l walltime={walltime}
-            #PBS -l nodes=1:gpus=1
-            #PBS -N {job_name}
-            #PBS -t 1-{instances}
-
-            {key_value_exports}
-            export PYTHONPATH="$PYTHONPATH":"{pydev}"
-
-            export THEANO_FLAGS="device={theano_device_type},floatX=float32"
-            {executable} '{script_path}' {user_args}
-
-            wait
-            echo "qsub/msub script done"
-            """ \
-            .format(
-                    allocation_name=    allocation_name,
-                    key_value_exports=  key_value_exports,
-                    executable=         executable,
-                    user_args=          user_script_args,
-                    walltime=           walltime,
-                    job_name=           job_name,
-                    pydev=              pydev,
-                    instances=          instances,
-                    script_path=        user_script_path,
-                    theano_device_type= "gpu0"
-                    )
-
-        # This is basic logic to detect if we are on Guillimin. We also previously used it to detect Helios
-
-        import re
         # if dnsdomainname fails, "" is assigned to dnsdomainname.
         try:
             dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname 2>/dev/null").read())
@@ -175,16 +174,16 @@ class Server(object):
             # We don't really care why we failed.
             dnsdomainname = None
 
-
+        ################################################################################
         # This part is very important.
         # This is the dnsnames that we associate with each launch utility.
+        ################################################################################
+
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}  # add "helios" in this field to use msub on helios
 
-        processes = []
-        launch_info_text = textwrap.dedent(
-            """
-            We queued the jobs onto the cluster. It might take up to a few hours for them to get executed.
+        launch_info_msub_qsub_jobdispatch = textwrap.dedent(
+            """We queued the jobs onto the cluster. It might take up to a few hours for them to get executed.
             Enter the command 'showq -u $USER' to see their state.
             Enter 'canceljob XXX' to cancel a serie of jobs, where XXX is the job number that you can see in showq.
             If you queue more than one job at once, the job number will have this format:
@@ -193,20 +192,22 @@ class Server(object):
             \tcanceljob XXX
             """)
 
+        launch_info_debug = "Launching legion locally.\nPressing ctrl+C will stop the whole thing."
+
+    #################################################################################
+    # Here are the launch scripts specific to msub, qsub and jobdispatch.
+    #################################################################################
+        processes = []
+        print("\n\n" + bcolors.BOLD + "Legion:" + bcolors.ENDC)
         if debug:
-            print(">>> debug")
             assert debug_specify_devices is None or len(debug_specify_devices) == instances, "if debug_specify_devices is specified, its size needs to be equal to the instances param"
-            # Add some fake qsub env variables to emulate those that would be present at the time of execution
-            to_export = {"PBS_NODENUM": "0"}
 
-            env_code = "\n".join(("export {key}={value}".format(key=key, value=value)
-                                  for key, value in to_export.items())) + "\n"
-
+            print(">>> local debug mode")
+            print(launch_info_debug)
+            print("\nScripts being executed by the subprocess(es) as means of local debugging:\n")
 
             for i in xrange(instances):
-
                 device = "cpu" if debug_specify_devices is None else debug_specify_devices[i]
-
                 launch_code = """export THEANO_FLAGS="device={theano_device_type},floatX=float32"
                       {executable} '{script_path}' {user_args}""".format(
                                                                    theano_device_type=  device,
@@ -215,43 +216,44 @@ class Server(object):
                                                                    user_args=           user_script_args
                                                                    )
 
-                complete_code = key_value_exports + env_code + launch_code
-                print(complete_code)
+                complete_code = key_value_exports + launch_code
+                print(format_script(complete_code))
+                print("\n")
                 process = sp.Popen("sh", stdin=sp.PIPE, stdout=sys.stdout)
                 process.communicate(complete_code)[0]
                 processes.append(process)
 
-        # allow further customization then just command name
-        elif not force_jobdispatch and dnsdomainname in qsub_set:
-            print(">>> qsub")
-            print(launch_info_text)
+        elif not force_jobdispatch and (dnsdomainname in qsub_set or dnsdomainname in msub_set):
+            ########################
+            # msub or qsub
+            ########################
 
-            process = sp.Popen("qsub", stdin=sp.PIPE, stdout=sys.stdout)
+            # We are either using qsub or msub. Not using ternary conditional operator for clarity.
+            if dnsdomainname in qsub_set:
+                program = "qsub"
+            else:
+                program = "msub"
+
+            print("\n>>> %s" % program)
+            print(launch_info_msub_qsub_jobdispatch)
+            print("'%s' script being run by the cluster:" % program)
+            launch_script = generate_qsub_msub_launch_script(allocation_name, key_value_exports, executable, user_script_args,
+                                             walltime, job_name, pydev, instances, user_script_path)
+            print(format_script(launch_script))
+
+            process = sp.Popen(program, stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            process.communicate(qsub_msub_launch_template)[0]
+            process.communicate(launch_script)[0]
             processes.append(process)
 
-        # allow further customization then just command name
-        elif not force_jobdispatch and dnsdomainname in msub_set:
-            print(">>> msub")
-            print(launch_info_text)
-
-            process = sp.Popen("msub", stdin=sp.PIPE, stdout=sys.stdout)
-            # pass the code through stdin
-            print("'msub' script being sent to the cluster:")
-            print(insert_tabs(qsub_msub_launch_template))
-
-            process.communicate(qsub_msub_launch_template)[0]
-            processes.append(process)
-        # fall back on jobdispatch
         else:
+            ########################
+            # Jobdispatch
+            ########################
 
-            ###################################################################
-            # Generation of the launch script
-            # as jobdispatch cannot read the script with stdin
-            ###################################################################
             print(">>> jobdispatch")
-            print(launch_info_text)
+            print(launch_info_msub_qsub_jobdispatch)
+            print("\n'jobdispatch' script being run by the cluster:")
 
             to_export = {
                      "legion_walltime":    walltime,
@@ -266,27 +268,24 @@ class Server(object):
 
             exports_substring_generator = ("--env={key}=\"{val}\"".format(key=key, val=val)
                                            for key, val in to_export.iteritems())
-
             key_value_exports = " ".join(exports_substring_generator) + " "
             execution = "python2 \"{user_script_path}\" {user_args}"\
                 .format(
                         user_script_path=user_script_path,
                         user_args=user_script_args)
-
-            ###################################################################
-            # We make and run the jobdispatch shell line
-            ###################################################################
-
-
-            experimental_jobdispatch_cmd = "jobdispatch --gpu --repeat_jobs={instances} {exports} {execution}" \
+            jobdispatch_cmd = "jobdispatch --gpu --repeat_jobs={instances} {exports} {execution}" \
                 .format(exports=key_value_exports, execution=execution, instances=instances)
 
-            print(experimental_jobdispatch_cmd)
-            process = sp.Popen(experimental_jobdispatch_cmd, shell=True, stderr=sys.stdout, stdout=sys.stdout)
+            print(format_script(jobdispatch_cmd))
+
+            process = sp.Popen(jobdispatch_cmd, shell=True, stderr=sys.stdout, stdout=sys.stdout)
             processes.append(process)
 
-            # job dispatch doesn't support quitting by joining and waiting.
-
+        ################################################################################
+        # End of the main thread. We sleep here until the user kills us.
+        # Other approaches have been too unreliable; this one is simple and has yet to fail
+        # having the expected behavior.
+        ################################################################################
         try:
             while True:
                     time.sleep(1000000)
