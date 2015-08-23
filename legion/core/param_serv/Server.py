@@ -99,6 +99,8 @@ class Server(object):
         # Function argument/param consistency check
         # TODO: This needs to be fairly tight at "shipping"
         ###################################################################
+        user_script_path = os.path.abspath(user_script_path)
+        
         assert os.path.exists(user_script_path), "Could not find the user script with path %s" % user_script_path
         assert debug or allocation_name is not None, "If we aren't debugging, we need an allocation name"
 
