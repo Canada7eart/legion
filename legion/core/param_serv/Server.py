@@ -203,9 +203,16 @@ few hours for them to get executed.
         processes = []
         is_qsub = (dnsdomainname in qsub_set) and not force_jobdispatch
         is_msub = (dnsdomainname in msub_set) and not force_jobdispatch
-
-        if force_jobdispatch:
+        if is_qsub:
+            print(bcolors.OKBLUE + "Using qsub." + bcolors.ENDC)
+        elif is_msub:
+            print(bcolors.OKBLUE + "Using msub." + bcolors.ENDC)
+        elif force_jobdispatch:
             print(bcolors.WARNING + "Forcing jobdispatch" + bcolors.ENDC)
+        elif debug:
+            print(bcolors.OKBLUE + "Local debug." + bcolors.ENDC)
+        else:
+            print(bcolors.WARNING + bcolors.UNDERLINE + "Unknown configuration, defaulting to jobdispatch" + bcolors.ENDC)
 
         print("\n\n" + bcolors.BOLD + "Legion:" + bcolors.ENDC)
         if debug:
