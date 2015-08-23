@@ -181,6 +181,7 @@ class Server(object):
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}  # add "helios" in this field to use msub on helios
 
+
         launch_info_msub_qsub_jobdispatch = textwrap.dedent(
 """We queued the jobs onto the cluster. It might take up to a
 few hours for them to get executed.
@@ -215,7 +216,7 @@ few hours for them to get executed.
             print(bcolors.OKBLUE + "Local debug." + bcolors.ENDC)
         else:
             print(bcolors.WARNING + bcolors.UNDERLINE + "Unknown configuration, defaulting to jobdispatch" + bcolors.ENDC)
-
+            print(bcolors.WARNING + "DNS DOMAIN NAME: " + bcolors.UNDERLINE + dnsdomainname + bcolors.ENDC)
 
         if debug:
             assert debug_specify_devices is None or len(debug_specify_devices) == instances, "if debug_specify_devices is specified, its size needs to be equal to the instances param"
