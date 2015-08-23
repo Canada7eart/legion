@@ -102,7 +102,7 @@ class Entry(object):
         self.rlock = threading.RLock()
     
     def __enter__(self):
-        self.rlock.acquire()    
+        self.rlock.acquire()
         return self.inner
 
     def __exit__(self, _type, value, traceback):

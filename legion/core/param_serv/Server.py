@@ -177,7 +177,7 @@ class Server(object):
 
 
         qsub_set = {"guillimin.clumeq.ca"}
-        msub_set = {}  # add "helios" in this field to use msub on helios
+        msub_set = {"helios"}  # add "helios" in this field to use msub on helios
 
 
         processes = []
