@@ -167,11 +167,12 @@ class Server(object):
         key_value_exports = " ".join(exports_substring_generator) + " "
 
         # if dnsdomainname fails, "" is assigned to dnsdomainname.
-        try:
-            dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname 2>/dev/null").read())
-        except:
-            # We don't really care why we failed.
-            dnsdomainname = None
+
+        import re
+        dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname 2>/dev/null").read())
+
+        # We don't really care why we failed.
+        dnsdomainname = None
 
         ################################################################################
         # This part is very important.
@@ -216,7 +217,10 @@ few hours for them to get executed.
             print(bcolors.OKBLUE + "Local debug." + bcolors.ENDC)
         else:
             print(bcolors.WARNING + bcolors.UNDERLINE + "Unknown configuration, defaulting to jobdispatch" + bcolors.ENDC)
-            print(bcolors.WARNING + "DNS DOMAIN NAME: " + bcolors.UNDERLINE + dnsdomainname + bcolors.ENDC)
+            if dnsdomainname is not None:
+                print(bcolors.WARNING + "dnsdomainname: " + bcolors.UNDERLINE + dnsdomainname + bcolors.ENDC)
+            else:
+                print(bcolors.WARNING + bcolors.UNDERLINE + "dnsdomainname was None." + bcolors.ENDC)
 
         if debug:
             assert debug_specify_devices is None or len(debug_specify_devices) == instances, "if debug_specify_devices is specified, its size needs to be equal to the instances param"
