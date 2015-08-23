@@ -182,14 +182,20 @@ class Server(object):
         msub_set = {"helios"}  # add "helios" in this field to use msub on helios
 
         launch_info_msub_qsub_jobdispatch = textwrap.dedent(
-            """We queued the jobs onto the cluster. It might take up to a few hours for them to get executed.
-            Enter the command 'showq -u $USER' to see their state.
-            Enter 'canceljob XXX' to cancel a serie of jobs, where XXX is the job number that you can see in showq.
-            If you queue more than one job at once, the job number will have this format:
-            \tXXX[YY]
-            This means that the job XXX has YY sub jobs. You can cancel them all at once by entering the command
-            \tcanceljob XXX
-            """)
+"""We queued the jobs onto the cluster. It might take up to a few hours for them to get executed.
+
+\t- Enter the command 'showq -u $USER' to see their state.
+
+\t- Enter 'canceljob XXX' to cancel a serie of jobs, where XXX is the job number that you can see in showq.
+
+\t- If you queue more than one job at once, the job number will have this format:
+
+\t\tXXX[YY]
+
+This means that the job XXX has YY sub jobs. You can cancel them all at once by entering the command
+
+\t\tcanceljob XXX
+""")
 
         launch_info_debug = "Launching legion locally.\nPressing ctrl+C will stop the whole thing."
 
