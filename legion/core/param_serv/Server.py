@@ -203,6 +203,8 @@ few hours for them to get executed.
         processes = []
         is_qsub = (dnsdomainname in qsub_set) and not force_jobdispatch
         is_msub = (dnsdomainname in msub_set) and not force_jobdispatch
+        print("\n\n" + bcolors.BOLD + "Legion:" + bcolors.ENDC)
+
         if is_qsub:
             print(bcolors.OKBLUE + "Using qsub." + bcolors.ENDC)
         elif is_msub:
@@ -214,7 +216,7 @@ few hours for them to get executed.
         else:
             print(bcolors.WARNING + bcolors.UNDERLINE + "Unknown configuration, defaulting to jobdispatch" + bcolors.ENDC)
 
-        print("\n\n" + bcolors.BOLD + "Legion:" + bcolors.ENDC)
+
         if debug:
             assert debug_specify_devices is None or len(debug_specify_devices) == instances, "if debug_specify_devices is specified, its size needs to be equal to the instances param"
 
