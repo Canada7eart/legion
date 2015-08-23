@@ -228,7 +228,7 @@ This means that the job XXX has YY sub jobs. You can cancel them all at once by 
                 process.communicate(complete_code)[0]
                 processes.append(process)
 
-        elif not force_jobdispatch and (dnsdomainname in qsub_set or dnsdomainname in msub_set):
+        elif not force_jobdispatch and ((dnsdomainname in qsub_set) or (dnsdomainname in msub_set)):
             ########################
             # msub or qsub
             ########################
