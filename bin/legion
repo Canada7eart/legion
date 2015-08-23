@@ -18,7 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug_pycharm',                default=False, action="store_true")
     parser.add_argument('--debug_devices',      type=str, default=None)
 
-    parser.add_argument('--allocation_name',    type=str, default="jvb-000-aa") # jvb-000-ag
+    parser.add_argument('--allocation',         type=str, default="jvb-000-aa") # jvb-000-ag
     parser.add_argument('--job_name',           type=str, default="[Unspecified]")
     parser.add_argument('--user_script_args',   type=str, default="")
 

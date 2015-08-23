@@ -4,7 +4,7 @@ from traceback import format_exc
 
 from theano import tensor
 from blocks.algorithms import GradientDescent, Scale
-
+import argparse
 import numpy as np
 from fuel.datasets import MNIST
 
@@ -26,6 +26,11 @@ from legion.blocks_extensions import SharedParamsAutoSync, SharedParamsRateLimit
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("every_n_batches", type=int, default=[1])
+    args = parser.parse_args()
+
+    # This part is a copy paste form the blocks tutorial page >>>
     x = tensor.matrix('features')
 
     input_to_hidden = Linear(name='input_to_hidden', input_dim=784, output_dim=100)
@@ -72,6 +77,7 @@ def main():
                                    data_stream=data_stream_test,
                                    prefix="test")
 
+    # Except for this line
     b1, b2 = VariableFilter(roles=[BIAS])(cg.variables)
     
     main_loop = MainLoop(data_stream=data_stream,
@@ -79,7 +85,7 @@ def main():
                          extensions=[monitor,
                                      FinishAfter(after_n_epochs=500),
                                      Printing(),
-                                     #SharedParamsAutoSync(
+                                     # And the inclusion of the legion sync module, SharedParamsRateLimited:
                                      SharedParamsRateLimited(
                                          params={"W1": W1,
                                                  "W2": W2,
@@ -88,7 +94,7 @@ def main():
                                                  },
                                          alpha=.5,
                                          beta=.5,
-                                         every_n_batches=1,
+                                         every_n_batches=args.every_n_batches[0],
                                          maximum_rate=0.1)])
     main_loop.run()
 

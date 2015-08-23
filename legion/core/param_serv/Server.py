@@ -3,6 +3,7 @@ from __future__ import print_function, with_statement, division, generators, abs
 """ Extremely simple launch script. Should be improved. """
 
 import os, sys, time, random, threading, socket
+import textwrap
 import subprocess as sp
 from traceback import format_exc
 
@@ -175,12 +176,22 @@ class Server(object):
             dnsdomainname = None
 
 
-
+        # This part is very important.
+        # This is the dnsnames that we associate with each launch utility.
         qsub_set = {"guillimin.clumeq.ca"}
         msub_set = {"helios"}  # add "helios" in this field to use msub on helios
 
-
         processes = []
+        launch_info_text = textwrap.dedent(
+            """
+            We queued the jobs onto the cluster. It might take up to a few hours for them to get executed.
+            Enter the command 'showq -u $USER' to see their state.
+            Enter 'canceljob XXX' to cancel a serie of jobs, where XXX is the job number that you can see in showq.
+            If you queue more than one job at once, the job number will have this format:
+            \tXXX[YY]
+            This means that the job XXX has YY sub jobs. You can cancel them all at once by entering the command
+            \tcanceljob XXX
+            """)
 
         if debug:
             print(">>> debug")
@@ -213,6 +224,8 @@ class Server(object):
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in qsub_set:
             print(">>> qsub")
+            print(launch_info_text)
+
             process = sp.Popen("qsub", stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
             process.communicate(qsub_msub_launch_template)[0]
@@ -221,9 +234,13 @@ class Server(object):
         # allow further customization then just command name
         elif not force_jobdispatch and dnsdomainname in msub_set:
             print(">>> msub")
+            print(launch_info_text)
+
             process = sp.Popen("msub", stdin=sp.PIPE, stdout=sys.stdout)
             # pass the code through stdin
-            print(qsub_msub_launch_template)
+            print("'msub' script being sent to the cluster:")
+            print(insert_tabs(qsub_msub_launch_template))
+
             process.communicate(qsub_msub_launch_template)[0]
             processes.append(process)
         # fall back on jobdispatch
@@ -233,6 +250,8 @@ class Server(object):
             # Generation of the launch script
             # as jobdispatch cannot read the script with stdin
             ###################################################################
+            print(">>> jobdispatch")
+            print(launch_info_text)
 
             to_export = {
                      "legion_walltime":    walltime,
@@ -249,8 +268,6 @@ class Server(object):
                                            for key, val in to_export.iteritems())
 
             key_value_exports = " ".join(exports_substring_generator) + " "
-
-
             execution = "python2 \"{user_script_path}\" {user_args}"\
                 .format(
                         user_script_path=user_script_path,
@@ -261,8 +278,8 @@ class Server(object):
             ###################################################################
 
 
-            experimental_jobdispatch_cmd = "jobdispatch --gpu {exports} {execution}" \
-                .format(exports=key_value_exports, execution=execution)
+            experimental_jobdispatch_cmd = "jobdispatch --gpu --repeat_jobs={instances} {exports} {execution}" \
+                .format(exports=key_value_exports, execution=execution, instances=instances)
 
             print(experimental_jobdispatch_cmd)
             process = sp.Popen(experimental_jobdispatch_cmd, shell=True, stderr=sys.stdout, stdout=sys.stdout)
