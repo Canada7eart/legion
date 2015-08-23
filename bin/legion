@@ -40,7 +40,7 @@ if __name__ == "__main__":
         walltime=              args.walltime,
         job_name=              args.job_name,
         instances=             args.instances,
-        allocation_name=       args.allocation_name,
+        allocation_name=       args.allocation,
         user_script_args=      args.user_script_args,
         debug=                 args.debug,
         debug_pycharm=         args.debug_pycharm,

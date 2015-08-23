@@ -27,10 +27,13 @@ from legion.blocks_extensions import SharedParamsAutoSync, SharedParamsRateLimit
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("every_n_batches", type=int, default=[1])
+    parser.add_argument("every_n_batches", type=int, default=[1], nargs=1)
     args = parser.parse_args()
+    print("We were asked to sync with legion at every_n_batches = %s" % str(args.every_n_batches[0]))
 
-    # This part is a copy paste form the blocks tutorial page >>>
+
+    # The rest is a copy paste from the blocks tutorial, except for the inclusion of the sync extension
+    # at the creation of the MainLoop blocks object.
     x = tensor.matrix('features')
 
     input_to_hidden = Linear(name='input_to_hidden', input_dim=784, output_dim=100)
