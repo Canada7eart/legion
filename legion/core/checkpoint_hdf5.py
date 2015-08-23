@@ -1,5 +1,4 @@
 from __future__ import print_function, with_statement, division, generators, absolute_import
-__author__ = 'jules'
 from traceback import format_exc
 import os, sys
 import h5py

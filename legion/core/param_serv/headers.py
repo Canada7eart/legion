@@ -2,7 +2,6 @@
 the headers.
 THE NUMBERS HAVE NO SIGNIFICATION - THEY ONLY NEED TO BE DIFFERENT
 """
-__orig_author__ = "Jules Gagnon-Marchand, jgagnonmarchand@gmail.com"
 
 HEADER_JSON = 10
 HEADER_NUMERIC = 11

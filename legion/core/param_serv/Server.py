@@ -168,11 +168,12 @@ class Server(object):
                                        for key, val in to_export.iteritems())
         key_value_exports = " ".join(exports_substring_generator) + " "
 
-        # if dnsdomainname fails, "" is assigned to dnsdomainname.
+        if os.popen("which dnsdomainname").read() != "":
+            import re
+            dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname 2>/dev/null").read())
 
-        import re
-        dnsdomainname = re.sub("\s", "", os.popen("dnsdomainname 2>/dev/null").read())
-        # We don't really care why we failed.
+        else:
+            dnsdomainname = None
 
         ################################################################################
         # This part is very important.

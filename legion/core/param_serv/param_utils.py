@@ -108,14 +108,14 @@ class Entry(object):
     """
     def __init__(self, val):
         self.inner = val
-        self.rlock = threading.Lock()
+        self.lock = threading.Lock()
     
     def __enter__(self):
-        self.rlock.acquire()
+        self.lock.acquire()
         return self.inner
 
     def __exit__(self, _type, value, traceback):
-        self.rlock.release()
+        self.lock.release()
 
 
 def now_milliseconds():
