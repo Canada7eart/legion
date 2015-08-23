@@ -4,7 +4,12 @@ from __future__ import print_function, with_statement, division, generators, abs
     Very helpful description, I know. """
 
 import socket, struct, threading, os, time, datetime
-import ujson
+
+try:
+    import ujson as json
+except:
+    import json
+
 from traceback import print_exc
 from itertools import product
 import numpy as np
@@ -169,7 +174,7 @@ def send_json(conn, dict_to_transform):
     :param dict_to_transform: the dictionary to build json from.
     :return: Nothing.
     """
-    data = ujson.dumps(dict_to_transform)
+    data = json.dumps(dict_to_transform)
     bytes = struct.pack("ii%ds" % len(data),  HEADER_JSON,    len(data),  data)
     conn.sendall(bytes)
 
@@ -186,7 +191,7 @@ def receive_json(conn):
     str_data = brecv(conn, number_of_bytes_to_receive)
     raw = struct.unpack("%ds" % number_of_bytes_to_receive, str_data)[0]
     try:
-        data = ujson.loads(raw)
+        data = json.loads(raw)
 
     except ValueError, err:
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
