@@ -1,2 +1,2 @@
 # legion
-machine learning/deep learning clustering solution
+Machine learning and deep learning distributed training solution.
