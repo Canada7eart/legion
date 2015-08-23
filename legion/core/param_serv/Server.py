@@ -275,5 +275,6 @@ class Server(object):
                     time.sleep(1000000)
         except KeyboardInterrupt:
             print("\nReceived KeyboardInterrupt. Exiting.")
+            exit(0)
 
-
+        print("Exiting.")
