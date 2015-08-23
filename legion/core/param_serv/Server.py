@@ -182,18 +182,16 @@ class Server(object):
         msub_set = {"helios"}  # add "helios" in this field to use msub on helios
 
         launch_info_msub_qsub_jobdispatch = textwrap.dedent(
-"""We queued the jobs onto the cluster. It might take up to a few hours for them to get executed.
+"""We queued the jobs onto the cluster. It might take up to a
+few hours for them to get executed.
 
 \t- Enter the command 'showq -u $USER' to see their state.
-
-\t- Enter 'canceljob XXX' to cancel a serie of jobs, where XXX is the job number that you can see in showq.
-
+\t- Enter 'canceljob XXX' to cancel a serie of jobs, where XXX is the job
+\t  number that you can see in showq.
 \t- If you queue more than one job at once, the job number will have this format:
-
 \t\tXXX[YY]
-
-This means that the job XXX has YY sub jobs. You can cancel them all at once by entering the command
-
+\tThis means that the job XXX has YY sub jobs. You can cancel them all at once by
+\tentering the command
 \t\tcanceljob XXX
 """)
 
@@ -203,6 +201,12 @@ This means that the job XXX has YY sub jobs. You can cancel them all at once by 
     # Here are the launch scripts specific to msub, qsub and jobdispatch.
     #################################################################################
         processes = []
+        is_qsub = (dnsdomainname in qsub_set) and not force_jobdispatch
+        is_msub = (dnsdomainname in msub_set) and not force_jobdispatch
+
+        if force_jobdispatch:
+            print(bcolors.WARNING + "Forcing jobdispatch" + bcolors.ENDC)
+
         print("\n\n" + bcolors.BOLD + "Legion:" + bcolors.ENDC)
         if debug:
             assert debug_specify_devices is None or len(debug_specify_devices) == instances, "if debug_specify_devices is specified, its size needs to be equal to the instances param"
@@ -228,13 +232,13 @@ This means that the job XXX has YY sub jobs. You can cancel them all at once by 
                 process.communicate(complete_code)[0]
                 processes.append(process)
 
-        elif not force_jobdispatch and ((dnsdomainname in qsub_set) or (dnsdomainname in msub_set)):
+        elif is_qsub or is_msub:
             ########################
             # msub or qsub
             ########################
 
             # We are either using qsub or msub. Not using ternary conditional operator for clarity.
-            if dnsdomainname in qsub_set:
+            if is_qsub:
                 program = "qsub"
             else:
                 program = "msub"
@@ -298,8 +302,8 @@ This means that the job XXX has YY sub jobs. You can cancel them all at once by 
             print("\nReceived KeyboardInterrupt. Exiting.")
             print("If you are on the cluster and the jobs have not run yet, remember to cancel them")
             print("By getting your jobid with " + bcolors.OKGREEN + "showq -u $USER" + bcolors.ENDC + " and ending them with")
-            print("\t" + bcolors.OKGREEN + "canceljob" + bcolors.UNDERLINE + "jobid" + bcolors.ENDC)
-            print("where 'jobid' is the jobid.")
+            print("\t" + bcolors.OKGREEN + "canceljob " + bcolors.ENDC + bcolors.UNDERLINE + "jobid" + bcolors.ENDC)
+            print("where " + bcolors.UNDERLINE + "jobid" + bcolors.ENDC + " is the jobid.\n")
             exit(0)
 
         print("Exiting.")
