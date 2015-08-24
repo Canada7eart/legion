@@ -271,7 +271,7 @@ few hours for them to get executed.
             print(launch_info_msub_qsub_jobdispatch)
             print("'%s' script being run by the cluster:" % program)
             launch_script = generate_qsub_msub_launch_script(allocation_name, key_value_exports, executable, user_script_args,
-                                             walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances, main_device)
+                                             walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances)
             print(format_script(launch_script))
 
             process = sp.Popen(program, stdin=sp.PIPE, stdout=sp.PIPE)
