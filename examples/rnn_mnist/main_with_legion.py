@@ -1,4 +1,5 @@
 
+import os
 import numpy as np
 
 ####################################################
@@ -7,6 +8,13 @@ import numpy as np
 # This goes against the way that Blocks is designed
 # at the current time, but it's necessary when
 # having multiple workers.
+
+if os.environ.has_key('MOAB_JOBARRAYINDEX'):
+    np.random.seed(int(os.environ['MOAB_JOBARRAYINDEX']))
+    print "Using MOAB_JOBARRAYINDEX to np.random.seed(%d)." % int(os.environ['MOAB_JOBARRAYINDEX'])
+else:
+    print "Not on helios, or no MOAB_JOBARRAYINDEX present to seed."
+
 s0 = np.random.randint(low=0, high=100000)
 s1 = np.random.randint(low=0, high=100000)
 import blocks
