@@ -138,8 +138,8 @@ monitor_valid_cost = DataStreamMonitoring([cost, error_rate],
                                           prefix="train",
                                           after_epoch=True)
 
-
-saving_path = os.path.join(os.getcwd(), "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+# os.getcwd()
+saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
 monitor_interval_nbr_batches = 50
 maximal_total_duration = 5*60
 
