@@ -52,8 +52,9 @@ def generate_qsub_msub_launch_script(allocation_name, key_value_exports, executa
 
 class Server(object):
     def __init__(self, instances, log_level):
-        self.acceptor = self.launch_server(instances)
         self.log_level = log_level
+        self.acceptor = self.launch_server(instances)
+
 
     def stop(self):
         if self.acceptor is not None:
@@ -79,7 +80,7 @@ class Server(object):
                         meta_rlock=  meta_rlock,
                         db=          db,
                         db_rlock=    db_rlock,
-                        debug_level= self.log_level
+                        debug_level= self.log_level,
                         )
 
         acceptor.setDaemon(True)
