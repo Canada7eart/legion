@@ -208,7 +208,7 @@ few hours for them to get executed.
 """)
 
         launch_info_debug = "Launching legion locally.\nPressing ctrl+C will stop the whole thing."
-
+        job_id = None
     #################################################################################
     # Here are the launch scripts specific to msub, qsub and jobdispatch.
     #################################################################################
@@ -273,9 +273,10 @@ few hours for them to get executed.
                                              walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances, main_device)
             print(format_script(launch_script))
 
-            process = sp.Popen(program, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen(program, stdin=sp.PIPE, stdout=sp.PIPE)
+            job_id = process.communicate(launch_script)[0]
+            print("job_id: %s" % job_id)
             # pass the code through stdin
-            process.communicate(launch_script)[0]
             processes.append(process)
 
         else:
@@ -315,6 +316,8 @@ few hours for them to get executed.
             print(format_script(jobdispatch_cmd))
 
             process = sp.Popen(jobdispatch_cmd, shell=True, stderr=sys.stdout, stdout=sys.stdout)
+
+
             processes.append(process)
 
         ################################################################################
@@ -331,6 +334,12 @@ few hours for them to get executed.
             print("first by getting their jobid with " + bcolors.OKGREEN + "showq -u $USER" + bcolors.ENDC + " and calling")
             print("\t" + bcolors.OKGREEN + "canceljob " + bcolors.ENDC + bcolors.UNDERLINE + "jobid" + bcolors.ENDC)
             print("where " + bcolors.UNDERLINE + "jobid" + bcolors.ENDC + " is the jobid.\n")
+
+            if job_id is not None and re.match(r"^\s*[0-9]+\s*$", job_id):
+                sp.Popen("canceljob %s" % job_id, shell=True, stdout=sys.stdout)
+            elif job_id is not None:
+                print("weird job_id : %s" % job_id)
+
             exit(0)
 
         print("Exiting.")
