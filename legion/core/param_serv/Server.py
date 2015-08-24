@@ -80,7 +80,7 @@ class Server(object):
                         meta_rlock=  meta_rlock,
                         db=          db,
                         db_rlock=    db_rlock,
-                        debug_level= self.log_level,
+                        log_level= self.log_level,
                         )
 
         acceptor.setDaemon(True)
