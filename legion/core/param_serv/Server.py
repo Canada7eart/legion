@@ -337,7 +337,7 @@ few hours for them to get executed.
             print("where " + bcolors.UNDERLINE + "jobid" + bcolors.ENDC + " is the jobid.\n")
 
             if job_id is not None and re.match(r"^\s*[0-9]+\s*$", job_id):
-                os.system("canceljob %s" % job_id)
+                os.system("canceljob %s" % re.sub("\s", "", job_id))
             elif job_id is not None:
                 print("weird job_id : %s" % job_id)
 
