@@ -66,7 +66,7 @@ class Server(object):
             self.acceptor.join_threads()
             self.acceptor.join()
 
-    def launch_server(self, instances, log_level):
+    def launch_server(self, instances):
         """ This launches the server acceptor thread. """
         db = {}
         db_rlock = threading.RLock()
