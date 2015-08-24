@@ -145,8 +145,10 @@ monitor_valid_cost = DataStreamMonitoring([cost, error_rate],
 
 
 
-saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/4workers_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+#saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/4workers_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
 #saving_path = os.path.join( os.getcwd(), "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/8workers_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+
 
 monitor_interval_nbr_batches = 50
 maximal_total_duration = 3*60*60
@@ -187,6 +189,6 @@ legion main_with_legion.py --allocation="jvb-000-ag" --instances=4 --walltime=0:
 
 legion main_with_legion.py --allocation="jvb-000-ag" --instances=4 --walltime=3:00:00
 
-legion main_with_legion.py --allocation="jvb-000-ag" --instances=2 --walltime=3:00:00
+legion main_with_legion.py --allocation="jvb-000-ag" --instances=8 --walltime=3:00:00
 
 """
