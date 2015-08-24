@@ -147,8 +147,8 @@ monitor_valid_cost = DataStreamMonitoring([cost, error_rate],
 
 #saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/4workers_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
 #saving_path = os.path.join( os.getcwd(), "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
-#saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/8workers_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
-saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/alone_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/8workers_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+#saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/alone_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
 
 
 monitor_interval_nbr_batches = 50
@@ -162,7 +162,7 @@ main_loop = MainLoop(data_stream=train_stream, algorithm=algorithm,
                                  monitor_valid_cost,
                                  FinishAfter(after_n_epochs=n_epochs),
                                  #SharedParamsAutoSync(params_to_sync, alpha=0.5, beta=0.5),
-                                 #SharedParamsRateLimited(params=params_to_sync, every_n_batches=1, alpha=0.5, beta=0.5, maximum_rate=0.25),
+                                 SharedParamsRateLimited(params=params_to_sync, every_n_batches=1, alpha=0.5, beta=0.5, maximum_rate=0.25),
                                  Checkpoint(path=saving_path, save_separately=['log'],
                                             every_n_batches=monitor_interval_nbr_batches),
                                  Timing(every_n_batches=monitor_interval_nbr_batches),
@@ -191,5 +191,7 @@ legion main_with_legion.py --allocation="jvb-000-ag" --instances=4 --walltime=0:
 legion main_with_legion.py --allocation="jvb-000-ag" --instances=4 --walltime=3:00:00
 
 legion main_with_legion.py --allocation="jvb-000-ag" --instances=8 --walltime=3:00:00
+
+legion main_with_legion.py --allocation="jvb-000-ag" --instances=1 --walltime=3:00:00
 
 """
