@@ -2,7 +2,11 @@ import numpy as np
 from utils import load_data
 from fuel.datasets import IterableDataset
 from fuel.streams import DataStream
+from fuel.schemes import SequentialScheme, ShuffledScheme
+
 import theano
+
+
 
 floatX = theano.config.floatX
 
@@ -38,6 +42,9 @@ def MNIST(batch_size=200):
     train = IterableDataset({'x': train_x.astype(floatX),
                              'y': train_y.astype('int32')})
     train_stream = DataStream(train)
+    # This doesn't work with ShuffledScheme because of a "ValueError".
+    # Not sure what to do, but let's forget about ShuffledScheme for now.
+    #train_stream = DataStream(train, iteration_scheme=ShuffledScheme(train.num_examples, batch_size))
 
     valid = IterableDataset({'x': valid_x.astype(floatX),
                              'y': valid_y.astype('int32')})

@@ -43,6 +43,7 @@ from utils import learning_algorithm
 from datasets import MNIST
 import os
 
+
 floatX = theano.config.floatX
 
 from legion.blocks_extensions import SharedParamsAutoSync, SharedParamsRateLimited
@@ -51,11 +52,11 @@ from legion.blocks_extensions import Timestamp, StopAfterTimeElapsed
 # TODO : shuffle the dataset ahead of time to have different workers
 #        cover different parts of the dataset
 
-n_epochs = 30
+n_epochs = 100000
 x_dim = 1
 h_dim = 100
 o_dim = 10
-batch_size = 500
+batch_size = 1000
 
 print 'Building model ...'
 # T x B x F
@@ -81,7 +82,7 @@ softmax_out.name = 'softmax_out'
 
 # comparing only last time-step
 cost = CategoricalCrossEntropy().apply(y[-1, :, 0], softmax_out[-1])
-cost.name = 'CrossEntropy'
+cost.name = 'cross_entropy'
 error_rate = MisclassificationRate().apply(y[-1, :, 0], softmax_out[-1])
 error_rate.name = 'error_rate'
 
@@ -135,13 +136,20 @@ monitor_train_cost = TrainingDataMonitoring([cost, error_rate],
 
 monitor_valid_cost = DataStreamMonitoring([cost, error_rate],
                                           data_stream=valid_stream,
-                                          prefix="train",
+                                          prefix="valid",
                                           after_epoch=True)
 
-# os.getcwd()
-saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+
+#DataStream.default_stream(train_set, iteration_scheme=ShuffledScheme(train_set.num_examples, batch_size))
+
+
+
+
+saving_path = os.path.join("/rap/jvb-000-aa/data/alaingui/experiments_legion/4workers_3h", "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+#saving_path = os.path.join( os.getcwd(), "checkpoint_%0.4d" % np.random.randint(low=0, high=100000))
+
 monitor_interval_nbr_batches = 50
-maximal_total_duration = 5*60
+maximal_total_duration = 3*60*60
 
 pid = os.getpid()
 
@@ -173,5 +181,12 @@ legion main_with_legion.py --instances=1 --debug --debug_devices=gpu0
 # on Helios :
 legion main_with_legion.py --allocation="jvb-000-ag" --instances=4
 
+legion main_with_legion.py --allocation="jvb-000-ag" --instances=4 --walltime=0:10:00
+
+
+
+legion main_with_legion.py --allocation="jvb-000-ag" --instances=4 --walltime=3:00:00
+
+legion main_with_legion.py --allocation="jvb-000-ag" --instances=2 --walltime=3:00:00
 
 """
