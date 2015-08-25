@@ -14,14 +14,18 @@ def format_script(text):
     return bcolors.OKGREEN + insert_tabs("\n".join(textwrap.wrap(text, 60))) + bcolors.ENDC
 
 def generate_qsub_msub_launch_script(allocation_name, key_value_exports, executable, user_script_args,
-                                     walltime, job_name, pydev, instances, user_script_path):
+                                     walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances):
+
+    if max_simultaneous_instances is None:
+        max_simultaneous_instances = instances
+
     return textwrap.dedent(
             """
             #PBS -A {allocation_name}
             #PBS -l walltime={walltime}
             #PBS -l nodes=1:gpus=1
             #PBS -N {job_name}
-            #PBS -t 1-{instances}
+            #PBS -t [1-{instances}]%{max_simultaneous_instances}
 
             {key_value_exports}
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
@@ -33,21 +37,24 @@ def generate_qsub_msub_launch_script(allocation_name, key_value_exports, executa
             echo "qsub/msub script done"
             """) \
             .format(
-                    allocation_name=    allocation_name,
-                    key_value_exports=  key_value_exports,
-                    executable=         executable,
-                    user_args=          user_script_args,
-                    walltime=           walltime,
-                    job_name=           job_name,
-                    pydev=              pydev,
-                    instances=          instances,
-                    script_path=        user_script_path,
-                    theano_device_type= "gpu0"
+                    allocation_name=             allocation_name,
+                    key_value_exports=           key_value_exports,
+                    executable=                  executable,
+                    user_args=                   user_script_args,
+                    walltime=                    walltime,
+                    job_name=                    job_name,
+                    pydev=                       pydev,
+                    instances=                   instances,
+                    script_path=                 user_script_path,
+                    theano_device_type=          "gpu0",
+                    max_simultaneous_instances = max_simultaneous_instances
                     )
 
 class Server(object):
-    def __init__(self, instances):
+    def __init__(self, instances, log_level):
+        self.log_level = log_level
         self.acceptor = self.launch_server(instances)
+
 
     def stop(self):
         if self.acceptor is not None:
@@ -73,7 +80,9 @@ class Server(object):
                         meta_rlock=  meta_rlock,
                         db=          db,
                         db_rlock=    db_rlock,
+                        log_level= self.log_level,
                         )
+
         acceptor.setDaemon(True)
         self.port = acceptor.bind()
         acceptor.start()
@@ -91,7 +100,8 @@ class Server(object):
                        debug=False,
                        debug_pycharm=False,
                        force_jobdispatch=False,
-                       debug_specify_devices=None
+                       debug_specify_devices=None,
+                       max_simultaneous_instances=None,
                        ):
         """ This makes the call to jobdispatch, msub or qsub.
          This function never ruturns! """
@@ -199,7 +209,7 @@ few hours for them to get executed.
 """)
 
         launch_info_debug = "Launching legion locally.\nPressing ctrl+C will stop the whole thing."
-
+        job_id = None
     #################################################################################
     # Here are the launch scripts specific to msub, qsub and jobdispatch.
     #################################################################################
@@ -233,12 +243,11 @@ few hours for them to get executed.
             for i in xrange(instances):
                 device = "cpu" if debug_specify_devices is None else debug_specify_devices[i]
                 launch_code = """export THEANO_FLAGS="device={theano_device_type},floatX=float32"
-                      {executable} '{script_path}' {user_args}""".format(
-                                                                   theano_device_type=  device,
-                                                                   executable=          executable,
-                                                                   script_path=         user_script_path,
-                                                                   user_args=           user_script_args
-                                                                   )
+                      {executable} '{script_path}' {user_args}""".format(theano_device_type= device,
+                                                                         executable=         executable,
+                                                                         script_path=        user_script_path,
+                                                                         user_args=          user_script_args
+                                                                         )
 
                 complete_code = key_value_exports + launch_code
                 print(format_script(complete_code))
@@ -262,47 +271,54 @@ few hours for them to get executed.
             print(launch_info_msub_qsub_jobdispatch)
             print("'%s' script being run by the cluster:" % program)
             launch_script = generate_qsub_msub_launch_script(allocation_name, key_value_exports, executable, user_script_args,
-                                             walltime, job_name, pydev, instances, user_script_path)
+                                             walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances)
             print(format_script(launch_script))
 
-            process = sp.Popen(program, stdin=sp.PIPE, stdout=sys.stdout)
+            process = sp.Popen(program, stdin=sp.PIPE, stdout=sp.PIPE)
+            job_id = process.communicate(launch_script)[0]
+            print("job_id: %s" % job_id)
             # pass the code through stdin
-            process.communicate(launch_script)[0]
             processes.append(process)
 
         else:
             ########################
             # Jobdispatch
             ########################
+            assert max_simultaneous_instances, "max_simultaneous_instances is not supported on jobdispatch."
 
             print(">>> jobdispatch")
             print(launch_info_msub_qsub_jobdispatch)
             print("\n'jobdispatch' script being run by the cluster:")
 
             to_export = {
-                     "legion_walltime":    walltime,
-                     "legion_job_name":    job_name,
-                     "legion_instances":   instances,
-                     "legion_script_path": user_script_path,
-                     "legion_server_ip":   our_ip(),
-                     "legion_server_port": self.port,
-                     "legion_debug":       str(debug).lower(),
-                     "THEANO_FLAGS":       "device=gpu0,floatX=float32",
-                     }
+                         "legion_walltime":     walltime,
+                         "legion_job_name":     job_name,
+                         "legion_instances":    instances,
+                         "legion_script_path":  user_script_path,
+                         "legion_server_ip":    our_ip(),
+                         "legion_server_port":  self.port,
+                         "legion_debug":        str(debug).lower(),
+                         "THEANO_FLAGS":        "device=gpu0, floatX=float32",
+                         }
 
             exports_substring_generator = ("--env={key}=\"{val}\"".format(key=key, val=val)
                                            for key, val in to_export.iteritems())
+
             key_value_exports = " ".join(exports_substring_generator) + " "
             execution = "python2 \"{user_script_path}\" {user_args}"\
                 .format(
                         user_script_path=user_script_path,
                         user_args=user_script_args)
-            jobdispatch_cmd = "jobdispatch --gpu --repeat_jobs={instances} {exports} {execution}" \
-                .format(exports=key_value_exports, execution=execution, instances=instances)
+
+
+            jobdispatch_cmd = "jobdispatch --gpu --duree={walltime} --repeat_jobs={instances} {exports} {execution}" \
+                .format(exports=key_value_exports, walltime=walltime, execution=execution, instances=instances)
 
             print(format_script(jobdispatch_cmd))
 
             process = sp.Popen(jobdispatch_cmd, shell=True, stderr=sys.stdout, stdout=sys.stdout)
+
+
             processes.append(process)
 
         ################################################################################
@@ -312,13 +328,19 @@ few hours for them to get executed.
         ################################################################################
         try:
             while True:
-                    time.sleep(1000000)
+                time.sleep(1000000)
         except KeyboardInterrupt:
             print("\nReceived KeyboardInterrupt. Exiting.")
             print("If you are on the cluster and the jobs have not run yet, remember to cancel them")
             print("first by getting their jobid with " + bcolors.OKGREEN + "showq -u $USER" + bcolors.ENDC + " and calling")
             print("\t" + bcolors.OKGREEN + "canceljob " + bcolors.ENDC + bcolors.UNDERLINE + "jobid" + bcolors.ENDC)
             print("where " + bcolors.UNDERLINE + "jobid" + bcolors.ENDC + " is the jobid.\n")
+
+            if job_id is not None and re.match(r"^\s*[0-9]+\s*$", job_id):
+                os.system("canceljob %s" % re.sub("\s", "", job_id))
+            elif job_id is not None:
+                print("weird job_id : %s" % job_id)
+
             exit(0)
 
         print("Exiting.")

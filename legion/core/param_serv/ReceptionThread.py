@@ -16,7 +16,7 @@ class ReceptionThread(threading.Thread):
     :return: Nothing.
     """
 
-    def __init__(self, conn, meta, meta_rlock, db, db_rlock):
+    def __init__(self, conn, meta, meta_rlock, db, db_rlock, log_level = 0):
         super(self.__class__, self).__init__()
         self.conn               = conn
         self.db                 = db
@@ -24,20 +24,22 @@ class ReceptionThread(threading.Thread):
         self.meta               = meta
         self.meta_rlock         = meta_rlock
         self.db_insertion_mutex = threading.RLock()
+        self.log_level = log_level
 
-    def pwhs(self, state, param_name = None, extra = None):
+    def pwhs(self, state, param_name = None, extra = None, logging_level = 1):
         """
         Prints the date, the pid, the fact that this is the server, and the name of current state.
         :return: No return value.
         """
-        text = "Server - client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state)
-        if param_name is not None:
-            text += " - " + param_name
+        if self.log_level >= logging_level:
+            text = "Server - client hash '{client_pid}' - {state}".format(client_pid=self.conn.__hash__(), state=state)
+            if param_name is not None:
+                text += " - " + param_name
 
-        if extra is not None:
-            text += " - " + extra
+            if extra is not None:
+                text += " - " + extra
 
-        pwh(text)
+            pwh(text)
 
 
     def run(self):

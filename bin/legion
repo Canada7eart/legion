@@ -8,26 +8,28 @@ import time
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('path',        nargs=1, type=str)
-    parser.add_argument('--instances',          type=int)
+    parser.add_argument('path',        nargs=1,            type=str)
+    parser.add_argument('--instances',                     type=int)
 
     # Optional
-    parser.add_argument('--walltime',           type=str, default="12:00:00")
+    parser.add_argument('--walltime',                      type=str, default="12:00:00")
 
-    parser.add_argument('--debug',                        default=False, action="store_true")
-    parser.add_argument('--debug_pycharm',                default=False, action="store_true")
-    parser.add_argument('--debug_devices',      type=str, default=None)
+    parser.add_argument('--debug',                                   default=False, action="store_true")
+    parser.add_argument('--debug_pycharm',                           default=False, action="store_true")
+    parser.add_argument('--debug_devices',                 type=str, default=None)
 
-    parser.add_argument('--allocation',         type=str, default="jvb-000-aa") # jvb-000-ag
-    parser.add_argument('--job_name',           type=str, default="[Unspecified]")
-    parser.add_argument('--user_script_args',   type=str, default="")
+    parser.add_argument('--allocation',                    type=str, default="jvb-000-aa")
+    parser.add_argument('--job_name',                      type=str, default="[Unspecified]")
+    parser.add_argument('--user_script_args',              type=str, default="")
+    parser.add_argument('--log_level',                     type=int, default=0)
+    parser.add_argument('--max_simultaneous_instances',    type=int, default=None)
 
     args = parser.parse_args()
     assert os.path.exists(args.path[0])
     assert not args.debug_pycharm or (args.debug and args.debug_pycharm), "The --debug flag must be activated to use the --debug_pycharm flag"
     assert args.debug or args.instances is not None and args.instances > 0
 
-    leg = Server(args.instances)
+    leg = Server(args.instances, args.log_level)
 
     if args.debug_devices is not None:
         debug_specify_devices = args.debug_devices.replace(";", ",").replace(" ", "").split(",")
@@ -36,14 +38,15 @@ if __name__ == "__main__":
         debug_specify_devices = None
 
     leg.launch_clients(
-        user_script_path=      args.path[0],
-        walltime=              args.walltime,
-        job_name=              args.job_name,
-        instances=             args.instances,
-        allocation_name=       args.allocation,
-        user_script_args=      args.user_script_args,
-        debug=                 args.debug,
-        debug_pycharm=         args.debug_pycharm,
-        debug_specify_devices= debug_specify_devices
+        user_script_path=            args.path[0],
+        walltime=                    args.walltime,
+        job_name=                    args.job_name,
+        instances=                   args.instances,
+        allocation_name=             args.allocation,
+        user_script_args=            args.user_script_args,
+        debug=                       args.debug,
+        debug_pycharm=               args.debug_pycharm,
+        debug_specify_devices=       debug_specify_devices,
+        max_simultaneous_instances=  args.max_simultaneous_instances,
         )
 

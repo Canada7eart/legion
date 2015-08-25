@@ -12,7 +12,7 @@ class AcceptorThread(threading.Thread):
     This is the server's acceptor thread. The server has one of these.
     Constantly loops to create "ReceptionThread"s when a connection to a client is accepted.
     """
-    def __init__(self, instances, meta, meta_rlock, db, db_rlock):
+    def __init__(self, instances, meta, meta_rlock, db, db_rlock, log_level = 0):
         super(self.__class__, self).__init__()
         self.meta =                 meta
         self.meta_rlock =           meta_rlock
@@ -22,6 +22,7 @@ class AcceptorThread(threading.Thread):
         self.instances =            instances
         self.instances_counter =    0
         self.reception_threads =    []
+        self.log_level = log_level
 
     def join_reception_threads(self):
         for reception_thread in self.reception_threads:
@@ -40,7 +41,7 @@ class AcceptorThread(threading.Thread):
             self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             self.sock.bind(('', 0))
-            #self.sock.getsockname()[1]
+            # self.sock.getsockname()[1]
             self.sock.listen(100)
 
         except socket.error, s_err:
@@ -78,7 +79,6 @@ class AcceptorThread(threading.Thread):
                 if self.instances_counter >= self.instances:
                     print("The acceptor has received all the threads it expected.")
                     break
-
 
         finally:
             if self.sock:
