@@ -80,6 +80,7 @@ class SharedParamsRateLimited(SharedParamsAutoSync):
 
     def __init__(self,
                  maximum_rate=1.0,
+                 want_sync_timing_log=False,
                  **kwargs):
 
         super(SharedParamsRateLimited, self).__init__(**kwargs)
@@ -98,6 +99,11 @@ class SharedParamsRateLimited(SharedParamsAutoSync):
         # Has to be in (0.0, 1.0) interval.
         self.decay_factor = 0.2
 
+        # This creates some "pollution" in the quantities reported,
+        # but it's useful if you want to get a better understanding
+        # of how much time was spent synching.
+        self.want_sync_timing_log = want_sync_timing_log
+
 
     def presync_callback(self):
         self.sync_start_timestamp = time.time()
@@ -106,6 +112,15 @@ class SharedParamsRateLimited(SharedParamsAutoSync):
         self.sync_end_timestamp = time.time()
         time_diff = self.sync_end_timestamp - self.sync_start_timestamp
         self.rolling_estimate_sync_cost = self.decay_factor * time_diff + (1.0-self.decay_factor) * self.rolling_estimate_sync_cost
+
+        if self.want_sync_timing_log:
+            # write down how long the sync took
+            current_row = self.main_loop.log.current_row
+
+            current_row['param_sync_start'] = self.sync_start_timestamp
+            current_row['param_sync_end'] = self.sync_end_timestamp
+            current_row['param_sync_duration'] = time_diff
+
 
     def should_we_sync_now(self):
         work_cost_since_last_sync = time.time() - self.sync_end_timestamp

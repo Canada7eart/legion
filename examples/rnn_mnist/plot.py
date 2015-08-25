@@ -16,10 +16,13 @@ import matplotlib.pyplot as plt
 def run():
 
     #experiment_dir = os.getcwd()
-    experiment_dir = "/rap/jvb-000-aa/data/alaingui/experiments_legion"
+    #experiment_dir = "/rap/jvb-000-aa/data/alaingui/experiments_legion"
+    experiment_dir = "/home/dpln/NIPS/experiments_legion"
 
-    read_results_and_plot(experiment_dir, 'cross_entropy')
-    #read_results_and_plot(experiment_dir, 'error_rate')
+    read_results_and_plot(experiment_dir, 'train_cross_entropy')
+    read_results_and_plot(experiment_dir, 'train_error_rate')
+    read_results_and_plot(experiment_dir, 'valid_cross_entropy')
+    read_results_and_plot(experiment_dir, 'valid_error_rate')
 
 
 def read_results_and_plot(experiment_dir, criterion):
@@ -38,19 +41,21 @@ def read_results_and_plot(experiment_dir, criterion):
 
     L_result_files = find_result_files(experiment_dir)
 
+    if len(L_result_files) == 0:
+        print "ERROR. You can't do anything with zero result files."
+        quit()
+
     L_legend_handles = []
     L_legend_tags = []
 
     pylab.hold(True)
 
     L_results = []
-    for result_file in reversed(sorted(L_result_files, key=lambda e:e['worker_id'])):
-        # The strange sorting thing is so that we'll print the worker_id==0
-        # at the very end so it will be at the top of the graph, above the others.
+    for result_file in L_result_files:
 
         path = result_file['path']
         worker_id = result_file['worker_id']
-        exp_path = res['exp_path']
+        exp_path = result_file['exp_path']
 
         A = pickle.load(open(path, "r"))
 
@@ -73,11 +78,14 @@ def read_results_and_plot(experiment_dir, criterion):
                 for k in D_logged.keys():
                     D_logged[k].append(v[k])
 
+        print "Parsed results from %s. Found %d values to plot." % (result_file, len(L_step))
+
         L_results.append({'A_step':np.array(L_step), 'D_logged':D_logged, 'exp_path':exp_path})
+
 
     # This is the smallest value encountered for all the steps (in any given experiment).
     # We shouldn't plot anything before we come up with this value.
-    D_step_min = None
+    D_step_min = {}
     for res in L_results:
         exp_path = res['exp_path']
         if D_step_min.has_key(exp_path):
@@ -92,6 +100,8 @@ def read_results_and_plot(experiment_dir, criterion):
     # TODO : You need to iterate with the exp_path and then you can
     #        plot one per exp_path.
 
+    pylab.hold(True)
+    L_legend_handles = []
     legend_checkbox_trick = set()
     for exp_path in ['alone_3h', '4workers_3h', '8workers_3h']:
     
@@ -108,25 +118,27 @@ def read_results_and_plot(experiment_dir, criterion):
             color = D_colors[exp_path]
 
             if legend_has_been_set_for_at_least_one_plot:
-                h = pylab.plot(domain - step_min, D_logged[k], c=color, label=exp_path)
+                h = pylab.plot(domain, D_logged[k], c=color, label=exp_path)
+                L_legend_handles.append(h)
                 legend_has_been_set_for_at_least_one_plot = True
             else:
-                h = pylab.plot(domain - step_min, D_logged[k], c=color)
-
-        plt.legend()
-
-        if criterion == 'error_rate':
-            pylab.ylim(ymin=0.0, ymax=1.0)
-        elif criterion == 'cross_entropy':
-            pylab.ylim(ymin=0.0)
+                h = pylab.plot(domain, D_logged[k], c=color)
 
 
-        outputfile = os.path.join(experiment_dir, "%s_%s.png" % (exp_path, criterion))
+    if criterion in ['train_error_rate', 'valid_error_rate']:
+        pylab.ylim(ymin=0.0, ymax=1.0)
+    elif criterion in ['train_cross_entropy', 'valid_cross_entropy']:
+        pylab.ylim(ymin=0.0)
 
-        pylab.draw()
-        pylab.savefig(outputfile, dpi=150)
-        pylab.close()
-        print "Wrote %s." % outputfile
+
+    #outputfile = os.path.join(experiment_dir, "%s_%s.png" % (exp_path, criterion))
+    outputfile = os.path.join(experiment_dir, "%s.png" % (criterion,))
+
+    plt.legend(handles=L_legend_handles)
+    pylab.draw()
+    pylab.savefig(outputfile, dpi=150)
+    pylab.close()
+    print "Wrote %s." % outputfile
 
 
 
@@ -140,32 +152,13 @@ def find_result_files(dir):
 
     L_result_files = []
     for path in L_files:
-        m = re.match(r".*/(\w*?)/checkpoint(\d+)_log", path)
+        m = re.match(r".*/(\w*)/checkpoint_(\d+)_log", path)
         if m:
-            L_result_files.append({'path' : path, 'worker_id' : int(m.group(2)), 'exp_path' : m.group(3)})
+            L_result_files.append({'path' : path, 'worker_id' : int(m.group(2)), 'exp_path' : m.group(1)})
 
     return L_result_files
 
 
-
-
-def plot(L_step, D_logged):
-
-    print "Generating plot."
-
-    pylab.hold(True)
-    pylab.scatter(samples[:,0], samples[:,1], c='#f9a21d')
-   
-    arrows_scaling = 1.0
-    pylab.quiver(plotgrid[:,0],
-                 plotgrid[:,1],
-                 arrows_scaling * (grid_pred[:,0] - plotgrid[:,0]),
-                 arrows_scaling * (grid_pred[:,1] - plotgrid[:,1]))
-    pylab.draw()
-    pylab.axis([center[0] - window_width*1.0, center[0] + window_width*1.0,
-                center[1] - window_width*1.0, center[1] + window_width*1.0])
-    pylab.savefig(outputfile, dpi=dpi)
-    pylab.close()
 
 
 if __name__ == "__main__":
@@ -174,6 +167,6 @@ if __name__ == "__main__":
 
 """
 
-rsync helios:
+rsync -av --delete helios:/rap/jvb-000-aa/data/alaingui/experiments_legion ${HOME}/NIPS
 
 """
