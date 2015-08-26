@@ -23,6 +23,7 @@ class SharedParamsAutoSync(SimpleExtension):
                  client=None,
                  debug=False,
                  verbose=False,
+                 want_sync_timing_log=False,
                  **kwargs):
 
         super(SharedParamsAutoSync, self).__init__(**kwargs)
@@ -35,6 +36,10 @@ class SharedParamsAutoSync(SimpleExtension):
         self.beta = beta
         self.verbose = verbose
         self.initialize_values(self.client, params, verbose)
+        # This creates some "pollution" in the quantities reported,
+        # but it's useful if you want to get a better understanding
+        # of how much time was spent synching.
+        self.want_sync_timing_log = want_sync_timing_log
 
     def do(self, which_callback, *args):
         if self.should_we_sync_now():
@@ -57,10 +62,19 @@ class SharedParamsAutoSync(SimpleExtension):
     # for other subclasses that will instrument this class a bit more.
 
     def presync_callback(self):
-        pass
+        self.sync_start_timestamp = time.time()
 
     def postsync_callback(self):
-        pass
+        self.sync_end_timestamp = time.time()
+
+        if self.want_sync_timing_log:
+            # write down how long the sync took
+            current_row = self.main_loop.log.current_row
+
+            current_row['param_sync_start'] = self.sync_start_timestamp
+            current_row['param_sync_end'] = self.sync_end_timestamp
+            current_row['param_sync_duration'] = time_diff
+
 
     def should_we_sync_now(self):
         return True
@@ -80,7 +94,6 @@ class SharedParamsRateLimited(SharedParamsAutoSync):
 
     def __init__(self,
                  maximum_rate=1.0,
-                 want_sync_timing_log=False,
                  **kwargs):
 
         super(SharedParamsRateLimited, self).__init__(**kwargs)
@@ -99,14 +112,6 @@ class SharedParamsRateLimited(SharedParamsAutoSync):
         # Has to be in (0.0, 1.0) interval.
         self.decay_factor = 0.2
 
-        # This creates some "pollution" in the quantities reported,
-        # but it's useful if you want to get a better understanding
-        # of how much time was spent synching.
-        self.want_sync_timing_log = want_sync_timing_log
-
-
-    def presync_callback(self):
-        self.sync_start_timestamp = time.time()
 
     def postsync_callback(self):
         self.sync_end_timestamp = time.time()

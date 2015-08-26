@@ -18,12 +18,13 @@ def pwhcf(verbose=False, param_name=None):
 class Client(object):
 
 
-    def __init__(self):
-        pwhcf()
+    def __init__(self, verbose=False):
+        pwhcf(verbose=False)
         # we minimise the number of hash map lookups by saving refs to values used more than once
         self._server_ip = os.environ["legion_server_ip"]
         self._server_port = os.environ["legion_server_port"]
         self._names = set()
+        self.verbose=verbose
 
         self._conn = None
         for i in range(3):
@@ -55,7 +56,7 @@ class Client(object):
         :param beta: The linear importance of the value being sent by the client in the new assignment
         :return: No return value/Always None.
         """
-        pwhcf(name)
+        pwhcf(verbose=self.verbose, param_name=name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
         assert name in self._names, "The array to be pushed needs to have been initialized with 'create_if_not_exist' first. '{name}' was not.".format(name=name)
 
@@ -91,7 +92,7 @@ class Client(object):
         :param beta: The linear importance of the value being sent by the client in the new assignment
         :return: No return value/Always None.
         """
-        pwhcf(name)
+        pwhcf(verbose=self.verbose, param_name=name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
         assert name in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
         assert isinstance(arr, np.ndarray)
@@ -118,7 +119,7 @@ class Client(object):
         :param axis_numbers: The axis numbers that compose the submatrix we are pulling
         :return: Nothing; the submatrix that we pull is assigned to an inner parameter.
         """
-        pwhcf(name)
+        pwhcf(verbose=self.verbose, param_name=name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
         assert name in self._names, "The array to be pulled needs to have been initialized with create_once first. '{name}' was not.".format(name=name)
 
@@ -139,7 +140,7 @@ class Client(object):
         :param name: Name of the param
         :return: The ndarray array that we pulled
         """
-        pwhcf(name)
+        pwhcf(verbose=self.verbose, param_name=name)
         assert isinstance(name, str), "Argument 'name' needs to be a string."
         assert name in self._names, \
             "The array to be pulled needs to have been initialized with create_once first. '{name}' was not."\
@@ -166,7 +167,7 @@ class Client(object):
         :param arr: value of the param
         :return: The value that was settled on
         """
-        pwhcf(name)
+        pwhcf(verbose=self.verbose, param_name=name)
         assert name is not None, "Argument 'name' cannot be None."
         assert arr is not None, "Argument 'arr' cannot be None."
         assert isinstance(name, np.str), "Expected argument 'name' to be of type 'str'. Got an object of type '{type}' instead.".format(type=type(arr))
@@ -228,7 +229,7 @@ class Client(object):
 #        :param beta: Float for the calculation of the final value on the server
 #        :return: No return value/Always None.
 #        """
-#        pwhcf(name)
+#        pwhcf(verbose=self.verbose, param_name=name)
 #        assert False, "TODO."
 #
 #        assert isinstance(name, str), "Argument 'name' needs to be a string."
@@ -260,7 +261,7 @@ class Client(object):
 #       :param indices: Tuple of tuple or list of tuples with the indices of the values to be requested from the server
 #       :return: No return value/Always None.
 #       """
-#       pwhcf(name)
+#       pwhcf(verbose=self.verbose, param_name=name)
 #       assert False, "TODO."
 
 #       assert isinstance(name, str), "Expected argument 'name' to be of type 'str'. Got an object of type '{type}' instead." \
