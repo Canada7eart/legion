@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--user_script_args',              type=str, default="")
     parser.add_argument('--log_level',                     type=int, default=0)
     parser.add_argument('--max_simultaneous_instances',    type=int, default=None)
+    parser.add_argument('--want_helios_k80',               action='store_true')
 
     args = parser.parse_args()
     assert os.path.exists(args.path[0])
@@ -48,5 +49,6 @@ if __name__ == "__main__":
         debug_pycharm=               args.debug_pycharm,
         debug_specify_devices=       debug_specify_devices,
         max_simultaneous_instances=  args.max_simultaneous_instances,
+        want_helios_k80=             args.want_helios_k80
         )
 

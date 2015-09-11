@@ -14,10 +14,16 @@ def format_script(text):
     return bcolors.OKGREEN + insert_tabs("\n".join(textwrap.wrap(text, 60))) + bcolors.ENDC
 
 def generate_qsub_msub_launch_script(allocation_name, key_value_exports, executable, user_script_args,
-                                     walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances):
+                                     walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances,
+                                     want_helios_k80=False):
 
     if max_simultaneous_instances is None:
         max_simultaneous_instances = instances
+
+    if want_helios_k80:
+        extra_PBS_args = "#PBS -l feature=k80"
+    else:
+        extra_PBS_args = ""
 
     return textwrap.dedent(
             """
@@ -26,6 +32,7 @@ def generate_qsub_msub_launch_script(allocation_name, key_value_exports, executa
             #PBS -l nodes=1:gpus=1
             #PBS -N {job_name}
             #PBS -t [1-{instances}]%{max_simultaneous_instances}
+            {extra_PBS_args}
 
             {key_value_exports}
             export PYTHONPATH="$PYTHONPATH":"{pydev}"
@@ -47,7 +54,8 @@ def generate_qsub_msub_launch_script(allocation_name, key_value_exports, executa
                     instances=                   instances,
                     script_path=                 user_script_path,
                     theano_device_type=          "gpu0",
-                    max_simultaneous_instances = max_simultaneous_instances
+                    max_simultaneous_instances = max_simultaneous_instances,
+                    extra_PBS_args=              extra_PBS_args
                     )
 
 class Server(object):
@@ -102,6 +110,7 @@ class Server(object):
                        force_jobdispatch=False,
                        debug_specify_devices=None,
                        max_simultaneous_instances=None,
+                       want_helios_k80=False,
                        ):
         """ This makes the call to jobdispatch, msub or qsub.
          This function never ruturns! """
@@ -271,7 +280,7 @@ few hours for them to get executed.
             print(launch_info_msub_qsub_jobdispatch)
             print("'%s' script being run by the cluster:" % program)
             launch_script = generate_qsub_msub_launch_script(allocation_name, key_value_exports, executable, user_script_args,
-                                             walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances)
+                                             walltime, job_name, pydev, instances, user_script_path, max_simultaneous_instances, want_helios_k80)
             print(format_script(launch_script))
 
             process = sp.Popen(program, stdin=sp.PIPE, stdout=sp.PIPE)
