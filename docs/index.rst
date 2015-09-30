@@ -3,26 +3,26 @@ Welcome to Legion' documentation!
 Legion is a machine learning and deep learning distributed training solution.
 
 It is currently at a late prototype stage and it is intended for use
-a the University of Montreal on clusters such as Helios.
+a the University of Montreal on clusters such as Helios (from Calcul Quebec).
 
 It contains an implementation of Asynchronous Stochastic Gradient Descent (ASGD) with:
 
-* parameter server in python
+* parameter server in python (over TCP sockets)
 * Blocks_ extensions to synchronize the parameters on individual workers with the parameter server
 * script to launch everything on the Helios cluster
 * examples of scripts adapted to be used with Legion
 
-For more information about the Helios cluster (from Calcul Quebec), see:
+For more information about the Helios cluster, see:
 
 * http://www.calculquebec.ca/en/resources/compute-servers/helios
 * https://wiki.calculquebec.ca/w/Helios/en
 
 .. warning::
-   Legion is not a way to use multiple GPUs in one Theano process.
+   Legion is **not** a way to use multiple GPUs in **one Theano process**.
 
 .. warning::
-   Legion is not a good strategy to explore a large collection of hyper-parameters;
-   it is meant to speed up ONE experiment being trained.
+   Legion is **not** a good strategy to explore a large collection of hyper-parameters.
+   It  goal is to speed up ONE experiment being trained.
 
 .. tip::
    Adaptating your Blocks (or Theano) programs to use Legion is relatively easy,
@@ -30,6 +30,13 @@ For more information about the Helios cluster (from Calcul Quebec), see:
    One rule of thumb seems to be that, if you can run through your whole dataset
    relatively quickly (let's say less than 30 seconds), then you probably will
    not get anything out of using Legion. Stay with regular SGD.
+
+
+Note that you should use the cluster as usual (with ``jobdispatch`` or ``msub``)
+if you want to perform hyper-parameter optimization.
+In almost all cases, given 128 available GPU slots, running 128 single-GPU jobs in parallel in faster
+than running the same 128 jobs in a queue where each job tries to use multi-GPU.
+
 
 .. _Blocks: https://github.com/mila-udem/blocks
 
