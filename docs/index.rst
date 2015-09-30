@@ -17,10 +17,10 @@ For more information about the Helios cluster (from Calcul Quebec), see:
 * http://www.calculquebec.ca/en/resources/compute-servers/helios
 * https://wiki.calculquebec.ca/w/Helios/en
 
-
-
 .. warning::
    Legion is not a way to use multiple GPUs in one Theano process.
+
+.. warning::
    Legion is not a good strategy to explore a large collection of hyper-parameters;
    it is meant to speed up ONE experiment being trained.
 
@@ -32,6 +32,28 @@ For more information about the Helios cluster (from Calcul Quebec), see:
    not get anything out of using Legion. Stay with regular SGD.
 
 .. _Blocks: https://github.com/mila-udem/blocks
+
+
+Overview
+--------
+
+have a sketch here
+
+Quick example
+--------
+
+detail some steps and bash commands
+
+
+
+Specific examples explained
+--------
+.. toctree::
+   :maxdepth: 1
+
+   example_blocks_tutorial.rst
+   ../examples/blocks_tutorial/tuto0.py
+
 
 |
 
