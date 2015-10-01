@@ -22,7 +22,7 @@ For more information about the Helios cluster, see:
 
 .. warning::
    Legion is **not** a good strategy to explore a large collection of hyper-parameters.
-   It  goal is to speed up ONE experiment being trained.
+   It  goal is to speed up training in **one** experiment.
 
 .. tip::
    Adaptating your Blocks (or Theano) programs to use Legion is relatively easy,
@@ -54,6 +54,7 @@ Quickstart
 Clone the library and install the python module.
 
 .. code-block:: bash
+
    $ git clone git@github.com:JulesGM/legion.git legion
    $ cd legion
    $ python setup.py develop --user
@@ -72,6 +73,7 @@ This is facilitated by the fact that Blocks gives access to the computational gr
 Debug the thing locally and then move over to the Helios cluster, where everything has to be set up again in the usual way.
 
 .. code-block:: bash
+
     $ ssh helios.calculquebec.ca
     $ screen -S my_experiment
     $ cd pathto/legion
