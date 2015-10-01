@@ -95,7 +95,7 @@ Specific examples explained
 --------
 
 .. toctree::
-   :maxdepth: 1
 
-   example_blocks_tutorial.rst
-   ../examples/blocks_tutorial/tuto0.py
+   ../examples/blocks_tutorial/example_blocks_tutorial.rst
+   ../examples/blocks_tutorial/example_blocks_tutorial.rst
+
