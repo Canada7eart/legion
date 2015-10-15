@@ -90,12 +90,18 @@ Within another screen, you can check on the queued jobs by using ``showq``.
 
 
 
-
-Specific examples explained
+Usage
 --------
 
-.. toctree::
+Legion can be used with or without the provided Blocks extensions.
+The communication with
 
-   ../examples/blocks_tutorial/example_blocks_tutorial.rst
-   ../examples/blocks_tutorial/example_blocks_tutorial.rst
+For more information about the actual protocol used, check out this
+:doc:`the lower-level description <lower_level_description>`.
+
+For more information about the Blocks extensions, check out this
+:doc:`description of the Blocks extensions <blocks_extensions>`.
+
+
+
 
