@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="legion_overview_of_components.svg">
+   sodipodi:docname="legion_overview_of_components.svg"
+   inkscape:export-filename="/home/gyomalin/Documents/legion_overview_of_components_small.png"
+   inkscape:export-xdpi="262.09222"
+   inkscape:export-ydpi="262.09222">
   <defs
      id="defs4">
     <inkscape:path-effect
@@ -93,7 +96,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="2.1019379"
      inkscape:cx="329.68233"
-     inkscape:cy="730.81218"
+     inkscape:cy="426.33126"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -393,20 +396,5 @@
        inkscape:original-d="m 295.43155,302.03058 c 0,0 40.55846,-110.1531 17.05299,12.90497 -23.50548,123.05807 40.55846,145.64176 40.55846,145.64176"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="csc" />
-    <text
-       xml:space="preserve"
-       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="346.34705"
-       y="792.60193"
-       id="text5670"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan5672"
-         x="346.34705"
-         y="792.60193">some machine learning experiment</tspan><tspan
-         sodipodi:role="line"
-         x="346.34705"
-         y="807.60193"
-         id="tspan5674">training script in python, using Blocks</tspan></text>
   </g>
 </svg>
