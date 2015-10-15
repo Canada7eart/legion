@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="legion_overview_of_components.svg">
+  <defs
+     id="defs4">
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5465"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5461"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5457"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5453"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5449"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5445"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5257"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5063"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4875"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Lend"
+       style="overflow:visible;">
+      <path
+         id="path3900"
+         style="fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(1.1) rotate(180) translate(1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path3882"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect3873"
+       is_visible="true" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.1019379"
+     inkscape:cx="329.68233"
+     inkscape:cy="730.81218"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="2560"
+     inkscape:window-height="1378"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="108.27071"
+       y="89.741318"
+       id="text2985"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2987"
+         x="108.27071"
+         y="89.741318" /><tspan
+         sodipodi:role="line"
+         x="108.27071"
+         y="104.74132"
+         id="tspan2989"
+         style="font-weight:bold;-inkscape-font-specification:Sans Bold;font-size:16px">on Helios cluster entry node</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:#a56827;font-family:Sans;stroke-width:0.95699999999999996;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x="255.51509"
+       y="290.56097"
+       id="text2991"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2993"
+         x="255.51509"
+         y="290.56097"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Courier 10 Pitch;-inkscape-font-specification:Courier 10 Pitch;stroke-width:0.95699999999999996;stroke-miterlimit:4;stroke-dasharray:none;stroke:#a56827;stroke-opacity:1">bin/legion</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:#417392;stroke-opacity:1;font-family:Sans"
+       x="386.04532"
+       y="279.27579"
+       id="text2995"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="386.04532"
+         y="279.27579"
+         id="tspan2999">some machine learning</tspan><tspan
+         sodipodi:role="line"
+         x="386.04532"
+         y="294.27579"
+         id="tspan5678">experiment training script</tspan><tspan
+         sodipodi:role="line"
+         x="386.04532"
+         y="309.27579"
+         id="tspan5684">in python, using Blocks</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:0;stroke:#417392;stroke-width:1.39934576;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect3005"
+       width="177.26755"
+       height="55.475166"
+       x="377.25958"
+       y="262.58551"
+       ry="9.4338341" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="78.806236"
+       y="180.66122"
+       id="text3775"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3777"
+         x="78.806236"
+         y="180.66122">takes cmdline arguments such as</tspan><tspan
+         sodipodi:role="line"
+         x="78.806236"
+         y="195.66122"
+         id="tspan3781">    -numbers of workers to use</tspan><tspan
+         sodipodi:role="line"
+         x="78.806236"
+         y="210.66122"
+         id="tspan3779">    -walltime for experiment</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#fbc94a;fill-opacity:0.91414142;stroke:#a56827;font-family:Sans;stroke-width:0.95699999999999996;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x="384.27991"
+       y="190.40834"
+       id="text3783"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3785"
+         x="384.27991"
+         y="190.40834">parameter synchronization</tspan><tspan
+         sodipodi:role="line"
+         x="384.27991"
+         y="205.40834"
+         id="tspan3787">extension for Blocks</tspan></text>
+    <rect
+       ry="7.5285492"
+       y="172.0555"
+       x="377.74429"
+       height="44.27124"
+       width="174.43683"
+       id="rect3789"
+       style="fill:#787878;fill-opacity:0;stroke:#a56827;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="69.054832"
+       y="359.67166"
+       id="text3791"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3793"
+         x="69.054832"
+         y="359.67166"
+         style="font-size:12px">Spaws parameter server</tspan><tspan
+         sodipodi:role="line"
+         x="69.054832"
+         y="374.67166"
+         id="tspan3801"
+         style="font-size:12px">on entry node <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Courier 10 Pitch;-inkscape-font-specification:Courier 10 Pitch"
+   id="tspan3827">helios1</tspan>;</tspan><tspan
+         sodipodi:role="line"
+         x="69.054832"
+         y="390.90765"
+         style="font-size:12px"
+         id="tspan3811" /><tspan
+         sodipodi:role="line"
+         x="69.054832"
+         y="407.14365"
+         id="tspan3795"
+         style="font-size:12px">This server becomes the focus.</tspan><tspan
+         sodipodi:role="line"
+         x="69.054832"
+         y="422.14365"
+         id="tspan3797"
+         style="font-size:12px">It waits for workers to connect,</tspan><tspan
+         sodipodi:role="line"
+         x="69.054832"
+         y="437.14365"
+         id="tspan3799"
+         style="font-size:12px">and it runs until the user hits <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Courier 10 Pitch;-inkscape-font-specification:Courier 10 Pitch"
+   id="tspan3825">CTRL-C</tspan>.</tspan></text>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3803"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:20px;line-height:125%;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion3805"><rect
+           id="rect3807"
+           width="161.75549"
+           height="80.877747"
+           x="180.78555"
+           y="396.7767" /></flowRegion><flowPara
+         id="flowPara3809"></flowPara></flowRoot>    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="208.82721"
+       y="490.45367"
+       id="text3813"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3815"
+         x="208.82721"
+         y="490.45367">Queues the jobs in scheduler using <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Courier 10 Pitch;-inkscape-font-specification:Courier 10 Pitch"
+   id="tspan3823">msub</tspan>.</tspan><tspan
+         sodipodi:role="line"
+         x="208.82721"
+         y="506.68967"
+         id="tspan3817">They will run eventually based on availability.</tspan><tspan
+         sodipodi:role="line"
+         x="208.82721"
+         y="521.68964"
+         id="tspan3819">Use <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Courier 10 Pitch;-inkscape-font-specification:Courier 10 Pitch"
+   id="tspan3821">showq</tspan> to list them.</tspan></text>
+    <g
+       id="g3859"
+       transform="translate(46.812471,295.57957)">
+      <rect
+         ry="0"
+         y="66.662971"
+         x="364.03714"
+         height="20"
+         width="20"
+         id="rect3829"
+         style="fill:#417392;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text3831"
+         y="80.950615"
+         x="391.37778"
+         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           y="80.950615"
+           x="391.37778"
+           id="tspan3833"
+           sodipodi:role="line">supplied by user</tspan></text>
+      <rect
+         ry="0"
+         y="93.221443"
+         x="363.73346"
+         height="20"
+         width="20"
+         id="rect3829-0"
+         style="fill:#a56827;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text3831-5"
+         y="107.50908"
+         x="391.0741"
+         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           y="107.50908"
+           x="391.0741"
+           id="tspan3833-2"
+           sodipodi:role="line">supplied by legion</tspan></text>
+    </g>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 152.50134,228.03506 c 4.74699,16.00203 14.48913,30.48338 27.52231,40.91098 13.03318,10.4276 29.29923,16.7549 45.95287,17.87511 3.68159,0.24764 7.37981,0.24765 11.0614,1e-5"
+       id="path3871"
+       inkscape:path-effect="#path-effect3873"
+       inkscape:original-d="m 152.50134,228.03506 c 78.81247,57.61145 156.43568,54.63807 73.47518,58.78609 -82.96049,4.14803 11.0614,1e-5 11.0614,1e-5"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 455.5342,220.60078 0,38.25401"
+       id="path4873"
+       inkscape:path-effect="#path-effect4875"
+       inkscape:original-d="m 455.5342,220.60078 0,38.25401"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 370.55689,287.28205 -31.34064,-0.4609"
+       id="path5061"
+       inkscape:path-effect="#path-effect5063"
+       inkscape:original-d="m 370.55689,287.28205 -31.34064,-0.4609"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="fill:#787878;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect5249"
+       width="252.41138"
+       height="103.34923"
+       x="55.776283"
+       y="342.05737"
+       ry="17.575062" />
+    <rect
+       ry="10.549319"
+       y="471.13855"
+       x="198.75148"
+       height="62.034718"
+       width="292.67468"
+       id="rect5251"
+       style="fill:#787878;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    <rect
+       style="fill:#787878;fill-opacity:0;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect5253"
+       width="221.54993"
+       height="62.155228"
+       x="69.683601"
+       y="159.73924"
+       ry="10.569813" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 265.36981,303.45783 -89.77009,32.67873"
+       id="path5255"
+       inkscape:path-effect="#path-effect5257"
+       inkscape:original-d="m 265.36981,303.45783 -89.77009,32.67873"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 295.43155,302.03058 c 6.00407,3.85582 11.71084,8.17446 17.05299,12.90497 19.94322,17.65985 34.64356,41.16868 41.78991,66.83057 7.14634,25.66188 6.71316,53.38511 -1.23145,78.81119"
+       id="path5463"
+       inkscape:path-effect="#path-effect5465"
+       inkscape:original-d="m 295.43155,302.03058 c 0,0 40.55846,-110.1531 17.05299,12.90497 -23.50548,123.05807 40.55846,145.64176 40.55846,145.64176"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csc" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="346.34705"
+       y="792.60193"
+       id="text5670"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5672"
+         x="346.34705"
+         y="792.60193">some machine learning experiment</tspan><tspan
+         sodipodi:role="line"
+         x="346.34705"
+         y="807.60193"
+         id="tspan5674">training script in python, using Blocks</tspan></text>
+  </g>
+</svg>
