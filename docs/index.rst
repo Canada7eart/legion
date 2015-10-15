@@ -44,8 +44,8 @@ than running the same 128 jobs in a queue where each job tries to use multi-GPU.
 Overview
 --------
 
-.. image:: /_static/legion_overview_usage_diagram.svg
-   :width: 60%
+.. image:: /_static/legion_overview_usage_diagram.png
+   :width: 70%
 
 
 Quickstart
