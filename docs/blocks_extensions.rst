@@ -5,6 +5,10 @@ Explanation about the Blocks extensions
 Parameter synchronization
 --------
 
+.. tip::
+    There are two extensions dealing with timing : ``SharedParamsAutoSync`` and ``SharedParamsRateLimited``.
+    In practice, you will only use ``SharedParamsRateLimited``.
+
 The preferred method to handle parameter synchronization
 is to use the solution provided in Blocks, which comes through
 either the ``SharedParamsAutoSync`` or ``SharedParamsRateLimited``
@@ -129,3 +133,39 @@ We need to specify how often the extension runs to make sure
 that we check if training has gone over the time limit.
 
 >>> StopAfterTimeElapsed(every_n_batches=1, total_duration=maximal_total_duration),
+
+
+Building dictionary of parameters to sync
+--------
+
+One way to get the ``params`` argument for those extensions
+is to ask Blocks to list all the parameters. At the current time,
+there is no absolute guarantee that Blocks will always return
+the parameters in the same order, but it practice this is the case.
+
+The following snippet of code shows how to build that dictionary ``params_to_sync``.
+It is not the most elegant piece of code, but it just tries to see
+if we already have a parameter with that name and appends something
+until it can find a unique name. Since this process is deterministic,
+all the workers will end up with the same naming scheme
+(assuming that Blocks is consistent and that the graph traversal is also consistent).
+
+>>> cg = ComputationGraph(cost)
+>>> params_to_sync = {}
+>>> 
+>>> counter = 0
+>>> print "---- cg.parameters ----"
+>>> for p in cg.parameters:
+>>>     # `p` is of type theano.sandbox.cuda.var.CudaNdarraySharedVariable
+>>> 
+>>>     # Warning. This is not as deterministic as we would want.
+>>>     # For now, however, we don't have much of a choice.
+>>>     new_name = p.name
+>>>     while params_to_sync.has_key(new_name):
+>>>         counter += 1
+>>>         new_name = p.name + ("_%d" % counter)
+>>> 
+>>>     params_to_sync[new_name] = p
+>>>     print "Parameter %s now referred to as %s." % (p.name, new_name)
+>>>     #import pdb; pdb.set_trace()
+>>> print "---- --.---------- ----"
