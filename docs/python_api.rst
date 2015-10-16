@@ -99,7 +99,7 @@ This is how the Blocks extensions provided work.
 If you want to use the parameter server to push "differences",
 you are free to use ``alpha`` and ``beta`` in a way that makes sense
 for this. For example, you might use ``alpha=1.0`` and ``beta=0.1``
-so that the end result of ``client.push_full(name, diff_value, 1.0, 0.1)``
+so that the end result of ``client.push_full(name, diff_value, 1.0, beta)``
 on the server would be mathematically equivalent to :
 
 >>> value += beta * diff_value
