@@ -105,3 +105,48 @@ on the server would be mathematically equivalent to :
 >>> value += beta * diff_value
 
 
+Transactions
+--------
+
+On the server side, every update on a given parameter happens as one transaction.
+Different parameters are handled separately, so two workers pushing updates on
+a large collection of parameters will not do so with two large transactions, but
+rather as collection of independent updates (that each happen atomically).
+
+In a previous incarnation, the parameter server had multiple threads and was
+written in C. In its current incarnation, it's written in python, which is single-threaded.
+The main limitation is the bandwidth and not the CPU. In fact, it consumes very little
+CPU (maybe 5% at most), and part of the reason to write it in python was
+for ease of maintenance.
+
+
+Submodel updates
+--------
+
+This feature is not meant to be documented here, but just in case
+that it never gets documented anywhere else, it's worth noting
+that the parameter server supports updates to a subset of the
+arrays as long as it can be specified using arrays of indices for
+each dimension.
+
+For example, we can update only the rows [0,2,4] and colums [1,2,3],
+but we cannot update only specific coefficients suchs as (0,1) and (2,2)
+without affecting the whole rows and columns.
+
+.. tip::
+    Ignore this feature. This section is meant only for someone
+    who read the parameter server code and could wonder why
+    there is support for this.
+
+
+
+
+
+
+
+
+
+
+
+
+
