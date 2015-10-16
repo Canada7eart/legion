@@ -96,8 +96,8 @@ Usage
 Legion can be used with or without the provided Blocks extensions.
 The communication with
 
-For more information about the actual protocol used, check out this
-:doc:`the lower-level description <lower_level_description>`.
+For more information about the python API to the parameter server,
+check out the :doc:`description of the python API<python_api>`.
 
 For more information about the Blocks extensions, check out this
 :doc:`description of the Blocks extensions <blocks_extensions>`.
