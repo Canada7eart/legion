@@ -22,12 +22,67 @@ each parameter with the rule
 The extension requires those parameters ``alpha`` and ``beta``.
 Usually, we just have that ``beta=1.0-alpha``.
 
->>> SharedParamsAutoSync(params_to_sync, alpha=0.5, beta=0.5)
+>>> SharedParamsAutoSync(params_to_sync, alpha=0.5, beta=0.5, every_n_batches=20)
+
+The ``params_to_sync`` parameter is a dictionary of theano shared variables
+whose keys are unique names. Be careful about using the default names
+given to theano variables because they might not be unique.
+
+The values in that dictionary are going to be modified with their
+``set_value`` and ``get_value`` methods.
+
+Be sure that all the workers are using the same names to refer
+to the same quantities. Calling something "weights" is fine
+if only one parameter in the whole model is going to have that
+name. When listing the theano variables as "weights_00", "weight_01"
+and so on, make sure that you list the variables in the same
+order on every worker. Otherwise, you will get nonsensical updates.
+
+Refer to the :doc:`description of the python API<python_api>` for
+more information about what to do and what to avoid.
+
+Be careful to avoid ``every_n_batches=1`` because that would
+create a bottleneck where the time spent in synchronization
+is much more than the time spent running data through your model.
 
 
 
 
-                                 SharedParamsRateLimited(params=params_to_sync, every_n_batches=1, alpha=0.5, beta=0.5, maximum_rate=0.25),
+The slightly more elaborate extension is ``SharedParamsRateLimited``.
+In practice, you will use this one 95% of the time. It is a subclass
+of the extension ``SharedParamsAutoSync`` described above, but it
+also features a mechanism to limit the amount of time spent synchronizing
+parameters with the server.
+
+>>> SharedParamsRateLimited(params=params_to_sync, every_n_batches=1, alpha=0.5, beta=0.5, maximum_rate=0.25)
+
+The extra argument here is the ``maximum_rate=0.25``,
+which specifies that the extension should not spend
+more than 25% of the total running time on itself.
+Using ``every_n_batches=1`` is a good idea here.
+This means that, whenever the extension is run,
+it takes into consideration how much time it took on
+the previous synchronization, and how much time has
+elapsed since then, and it makes the decision based on that.
+This counts the ``set_value`` and ``get_value`` as part
+of the synchronization cost.
+
+It will try to get as close to 25% without exceeding it.
+It has an little decay mechanism inside to be more robust
+to sudden delays that would lead to a bad estimate of
+the synchronization costs.
+
+That ``maximum_rate`` should be based loosely on
+the number of workers in that experiment. There is no danger
+of oversaturating the parameter server because this
+extension will automatically compensate for this.
+When synchronization operations take twice as long,
+it will synchronize twice as rarely to balance out.
+
+As a rule of thumb, ``maximum_rate`` should probably
+be below 0.5, and a more reasonable rate would probably
+be around 0.5/nbr_of_workers. But that's not justified
+by any theory.
 
 
 
